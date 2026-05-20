@@ -1,0 +1,62 @@
+{
+  "name": "inlinr",
+  "displayName": "Inlinr",
+  "description": "A custom Markdown viewer for VS Code.",
+  "version": "0.0.1",
+  "publisher": "inlinr",
+  "private": true,
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./out/src/extension.js",
+  "files": [
+    "out",
+    "media"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "inlinr.reopenWithDefaultEditor",
+        "title": "Reopen With Default Text Editor",
+        "category": "Inlinr"
+      }
+    ],
+    "customEditors": [
+      {
+        "viewType": "inlinr.markdownViewer",
+        "displayName": "Inlinr Markdown Viewer",
+        "selector": [
+          {
+            "filenamePattern": "*.md"
+          }
+        ],
+        "priority": "default"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "test": "npm run test:integration && npm run test:unit",
+    "test:integration": "node ./out/tests/runTest.js integration",
+    "test:unit": "node ./out/tests/runTest.js unit"
+  },
+  "dependencies": {
+    "markdown-it": "^14.1.0"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "^14.1.2",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.15.21",
+    "@types/vscode": "^1.90.0",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
+    "mocha": "^11.2.2",
+    "typescript": "^5.8.3"
+  }
+}

@@ -1,0 +1,174 @@
+:root {
+  color-scheme: light dark;
+  --viewer-border: color-mix(in srgb, var(--vscode-editor-foreground) 14%, transparent);
+  --viewer-surface: color-mix(in srgb, var(--vscode-editor-background) 94%, var(--vscode-sideBar-background));
+  --viewer-panel: color-mix(in srgb, var(--vscode-editor-background) 90%, var(--vscode-sideBar-background));
+  --viewer-muted: var(--vscode-descriptionForeground);
+  --viewer-accent: var(--vscode-textLink-foreground);
+  --viewer-error: var(--vscode-errorForeground);
+  --viewer-shadow: 0 18px 48px rgba(0, 0, 0, 0.14);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body.viewer-shell {
+  margin: 0;
+  padding: 24px;
+  color: var(--vscode-editor-foreground);
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--viewer-accent) 12%, transparent), transparent 32%),
+    linear-gradient(180deg, color-mix(in srgb, var(--vscode-editor-background) 98%, white), var(--vscode-editor-background));
+  font-family: var(--vscode-font-family);
+}
+
+.viewer-header,
+.viewer-main {
+  width: min(960px, 100%);
+  margin: 0 auto;
+}
+
+.viewer-header {
+  margin-bottom: 20px;
+  padding: 20px 24px;
+  border: 1px solid var(--viewer-border);
+  border-radius: 20px;
+  background: var(--viewer-surface);
+  box-shadow: var(--viewer-shadow);
+}
+
+.viewer-kicker {
+  margin: 0 0 10px;
+  color: var(--viewer-accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.viewer-title {
+  margin: 0;
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  line-height: 1.1;
+}
+
+.viewer-meta {
+  margin: 12px 0 0;
+  color: var(--viewer-muted);
+  font-size: 0.92rem;
+  word-break: break-word;
+}
+
+.viewer-main {
+  padding: 28px 30px 40px;
+  border: 1px solid var(--viewer-border);
+  border-radius: 24px;
+  background: var(--viewer-panel);
+  box-shadow: var(--viewer-shadow);
+}
+
+.viewer-document {
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.viewer-document > :first-child {
+  margin-top: 0;
+}
+
+.viewer-document img {
+  max-width: 100%;
+}
+
+.viewer-document code {
+  font-family: var(--vscode-editor-font-family);
+  font-size: 0.95em;
+}
+
+.viewer-document pre {
+  overflow-x: auto;
+  padding: 16px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--vscode-editor-background) 80%, black);
+}
+
+.viewer-document blockquote {
+  margin-left: 0;
+  padding-left: 16px;
+  border-left: 3px solid var(--viewer-accent);
+  color: var(--viewer-muted);
+}
+
+.viewer-document a {
+  color: var(--viewer-accent);
+}
+
+.viewer-error {
+  padding: 28px;
+  border: 1px solid color-mix(in srgb, var(--viewer-error) 45%, transparent);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--viewer-error) 8%, var(--viewer-panel));
+}
+
+.viewer-error-badge {
+  display: inline-block;
+  margin: 0 0 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--viewer-error) 12%, transparent);
+  color: var(--viewer-error);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.viewer-error-title {
+  margin: 0 0 12px;
+  font-size: 1.5rem;
+}
+
+.viewer-error-message {
+  margin: 0 0 18px;
+  line-height: 1.6;
+}
+
+.viewer-error-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin: 0;
+}
+
+.viewer-error-meta div {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--vscode-editor-background) 75%, transparent);
+}
+
+.viewer-error-meta dt {
+  margin-bottom: 6px;
+  color: var(--viewer-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.viewer-error-meta dd {
+  margin: 0;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  body.viewer-shell {
+    padding: 14px;
+  }
+
+  .viewer-header,
+  .viewer-main {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+}
