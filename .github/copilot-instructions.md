@@ -28,3 +28,8 @@
 - Keep docs concise, decision-oriented, and easy for future agents to apply.
 - Do not invent build, test, or lint commands until the corresponding tooling exists in the repo.
 - If a task changes product or architecture direction, update the relevant source doc instead of leaving the decision only in code or chat history.
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+<!-- SPECKIT END -->
