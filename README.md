@@ -6,4 +6,5 @@ Inlinr is a VS Code extension for inline, selection-based AI editing of Markdown
 
 - `product/` holds product direction, scope, terminology, and UX guidance.
 - `architecture/` holds system design, guardrails, and durable technical decisions.
+- `.specify/memory/constitution.md` defines the project guardrails for selection-scoped, reviewable, privacy-bounded editing work.
 - `.github/copilot-instructions.md` tells Copilot what to read first when working in this repo.

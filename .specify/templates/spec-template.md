@@ -72,8 +72,15 @@
   Fill them out with the right edge cases.
 -->
 
-- What happens when [boundary condition]?
-- How does system handle [error scenario]?
+- What happens when the selected range can no longer be anchored unambiguously?
+- How does the system handle malformed provider output, empty suggestions, or edit proposals outside the requested scope?
+
+## Scope & Boundaries *(mandatory)*
+
+- **Selection Scope**: [What exact user-selected text or editor surface this feature acts on]
+- **Review Model**: [How the user inspects, applies, rejects, refines, or undoes the change]
+- **Context Exposure**: [What document context leaves the editor, why it is needed, and how it is minimized]
+- **Out of Scope**: [Explicit non-goals such as non-Markdown support, multi-file edits, background automation, or provider-specific UX lock-in]
 
 ## Requirements *(mandatory)*
 

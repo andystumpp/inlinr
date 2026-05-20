@@ -31,7 +31,12 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- [ ] The feature remains selection-scoped, or the expanded scope is explicitly approved by updated product and architecture docs.
+- [ ] The user review and apply flow remains mandatory for material document changes.
+- [ ] Provider, logging, and persistence boundaries minimize document exposure and define any privacy-sensitive data handling.
+- [ ] Command, provider, suggestion, and edit-application contracts are defined or updated with runtime validation at affected boundaries.
+- [ ] Tests or manual verification cover anchoring, Markdown integrity, scoped edit application, and any changed privacy or security behavior.
+- [ ] An architecture update or ADR is included when the feature adds cross-file scope, persisted state, background workflows, or new provider abstractions.
 
 ## Project Structure
 
