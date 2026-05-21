@@ -1,8 +1,25 @@
+import {
+  EMPTY_RENDERED_SELECTION_METADATA,
+  assertValidRenderedSelectionMetadata,
+  type RenderedSelectionMetadata
+} from '../rendering/renderedSelectionMetadata';
+
 export type ViewerErrorReasonCode =
   | 'missing-document'
   | 'unreadable-document'
   | 'render-failed'
   | 'unsupported-content';
+
+export type ActiveRequestValidationState = 'drafting' | 'invalid' | 'submitting' | 'submitted';
+
+export interface ActiveRequestViewState {
+  sessionId: string;
+  selectedTextPreview: string;
+  selectedRegionIds: string[];
+  validationState: ActiveRequestValidationState;
+  validationMessage?: string;
+  draftText: string;
+}
 
 export interface ViewerRenderedState {
   kind: 'rendered';
@@ -13,6 +30,9 @@ export interface ViewerRenderedState {
   sourceMode: false;
   canFallbackToDefaultEditor: false;
   html: string;
+  selectionMode: 'enabled';
+  activeRequest: ActiveRequestViewState | null;
+  selectionMetadata: RenderedSelectionMetadata;
 }
 
 export interface ViewerErrorState {
@@ -32,11 +52,34 @@ function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.length > 0;
 }
 
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every(isNonEmptyString);
+}
+
+export function isActiveRequestViewState(value: unknown): value is ActiveRequestViewState {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const candidate = value as Partial<ActiveRequestViewState>;
+
+  return (
+    isNonEmptyString(candidate.sessionId) &&
+    isNonEmptyString(candidate.selectedTextPreview) &&
+    isStringArray(candidate.selectedRegionIds) &&
+    isNonEmptyString(candidate.validationState) &&
+    typeof candidate.draftText === 'string' &&
+    (candidate.validationMessage === undefined || isNonEmptyString(candidate.validationMessage))
+  );
+}
+
 export function createRenderedState(input: {
   uri: string;
   title: string;
   documentVersion: number;
   html: string;
+  selectionMetadata?: RenderedSelectionMetadata;
+  activeRequest?: ActiveRequestViewState | null;
 }): ViewerRenderedState {
   return {
     kind: 'rendered',
@@ -46,7 +89,10 @@ export function createRenderedState(input: {
     previewOnly: true,
     sourceMode: false,
     canFallbackToDefaultEditor: false,
-    html: input.html
+    html: input.html,
+    selectionMode: 'enabled',
+    activeRequest: input.activeRequest ?? null,
+    selectionMetadata: input.selectionMetadata ?? EMPTY_RENDERED_SELECTION_METADATA
   };
 }
 
@@ -85,7 +131,13 @@ export function isViewerState(value: unknown): value is ViewerState {
   }
 
   if (candidate.kind === 'rendered') {
-    return candidate.sourceMode === false && isNonEmptyString(candidate.html);
+    return (
+      candidate.sourceMode === false &&
+      isNonEmptyString(candidate.html) &&
+      candidate.selectionMode === 'enabled' &&
+      (candidate.activeRequest === null || isActiveRequestViewState(candidate.activeRequest)) &&
+      assertRenderedSelectionMetadata(candidate.selectionMetadata)
+    );
   }
 
   if (candidate.kind === 'error') {
@@ -98,5 +150,14 @@ export function isViewerState(value: unknown): value is ViewerState {
 export function assertValidViewerState(value: unknown): asserts value is ViewerState {
   if (!isViewerState(value)) {
     throw new TypeError('Invalid viewer state payload.');
+  }
+}
+
+function assertRenderedSelectionMetadata(value: unknown): boolean {
+  try {
+    assertValidRenderedSelectionMetadata(value);
+    return true;
+  } catch {
+    return false;
   }
 }

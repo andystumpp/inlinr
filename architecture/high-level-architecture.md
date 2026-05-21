@@ -5,11 +5,13 @@
 - **Editor platform:** VS Code extension
 - **Primary surface:** Inlinr custom Markdown editor hosted in the current editor tab
 - **Initial document experience:** Render Markdown locally as preview-only content inside the Inlinr surface
-- **AI layer:** provider client plus a thin request/response harness for scoped editing
+- **AI layer:** Inlinr-owned request capture plus a provider client behind supported VS Code extension APIs, with the VS Code Language Model API as the default invocation boundary for scoped editing
 - **Edit application:** diff or replacement flow that updates only the intended document region
 
 See `architecture/adr-001-custom-markdown-editor-surface.md` for the decision to use a custom editor
-surface as the foundation for both the initial viewer and later inline editing flows.
+surface as the foundation for both the initial viewer and later inline editing flows. See
+`architecture/adr-002-inlinr-owned-request-capture-and-model-invocation.md` for the decision to keep
+request capture and model invocation under Inlinr control rather than automating another chat UI.
 
 ## Current component diagram
 
@@ -55,8 +57,9 @@ flowchart LR
 | Document Session Controller | Coordinates a text document, its visible Inlinr editor instance, refresh, and future editing state. |
 | Markdown Render Pipeline | Converts Markdown text into locally rendered preview content for the custom editor webview. |
 | Selection and Anchor Logic | Tracks what text the request targets and keeps that intent stable as edits happen. |
+| Anchored Request Popup | Webview-owned transient overlay that appears near the live selection and keeps request entry inside the Inlinr surface while the extension host validates source-backed targeting. |
 | Scoped Request Builder | Packages the selected text and nearby context for an AI edit request. |
-| AI Provider Client | Calls the configured model backend. |
+| AI Provider Client | Calls the configured model backend through supported VS Code extension APIs rather than another extension's chat UI. |
 | Suggestion Normalizer | Converts provider output into a predictable suggested edit shape. |
 | Suggestion Review and Apply Flow | Shows the proposed change and lets the user accept, reject, or refine it. |
 | Edit Application Service | Applies the approved edit to the intended range in the document. |
@@ -65,7 +68,9 @@ flowchart LR
 
 - Keep the document surface under Inlinr control so viewing and later editing share one editor model.
 - Keep the editing loop precise and selection-scoped.
+- Keep transient overlay state in the webview and keep source-backed validation in the extension host.
 - Keep provider details behind a stable contract.
+- Prefer extension-owned UI and supported APIs over automating other extension surfaces.
 - Preserve document integrity and user trust.
 - Favor simple local extension flows before adding background orchestration.
 

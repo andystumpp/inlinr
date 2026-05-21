@@ -10,9 +10,16 @@ function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;');
 }
 
+function escapeJsonForHtml(value: string): string {
+  return value.replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026');
+}
+
 function renderBody(state: ViewerState): string {
   if (state.kind === 'rendered') {
-    return `<article class="viewer-document markdown-body">${state.html}</article>`;
+    return `
+      <article class="viewer-document markdown-body" data-selection-mode="${state.selectionMode}">${state.html}</article>
+      <aside class="selection-request-root" data-selection-request-root hidden></aside>
+    `;
   }
 
   return `
@@ -44,10 +51,15 @@ export function getMarkdownViewerHtml(
   const stylesheetUri = webview.asWebviewUri(
     vscode.Uri.joinPath(extensionUri, 'media', 'markdownViewer', 'styles.css')
   );
+  const selectionScriptUri = webview.asWebviewUri(
+    vscode.Uri.joinPath(extensionUri, 'media', 'markdownViewer', 'selectionRequest.js')
+  );
+  const serializedState = escapeJsonForHtml(JSON.stringify(state));
 
   const csp = [
     "default-src 'none'",
     `style-src ${webview.cspSource}`,
+    `script-src ${webview.cspSource}`,
     `img-src ${webview.cspSource} data:`,
     `font-src ${webview.cspSource}`
   ].join('; ');
@@ -71,6 +83,8 @@ export function getMarkdownViewerHtml(
     <main class="viewer-main">
       ${renderBody(state)}
     </main>
+    <script id="inlinr-viewer-state" type="application/json">${serializedState}</script>
+    <script src="${selectionScriptUri}" defer></script>
   </body>
 </html>`;
 }
