@@ -9,6 +9,8 @@ include a manual verification task for the affected workflow.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
+**Architecture correction note (2026-05-20)**: The completed tasks below established a first pass at the inline request flow, but manual testing exposed a systemic control-boundary flaw: popup behavior is currently too host-rendered and too lightly exercised through real DOM interaction. Complete the architecture-correction phase below before spending more time on popup bug-fixing.
+
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
@@ -24,10 +26,10 @@ include a manual verification task for the affected workflow.
 
 **Purpose**: Prepare the feature-specific source, asset, and test scaffolding for rendered selection work
 
-- [ ] T001 Create the selection request source scaffolding in src/requests/requestService.ts, src/requests/requestPayloadBuilder.ts, src/requests/selectionAnchorResolver.ts, src/rendering/renderedSelectionMetadata.ts, and src/webview/viewerProtocol.ts
-- [ ] T002 [P] Create the selection request webview asset entry point in media/markdownViewer/selectionRequest.js and extend media/markdownViewer/styles.css for popup states
-- [ ] T003 [P] Add Markdown fixture documents for valid and unsupported selections in tests/fixtures/workspace/selection-request-basic.md and tests/fixtures/workspace/selection-request-unsupported.md
-- [ ] T004 [P] Create feature test scaffolding in tests/integration/selectionScopedEditRequest.test.ts, tests/integration/selectionRequest.contract.test.ts, tests/unit/selectionSupportPolicy.test.ts, tests/unit/selectionAnchorResolver.test.ts, and tests/unit/requestPayloadBuilder.test.ts
+- [X] T001 Create the selection request source scaffolding in src/requests/requestService.ts, src/requests/requestPayloadBuilder.ts, src/requests/selectionAnchorResolver.ts, src/rendering/renderedSelectionMetadata.ts, and src/webview/viewerProtocol.ts
+- [X] T002 [P] Create the selection request webview asset entry point in media/markdownViewer/selectionRequest.js and extend media/markdownViewer/styles.css for popup states
+- [X] T003 [P] Add Markdown fixture documents for valid and unsupported selections in tests/fixtures/workspace/selection-request-basic.md and tests/fixtures/workspace/selection-request-unsupported.md
+- [X] T004 [P] Create feature test scaffolding in tests/integration/selectionScopedEditRequest.test.ts, tests/integration/selectionRequest.contract.test.ts, tests/unit/selectionSupportPolicy.test.ts, tests/unit/selectionAnchorResolver.test.ts, and tests/unit/requestPayloadBuilder.test.ts
 
 ---
 
@@ -37,12 +39,12 @@ include a manual verification task for the affected workflow.
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 Define runtime-validated selection message contracts and active request view state in src/webview/viewerProtocol.ts and src/webview/viewerState.ts
-- [ ] T006 [P] Extend the Markdown render pipeline to emit supported selection metadata in src/rendering/markdownRenderer.ts and src/rendering/renderedSelectionMetadata.ts
-- [ ] T007 [P] Enable secure webview scripting and bundle the selection request asset in src/editors/markdownCustomEditorProvider.ts and src/webview/getMarkdownViewerHtml.ts
-- [ ] T008 [P] Add document-level active request session tracking and invalidation hooks in src/sessions/documentSessionController.ts and src/extension.ts
-- [ ] T009 Define the provider-agnostic request service boundary and local payload validator in src/requests/requestService.ts and src/requests/requestPayloadBuilder.ts
-- [ ] T010 Implement hybrid selection anchor creation and revalidation primitives in src/requests/selectionAnchorResolver.ts
+- [X] T005 Define runtime-validated selection message contracts and active request view state in src/webview/viewerProtocol.ts and src/webview/viewerState.ts
+- [X] T006 [P] Extend the Markdown render pipeline to emit supported selection metadata in src/rendering/markdownRenderer.ts and src/rendering/renderedSelectionMetadata.ts
+- [X] T007 [P] Enable secure webview scripting and bundle the selection request asset in src/editors/markdownCustomEditorProvider.ts and src/webview/getMarkdownViewerHtml.ts
+- [X] T008 [P] Add document-level active request session tracking and invalidation hooks in src/sessions/documentSessionController.ts and src/extension.ts
+- [X] T009 Define the provider-agnostic request service boundary and local payload validator in src/requests/requestService.ts and src/requests/requestPayloadBuilder.ts
+- [X] T010 Implement hybrid selection anchor creation and revalidation primitives in src/requests/selectionAnchorResolver.ts
 
 **Checkpoint**: Render metadata, message contracts, request-session infrastructure, and anchor primitives are ready for story work
 
@@ -58,16 +60,16 @@ include a manual verification task for the affected workflow.
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T011 [P] [US1] Add an integration test for opening one anchored request popup from a valid rendered selection in tests/integration/selectionScopedEditRequest.test.ts
-- [ ] T012 [P] [US1] Add a unit test for single-range rendered selection validation in tests/unit/selectionSupportPolicy.test.ts
-- [ ] T013 [P] [US1] Add a contract test for selection capture, draft change, cancel, and submit message validation in tests/integration/selectionRequest.contract.test.ts
+- [X] T011 [P] [US1] Add an integration test for opening one anchored request popup from a valid rendered selection in tests/integration/selectionScopedEditRequest.test.ts
+- [X] T012 [P] [US1] Add a unit test for single-range rendered selection validation in tests/unit/selectionSupportPolicy.test.ts
+- [X] T013 [P] [US1] Add a contract test for selection capture, draft change, cancel, and submit message validation in tests/integration/selectionRequest.contract.test.ts
 
 ### Implementation for User Story 1
 
-- [ ] T014 [US1] Implement DOM selection capture, popup draft input, and cancel or submit messaging in media/markdownViewer/selectionRequest.js
-- [ ] T015 [US1] Implement accepted-selection state, single-draft enforcement, and popup lifecycle handling in src/editors/markdownCustomEditorProvider.ts and src/sessions/documentSessionController.ts
-- [ ] T016 [US1] Render anchored popup state and visible targeted-selection UI in src/webview/getMarkdownViewerHtml.ts, src/webview/viewerState.ts, and media/markdownViewer/styles.css
-- [ ] T017 [US1] Create the local selection-scoped request payload only on explicit submit in src/requests/requestPayloadBuilder.ts and src/requests/requestService.ts
+- [X] T014 [US1] Implement DOM selection capture, popup draft input, and cancel or submit messaging in media/markdownViewer/selectionRequest.js
+- [X] T015 [US1] Implement accepted-selection state, single-draft enforcement, and popup lifecycle handling in src/editors/markdownCustomEditorProvider.ts and src/sessions/documentSessionController.ts
+- [X] T016 [US1] Render anchored popup state and visible targeted-selection UI in src/webview/getMarkdownViewerHtml.ts, src/webview/viewerState.ts, and media/markdownViewer/styles.css
+- [X] T017 [US1] Create the local selection-scoped request payload only on explicit submit in src/requests/requestPayloadBuilder.ts and src/requests/requestService.ts
 
 **Checkpoint**: At this point, a user can open exactly one inline request popup from a valid rendered selection and submit a local request payload independently of later stories
 
@@ -81,15 +83,15 @@ include a manual verification task for the affected workflow.
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T018 [P] [US2] Add an integration test for contiguous multi-block prose selections in tests/integration/selectionScopedEditRequest.test.ts
-- [ ] T019 [P] [US2] Add a unit test for adjacent-prose selection normalization and supported-region allowlisting in tests/unit/selectionSupportPolicy.test.ts
-- [ ] T020 [P] [US2] Add a unit test for hybrid anchor capture across multi-block selections in tests/unit/selectionAnchorResolver.test.ts
+- [X] T018 [P] [US2] Add an integration test for contiguous multi-block prose selections in tests/integration/selectionScopedEditRequest.test.ts
+- [X] T019 [P] [US2] Add a unit test for adjacent-prose selection normalization and supported-region allowlisting in tests/unit/selectionSupportPolicy.test.ts
+- [X] T020 [P] [US2] Add a unit test for hybrid anchor capture across multi-block selections in tests/unit/selectionAnchorResolver.test.ts
 
 ### Implementation for User Story 2
 
-- [ ] T021 [US2] Extend supported rendered-region metadata for adjacent prose blocks and inline spans in src/rendering/markdownRenderer.ts and src/rendering/renderedSelectionMetadata.ts
-- [ ] T022 [US2] Normalize contiguous multi-block selections into one source-backed target range in src/requests/selectionAnchorResolver.ts and src/webview/viewerProtocol.ts
-- [ ] T023 [US2] Preserve the full targeted range in popup preview and active request state for larger selections in src/webview/viewerState.ts, src/webview/getMarkdownViewerHtml.ts, and media/markdownViewer/selectionRequest.js
+- [X] T021 [US2] Extend supported rendered-region metadata for adjacent prose blocks and inline spans in src/rendering/markdownRenderer.ts and src/rendering/renderedSelectionMetadata.ts
+- [X] T022 [US2] Normalize contiguous multi-block selections into one source-backed target range in src/requests/selectionAnchorResolver.ts and src/webview/viewerProtocol.ts
+- [X] T023 [US2] Preserve the full targeted range in popup preview and active request state for larger selections in src/webview/viewerState.ts, src/webview/getMarkdownViewerHtml.ts, and media/markdownViewer/selectionRequest.js
 
 **Checkpoint**: At this point, section-sized prose selections work as one request without breaking the User Story 1 flow
 
@@ -104,14 +106,14 @@ include a manual verification task for the affected workflow.
 ### Tests for User Story 3 ⚠️
 
 - [ ] T024 [P] [US3] Add an integration test for ambiguous mapping and submit blocking after document changes in tests/integration/selectionScopedEditRequest.test.ts
-- [ ] T025 [P] [US3] Add a unit test for anchor revalidation failure and recovery messaging in tests/unit/selectionAnchorResolver.test.ts
-- [ ] T026 [P] [US3] Add a unit test for minimal-context payload creation and blocked unsupported selections in tests/unit/requestPayloadBuilder.test.ts
+- [X] T025 [P] [US3] Add a unit test for anchor revalidation failure and recovery messaging in tests/unit/selectionAnchorResolver.test.ts
+- [X] T026 [P] [US3] Add a unit test for minimal-context payload creation and blocked unsupported selections in tests/unit/requestPayloadBuilder.test.ts
 
 ### Implementation for User Story 3
 
-- [ ] T027 [US3] Implement submit-time anchor revalidation and invalid-session recovery states in src/requests/selectionAnchorResolver.ts, src/requests/requestService.ts, and src/webview/viewerState.ts
-- [ ] T028 [US3] Block unsupported or drifted selections and surface reselect guidance in src/editors/markdownCustomEditorProvider.ts, src/webview/getMarkdownViewerHtml.ts, and media/markdownViewer/selectionRequest.js
-- [ ] T029 [US3] Invalidate or revalidate the active draft when the backing TextDocument changes in src/sessions/documentSessionController.ts and src/editors/markdownCustomEditorProvider.ts
+- [X] T027 [US3] Implement submit-time anchor revalidation and invalid-session recovery states in src/requests/selectionAnchorResolver.ts, src/requests/requestService.ts, and src/webview/viewerState.ts
+- [X] T028 [US3] Block unsupported or drifted selections and surface reselect guidance in src/editors/markdownCustomEditorProvider.ts, src/webview/getMarkdownViewerHtml.ts, and media/markdownViewer/selectionRequest.js
+- [X] T029 [US3] Invalidate or revalidate the active draft when the backing TextDocument changes in src/sessions/documentSessionController.ts and src/editors/markdownCustomEditorProvider.ts
 
 **Checkpoint**: All user stories are independently demonstrable with fail-closed selection and submit behavior
 
@@ -128,6 +130,29 @@ include a manual verification task for the affected workflow.
 
 ---
 
+## Phase 7: Architecture Correction - Client-Owned Overlay And DOM-Driven Selection
+
+**Purpose**: Correct the control boundary so transient popup behavior stays in the webview while the extension host remains authoritative for source-backed validation and submit-time payload creation
+
+**⚠️ CRITICAL**: Complete this phase before more popup-positioning or visibility bug-fix work
+
+### Tests for Architecture Correction ⚠️
+
+- [ ] T034 [P] Add a DOM-driven regression path for real rendered selection capture and popup visibility in tests/integration/helpers.ts and tests/integration/selectionScopedEditRequest.test.ts or a new DOM-focused integration test file
+- [ ] T035 [P] Add a regression test for scroll-safe popup positioning and live overlay visibility in tests/integration/selectionScopedEditRequest.test.ts or a new DOM-focused integration test file
+
+### Implementation for Architecture Correction
+
+- [X] T036 Emit stable DOM attributes for selectable regions and source-backed markers from src/rendering/markdownRenderer.ts and src/rendering/renderedSelectionMetadata.ts so the webview can resolve actual DOM selections safely
+- [X] T037 Replace host-rendered transient popup markup with a client-owned overlay controller in media/markdownViewer/selectionRequest.js, src/webview/getMarkdownViewerHtml.ts, and src/webview/viewerProtocol.ts
+- [X] T038 Move popup placement, scroll handling, focus handling, and draft entry to the webview while keeping the extension host authoritative for accepted selection state in media/markdownViewer/selectionRequest.js, src/editors/markdownCustomEditorProvider.ts, src/sessions/documentSessionController.ts, and src/webview/viewerState.ts
+- [X] T039 Narrow the extension-host contract to selection acceptance, invalidation, and submit-time draft handoff in src/webview/viewerProtocol.ts, src/editors/markdownCustomEditorProvider.ts, and specs/002-selection-scoped-edit-request/contracts/selection-request-contract.md
+- [X] T040 Update the rendered-selection quickstart and manual verification guidance for the client-owned overlay boundary in specs/002-selection-scoped-edit-request/quickstart.md and README.md
+
+**Checkpoint**: The popup is driven by real DOM selection behavior inside the webview, while the extension host keeps durable targeting and submit-time validation under Inlinr control
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
@@ -138,6 +163,7 @@ include a manual verification task for the affected workflow.
 - **User Story 2 (Phase 4)**: Depends on User Story 1 because larger contiguous selections build on the base popup and accepted-selection lifecycle
 - **User Story 3 (Phase 5)**: Depends on User Story 1 because ambiguity handling builds on the base request session and submit flow; it can overlap with User Story 2 once the shared anchor primitives are stable
 - **Polish (Phase 6)**: Depends on all desired user stories being complete
+- **Architecture Correction (Phase 7)**: Must complete before additional popup-visibility or popup-positioning fixes are treated as done; it builds on existing foundational work but should precede further UI bug-fix iteration
 
 ### User Story Dependencies
 
@@ -160,6 +186,7 @@ include a manual verification task for the affected workflow.
 - `T018`, `T019`, and `T020` can run in parallel for User Story 2
 - `T024`, `T025`, and `T026` can run in parallel for User Story 3
 - `T030` and `T032` can run in parallel during Polish
+- `T034` and `T035` can run in parallel for the architecture-correction test harness
 
 ---
 
@@ -223,13 +250,15 @@ Task: "Invalidate or revalidate the active draft when the backing TextDocument c
 2. Deliver User Story 1 to establish the MVP inline request flow
 3. Deliver User Story 2 to expand selection scope across adjacent prose blocks
 4. Deliver User Story 3 to harden ambiguity handling and submit safety
-5. Finish with cross-cutting accessibility, privacy, and documentation updates
+5. Complete Phase 7 to move transient popup behavior into the webview and add DOM-driven regression coverage
+6. Finish with cross-cutting accessibility, privacy, and documentation updates
 
 ### Parallel Team Strategy
 
 1. One developer can own render metadata and anchor primitives while another prepares webview assets and test scaffolding during Setup and Foundational
 2. After Foundational lands, one developer can own popup behavior while another owns local request payload creation for User Story 1
 3. After User Story 1 lands, one developer can extend multi-block selection support while another hardens ambiguity handling and document-change invalidation
+4. Before further popup bug-fix iteration, one developer should own the DOM-driven test seam while another refactors the popup to a client-owned overlay controller
 
 ---
 

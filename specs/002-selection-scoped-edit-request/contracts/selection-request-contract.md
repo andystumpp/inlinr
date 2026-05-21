@@ -6,7 +6,7 @@ Define the stable interface boundaries for the first interactive selection and r
 
 ## Extension-To-Webview State Contract
 
-The extension host remains authoritative for session state, selection validity, and submit eligibility. The webview receives prepared UI state for the current document and any active request session.
+The extension host remains authoritative for source-backed session state, selection validity, and submit eligibility. The webview owns transient overlay UI, draft entry, and popup placement for the current rendered DOM.
 
 ### Selection-Capable Rendered State
 
@@ -19,16 +19,15 @@ interface SelectionCapableViewerState {
   previewOnly: true;
   html: string;
   selectionMode: 'enabled';
-  activeRequest: ActiveRequestViewState | null;
+  activeRequestSession: ActiveRequestSessionViewState | null;
 }
 
-interface ActiveRequestViewState {
+interface ActiveRequestSessionViewState {
   sessionId: string;
   selectedTextPreview: string;
-  canSubmit: boolean;
-  validationState: 'drafting' | 'invalid' | 'submitting' | 'submitted';
+  selectedRegionIds: string[];
+  submitState: 'drafting' | 'invalid' | 'submitting' | 'submitted';
   validationMessage?: string;
-  draftText: string;
 }
 ```
 
@@ -36,6 +35,7 @@ interface ActiveRequestViewState {
 
 - All state passed to the webview must be JSON-serializable.
 - The webview must not treat rendered selection as canonical until the extension host accepts it.
+- Overlay coordinates, textarea contents, and draft-button enablement are webview-owned transient state and are not required to be echoed back in every host state payload.
 - Provider-specific response data is out of scope for this contract.
 - Contract changes must be versioned intentionally alongside validator and test updates.
 
@@ -53,7 +53,6 @@ The webview may send only validated message types defined below. The extension h
 ```ts
 type ViewerToExtensionMessage =
   | SelectionCaptureMessage
-  | RequestDraftChangeMessage
   | RequestSubmitMessage
   | RequestCancelMessage;
 
@@ -64,17 +63,18 @@ interface SelectionCaptureMessage {
   startMarker: string;
   endMarker: string;
   renderedRegionIds: string[];
-}
-
-interface RequestDraftChangeMessage {
-  type: 'request.draftChanged';
-  sessionId: string;
-  draftText: string;
+  selectionRect?: {
+    top: number;
+    left: number;
+    bottom: number;
+    right: number;
+  };
 }
 
 interface RequestSubmitMessage {
   type: 'request.submit';
   sessionId: string;
+  draftText: string;
 }
 
 interface RequestCancelMessage {
@@ -88,7 +88,51 @@ Contract rules:
 - The webview must not open more than one request session at a time.
 - The extension host must reject unknown message types and malformed payloads.
 - `selection.capture` is a request for validation, not proof that the target is safe.
+- `selectionRect` and similar UI hints must not be treated as canonical targeting data.
+- `request.submit` carries the final draft text so the host does not need to receive every interim keystroke.
 - `request.submit` must fail if anchor revalidation does not succeed.
+
+## Extension Push Events
+
+The extension host may send small, targeted session events to the webview instead of rebuilding the full document HTML for transient overlay changes.
+
+```ts
+type ExtensionToViewerMessage =
+  | SelectionAcceptedMessage
+  | SelectionRejectedMessage
+  | RequestInvalidatedMessage
+  | RequestSubmittedMessage;
+
+interface SelectionAcceptedMessage {
+  type: 'selection.accepted';
+  sessionId: string;
+  selectedTextPreview: string;
+  selectedRegionIds: string[];
+}
+
+interface SelectionRejectedMessage {
+  type: 'selection.rejected';
+  message: string;
+}
+
+interface RequestInvalidatedMessage {
+  type: 'request.invalidated';
+  sessionId: string;
+  message: string;
+}
+
+interface RequestSubmittedMessage {
+  type: 'request.submitted';
+  sessionId: string;
+  message: string;
+}
+```
+
+Contract rules:
+
+- Push events update transient overlay state without forcing a full document rerender for each draft change.
+- Full document rerender remains allowed for actual document-version changes or structural render changes.
+- The webview must tolerate missing push events by falling back to the latest bootstrapped state after a document rerender.
 
 ## Local Request Payload Contract
 

@@ -3,7 +3,7 @@
 ## RenderedSelectionCandidate
 
 - Purpose: Represents the raw selection captured in the rendered webview before the extension host accepts it as a valid target.
-- Source: Webview DOM selection plus source-backed render metadata.
+- Source: Actual webview DOM selection resolved against source-backed render metadata emitted into the rendered DOM.
 - Fields:
   - `documentUri`: Markdown document URI.
   - `documentVersion`: Rendered document version at capture time.
@@ -15,7 +15,25 @@
   - Must be non-empty and not whitespace-only.
   - Must stay within supported prose regions.
   - Must not cross structural containers or unsupported rendered regions in v1.
+  - Must be derived from the user's actual rendered DOM range rather than from a heuristic fallback region.
   - Must be revalidated against the canonical `TextDocument` before becoming an active request session.
+
+## InlineRequestOverlayState
+
+- Purpose: Represents the transient, webview-owned inline request overlay that is anchored to the live rendered selection.
+- Source: Webview controller state derived from the accepted selection plus local draft entry.
+- Fields:
+  - `sessionId`: Identifier for the currently accepted request session.
+  - `documentVersion`: Document version the overlay was opened against.
+  - `selectedTextPreview`: Visible text preview shown in the popup.
+  - `selectionRect`: Viewport-relative selection bounds or equivalent placement hints used only for UI.
+  - `draftText`: Current request text entered in the popup.
+  - `uiState`: `drafting | invalid | submitting | submitted`.
+  - `message`: Optional user-facing status or recovery text.
+- Validation rules:
+  - Exists only inside the webview and is not canonical source-of-truth for targeting.
+  - May be repositioned on scroll, resize, or selection changes without creating a new host-side session.
+  - Must be recreated from host-side session state if the document is rerendered for structural reasons.
 
 ## SupportedSelectionRegion
 
@@ -51,7 +69,7 @@
 
 ## EditRequestDraft
 
-- Purpose: User-authored change request tied to one validated target selection.
+- Purpose: User-authored change request tied to one validated target selection before explicit submit.
 - Fields:
   - `draftId`: In-memory identifier for the request draft.
   - `documentUri`: Markdown document URI.
@@ -63,22 +81,23 @@
   - May exist only while one active request session is open.
   - `requestText` must be non-empty before submit.
   - Must remain attached to exactly one `SelectionAnchor`.
+  - In the preferred architecture for this feature, draft entry is webview-owned until explicit submit and is not required to trigger host-side rerendering on every keystroke.
 
 ## ActiveRequestSession
 
-- Purpose: Tracks the single in-progress popup flow allowed in v1 for one document and one targeted selection.
+- Purpose: Tracks the single host-authoritative validated request target allowed in v1 for one document and one targeted selection.
 - Fields:
   - `sessionId`: Unique in-memory identifier.
   - `documentUri`: Markdown document URI.
   - `selection`: Accepted `RenderedSelectionCandidate` normalized to source-backed coordinates.
   - `selectionAnchor`: Durable anchor for submit-time revalidation.
-  - `draft`: Current `EditRequestDraft`.
   - `state`: `drafting | invalid | submitting | submitted | closed`.
   - `validationMessage`: Optional user-facing explanation when submission is blocked.
 - Validation rules:
   - Only one `ActiveRequestSession` may exist per extension at a time in v1.
   - `submitting` requires a non-empty draft and a valid revalidated anchor.
   - `invalid` must block downstream request submission.
+  - Host-side session state should keep only durable targeting and submit eligibility, not transient overlay coordinates.
 
 ## SelectionScopedRequestPayload
 
@@ -101,7 +120,7 @@
 
 - One `MarkdownDocument` version produces many `SupportedSelectionRegion` records.
 - One accepted `RenderedSelectionCandidate` resolves to exactly one `SelectionAnchor`.
-- One `ActiveRequestSession` owns exactly one `EditRequestDraft` and may produce at most one `SelectionScopedRequestPayload`.
+- One `ActiveRequestSession` may be paired with one active `EditRequestDraft` in the webview and may produce at most one `SelectionScopedRequestPayload`.
 - One `SelectionScopedRequestPayload` is derived from one `SelectionAnchor` and one explicit user submit action.
 
 ## State Transitions

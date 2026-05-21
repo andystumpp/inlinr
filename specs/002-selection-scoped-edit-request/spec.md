@@ -15,6 +15,7 @@
 - Q: Where should the request UI appear? → A: Show the request popup anchored near the rendered selection in the document surface.
 - Q: How much surrounding document context should be included on submit? → A: Include the exact selected text plus a small amount of adjacent surrounding Markdown context.
 - Q: What architectural path should the primary submit flow use? → A: Keep the request flow inside Inlinr and hand the payload to an Inlinr-owned request service rather than routing through another extension-owned chat textbox.
+- Q: Where should transient popup interaction state live? → A: Keep the inline popup as webview-owned UI near the live selection, while the extension host remains authoritative for source-backed validation and submit-time payload creation.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -108,6 +109,8 @@ A user sees a clear recovery path when the rendered selection cannot be mapped c
 - **FR-020**: The system MUST NOT include the entire document or entire enclosing section in the request payload by default in v1.
 - **FR-021**: When the user submits the request popup, the system MUST create the selection-scoped request payload inside Inlinr and keep the primary request flow in the Inlinr document surface.
 - **FR-022**: The v1 primary request-submission flow MUST NOT depend on programmatically writing to or sending from another extension-owned chat input UI.
+- **FR-023**: The system MUST derive the targeted rendered selection from the actual rendered DOM boundaries associated with source-backed selection metadata rather than from a heuristic default region.
+- **FR-024**: The system MUST keep popup draft entry, placement, and scroll behavior responsive inside the document surface without requiring a full-document rerender for each draft edit or overlay movement.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -126,6 +129,7 @@ A user sees a clear recovery path when the rendered selection cannot be mapped c
 - **SC-003**: In acceptance testing, 100% of sampled valid requests show the correct targeted text boundaries in the request draft before submission.
 - **SC-004**: In failure-path testing, 100% of ambiguous or unmappable rendered selections are blocked from submission and present a clear reselect or recovery message.
 - **SC-005**: In acceptance testing, 100% of sampled v1 requests remain scoped to a single contiguous selection in one Markdown document.
+- **SC-006**: In end-to-end rendered-selection testing, 100% of sampled valid selections produce a visible inline request popup near the selected text without relying on synthetic message injection.
 
 ## Assumptions
 

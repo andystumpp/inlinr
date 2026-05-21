@@ -57,7 +57,7 @@ flowchart LR
 | Document Session Controller | Coordinates a text document, its visible Inlinr editor instance, refresh, and future editing state. |
 | Markdown Render Pipeline | Converts Markdown text into locally rendered preview content for the custom editor webview. |
 | Selection and Anchor Logic | Tracks what text the request targets and keeps that intent stable as edits happen. |
-| Anchored Request Popup | Captures the user's request inline near the selected text and keeps the request-entry flow inside the Inlinr surface. |
+| Anchored Request Popup | Webview-owned transient overlay that appears near the live selection and keeps request entry inside the Inlinr surface while the extension host validates source-backed targeting. |
 | Scoped Request Builder | Packages the selected text and nearby context for an AI edit request. |
 | AI Provider Client | Calls the configured model backend through supported VS Code extension APIs rather than another extension's chat UI. |
 | Suggestion Normalizer | Converts provider output into a predictable suggested edit shape. |
@@ -68,6 +68,7 @@ flowchart LR
 
 - Keep the document surface under Inlinr control so viewing and later editing share one editor model.
 - Keep the editing loop precise and selection-scoped.
+- Keep transient overlay state in the webview and keep source-backed validation in the extension host.
 - Keep provider details behind a stable contract.
 - Prefer extension-owned UI and supported APIs over automating other extension surfaces.
 - Preserve document integrity and user trust.

@@ -56,16 +56,23 @@ export function getExtensionUri(): vscode.Uri {
 export function createMockWebviewPanel(): {
   panel: vscode.WebviewPanel;
   webview: vscode.Webview;
+  postedMessages: unknown[];
+  sendMessageToExtension: (message: unknown) => void;
 } {
   const didDisposeEmitter = new vscode.EventEmitter<void>();
   const didChangeViewStateEmitter = new vscode.EventEmitter<vscode.WebviewPanelOnDidChangeViewStateEvent>();
+  const didReceiveMessageEmitter = new vscode.EventEmitter<unknown>();
+  const postedMessages: unknown[] = [];
   const webview = {
     html: '',
     options: {},
     cspSource: 'https://inlinr.test',
     asWebviewUri: (uri: vscode.Uri) => uri,
-    onDidReceiveMessage: () => new vscode.Disposable(() => undefined),
-    postMessage: async () => true
+    onDidReceiveMessage: didReceiveMessageEmitter.event,
+    postMessage: async (message: unknown) => {
+      postedMessages.push(message);
+      return true;
+    }
   } as unknown as vscode.Webview;
 
   const panel = {
@@ -84,8 +91,16 @@ export function createMockWebviewPanel(): {
       didDisposeEmitter.fire();
       didDisposeEmitter.dispose();
       didChangeViewStateEmitter.dispose();
+      didReceiveMessageEmitter.dispose();
     }
   } as unknown as vscode.WebviewPanel;
 
-  return { panel, webview };
+  return {
+    panel,
+    webview,
+    postedMessages,
+    sendMessageToExtension: (message: unknown) => {
+      didReceiveMessageEmitter.fire(message);
+    }
+  };
 }
