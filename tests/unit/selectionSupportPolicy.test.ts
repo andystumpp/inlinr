@@ -29,7 +29,7 @@ suite('Selection support policy', () => {
     });
 
     assert.equal(decision.allowed, false);
-    assert.match(decision.reason ?? '', /non-empty prose/i);
+    assert.match(decision.reason ?? '', /non-empty content/i);
   });
 
   test('normalizes rendered region ids for adjacent multi-block selections', () => {

@@ -30,11 +30,25 @@ export interface RequestCancelMessage {
   sessionId: string;
 }
 
+export interface SuggestionApplyMessage {
+  type: 'suggestion.apply';
+  sessionId: string;
+  proposalId: string;
+}
+
+export interface SuggestionRejectMessage {
+  type: 'suggestion.reject';
+  sessionId: string;
+  proposalId: string;
+}
+
 export type ViewerToExtensionMessage =
   | SelectionCaptureMessage
   | RequestDraftChangeMessage
   | RequestSubmitMessage
-  | RequestCancelMessage;
+  | RequestCancelMessage
+  | SuggestionApplyMessage
+  | SuggestionRejectMessage;
 
 export interface ViewerStateMessage {
   type: 'viewer.state';
@@ -46,7 +60,17 @@ export interface SelectionAcceptedMessage {
   selectedTextPreview: string;
   selectedRegionIds: string[];
   draftText: string;
-  validationState: 'drafting' | 'invalid' | 'submitting' | 'submitted';
+  validationState:
+    | 'drafting'
+    | 'invalid'
+    | 'submitting'
+    | 'submitted'
+    | 'executing'
+    | 'review'
+    | 'failed'
+    | 'unavailable'
+    | 'applying'
+    | 'applied';
   validationMessage?: string;
 }
 
@@ -67,12 +91,59 @@ export interface RequestSubmittedMessage {
   message: string;
 }
 
+export interface RequestExecutingMessage {
+  type: 'request.executing';
+  sessionId: string;
+  message: string;
+}
+
+export interface SuggestionReadyMessage {
+  type: 'suggestion.ready';
+  sessionId: string;
+  proposal: {
+    proposalId: string;
+    previewMode: 'blended-inline';
+    replacementMarkdown: string;
+  };
+}
+
+export interface RequestFailedMessage {
+  type: 'request.failed';
+  sessionId: string;
+  message: string;
+}
+
+export interface RequestUnavailableMessage {
+  type: 'request.unavailable';
+  sessionId: string;
+  message: string;
+}
+
+export interface SuggestionAppliedMessage {
+  type: 'suggestion.applied';
+  sessionId: string;
+  message: string;
+}
+
+export interface SuggestionRejectedMessage {
+  type: 'suggestion.rejected';
+  sessionId: string;
+  draftText: string;
+  message?: string;
+}
+
 export type ExtensionToViewerMessage =
   | ViewerStateMessage
   | SelectionAcceptedMessage
   | SelectionRejectedMessage
   | RequestInvalidatedMessage
-  | RequestSubmittedMessage;
+  | RequestSubmittedMessage
+  | RequestExecutingMessage
+  | SuggestionReadyMessage
+  | RequestFailedMessage
+  | RequestUnavailableMessage
+  | SuggestionAppliedMessage
+  | SuggestionRejectedMessage;
 
 function isSelectionRect(
   value: unknown
@@ -132,6 +203,10 @@ export function isViewerToExtensionMessage(value: unknown): value is ViewerToExt
       return isNonEmptyString(candidate.sessionId) && typeof candidate.draftText === 'string';
     case 'request.cancel':
       return isNonEmptyString(candidate.sessionId);
+    case 'suggestion.apply':
+      return isNonEmptyString(candidate.sessionId) && isNonEmptyString(candidate.proposalId);
+    case 'suggestion.reject':
+      return isNonEmptyString(candidate.sessionId) && isNonEmptyString(candidate.proposalId);
     default:
       return false;
   }

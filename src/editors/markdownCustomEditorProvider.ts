@@ -4,9 +4,21 @@ import {
   renderMarkdownDocumentWithMetadata,
   toViewerError
 } from '../rendering/markdownRenderer';
-import { buildSelectionScopedRequestPayload, type SelectionScopedRequestPayload } from '../requests/requestPayloadBuilder';
+import type { RenderedSelectionMetadata } from '../rendering/renderedSelectionMetadata';
+import {
+  ExecutionServiceError,
+  UnsupportedExecutionService,
+  type ExecutionService
+} from '../requests/executionService';
+import { EditApplicationError, applySuggestedEdit } from '../requests/editApplicationService';
+import {
+  buildSelectionScopedRequestPayload,
+  type EffectiveSelectionScope,
+  type SelectionScopedRequestPayload
+} from '../requests/requestPayloadBuilder';
 import { createSelectionAnchor, revalidateSelectionAnchor } from '../requests/selectionAnchorResolver';
 import { evaluateSelectionSupport, normalizeRenderedRegionIds } from '../requests/selectionSupportPolicy';
+import { normalizeSuggestedEdit } from '../requests/suggestionNormalizer';
 import {
   UnsupportedRequestService,
   type RequestService
@@ -37,7 +49,14 @@ function toActiveRequestViewState(activeRequest: TrackedActiveRequestSession | n
     selectedRegionIds: activeRequest.selectedRegionIds,
     validationState: activeRequest.validationState,
     validationMessage: activeRequest.validationMessage,
-    draftText: activeRequest.draftText
+    draftText: activeRequest.draftText,
+    suggestion: activeRequest.suggestion
+      ? {
+          proposalId: activeRequest.suggestion.proposalId,
+          previewMode: activeRequest.suggestion.previewMode,
+          replacementMarkdown: activeRequest.suggestion.replacementMarkdown
+        }
+      : undefined
   };
 }
 
@@ -81,6 +100,134 @@ function findSelectionRange(markdownSource: string, selectedText: string): { sou
     sourceStart,
     sourceEnd: sourceStart + selectedText.length
   };
+}
+
+interface ResolvedSelectionRange {
+  sourceStart: number;
+  sourceEnd: number;
+  visibleSourceStart: number;
+  visibleSourceEnd: number;
+  scopeKind: EffectiveSelectionScope['scopeKind'];
+}
+
+function resolveSelectionRangeFromMetadata(
+  markdownSource: string,
+  selectionMetadata: RenderedSelectionMetadata,
+  message: SelectionCaptureMessage
+): ResolvedSelectionRange | null {
+  const normalizedRegionIds = normalizeRenderedRegionIds(message.renderedRegionIds);
+  const regionLookup = new Map(selectionMetadata.regions.map((region) => [region.regionId, region]));
+  const markerLookup = new Map(selectionMetadata.markers.map((marker) => [marker.markerId, marker]));
+  const selectedRegions = normalizedRegionIds
+    .map((regionId) => regionLookup.get(regionId))
+    .filter((region): region is RenderedSelectionMetadata['regions'][number] => Boolean(region));
+  const selectedOffsets: number[] = [];
+
+  for (const region of selectedRegions) {
+    selectedOffsets.push(region.sourceStart, region.sourceEnd);
+  }
+
+  const startMarker = markerLookup.get(message.startMarker);
+  const endMarker = markerLookup.get(message.endMarker);
+
+  if (startMarker) {
+    selectedOffsets.push(startMarker.sourceOffset);
+  }
+
+  if (endMarker) {
+    selectedOffsets.push(endMarker.sourceOffset);
+  }
+
+  if (selectedOffsets.length === 0) {
+    return null;
+  }
+
+  const boundedSourceStart = Math.min(...selectedOffsets);
+  const boundedSourceEnd = Math.max(...selectedOffsets);
+  const boundedMarkdown = markdownSource.slice(boundedSourceStart, boundedSourceEnd);
+  const directMatch = findSelectionRange(boundedMarkdown, message.selectedText);
+
+  const widenToStructuralBoundaries = (sourceStart: number, sourceEnd: number): ResolvedSelectionRange => {
+    const findContainingStructuralRegion = (offset: number) => {
+      return selectionMetadata.regions
+        .filter((region) => {
+          return (
+            (region.kind === 'heading' || region.kind === 'list-item-prose') &&
+            region.sourceStart <= offset &&
+            region.sourceEnd > offset
+          );
+        })
+        .sort((left, right) => {
+          return (left.sourceEnd - left.sourceStart) - (right.sourceEnd - right.sourceStart);
+        })[0];
+    };
+
+    const getStructuralRegionEnd = (region: RenderedSelectionMetadata['regions'][number] | undefined) => {
+      if (!region) {
+        return sourceEnd;
+      }
+
+      if (region.kind !== 'list-item-prose') {
+        return region.sourceEnd;
+      }
+
+      const regionMarkdown = markdownSource.slice(region.sourceStart, region.sourceEnd);
+
+      return regionMarkdown.endsWith('\n\n') ? region.sourceEnd - 1 : region.sourceEnd;
+    };
+
+    const startRegion = findContainingStructuralRegion(sourceStart);
+    const endProbe = Math.max(sourceStart, sourceEnd - 1);
+    const endRegion = findContainingStructuralRegion(endProbe);
+    const effectiveSourceStart = startRegion?.sourceStart ?? sourceStart;
+    const effectiveSourceEnd = getStructuralRegionEnd(endRegion);
+
+    return {
+      sourceStart: effectiveSourceStart,
+      sourceEnd: effectiveSourceEnd,
+      visibleSourceStart: sourceStart,
+      visibleSourceEnd: sourceEnd,
+      scopeKind:
+        (startRegion?.kind === 'list-item-prose' || endRegion?.kind === 'list-item-prose') &&
+        (effectiveSourceStart !== sourceStart || effectiveSourceEnd !== sourceEnd)
+          ? 'containing-list-item'
+          : 'exact-selection'
+    };
+  };
+
+  if (directMatch) {
+    return widenToStructuralBoundaries(
+      boundedSourceStart + directMatch.sourceStart,
+      boundedSourceStart + directMatch.sourceEnd
+    );
+  }
+
+  return widenToStructuralBoundaries(boundedSourceStart, boundedSourceEnd);
+}
+
+function shiftEffectiveSelectionScope(
+  scope: EffectiveSelectionScope,
+  delta: number,
+  effectiveSourceStart: number,
+  effectiveSourceEnd: number
+): EffectiveSelectionScope {
+  return {
+    ...scope,
+    visibleSourceStart: scope.visibleSourceStart + delta,
+    visibleSourceEnd: scope.visibleSourceEnd + delta,
+    effectiveSourceStart,
+    effectiveSourceEnd
+  };
+}
+
+function blocksReplacementSelection(activeRequest: TrackedActiveRequestSession): boolean {
+  return (
+    activeRequest.validationState === 'submitting' ||
+    activeRequest.validationState === 'submitted' ||
+    activeRequest.validationState === 'executing' ||
+    activeRequest.validationState === 'review' ||
+    activeRequest.validationState === 'applying'
+  );
 }
 
 export function createViewerStateForDocument(
@@ -127,13 +274,15 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
   public static readonly viewType = 'inlinr.markdownViewer';
 
   private readonly disposables: vscode.Disposable[] = [];
+  private readonly selectionMetadataByDocument = new Map<string, RenderedSelectionMetadata>();
   private sessionCounter = 0;
   private requestSessionCounter = 0;
 
   public constructor(
     private readonly extensionUri: vscode.Uri,
     private readonly sessionController: DocumentSessionController,
-    private readonly requestService: RequestService<SelectionScopedRequestPayload> = new UnsupportedRequestService<SelectionScopedRequestPayload>()
+    private readonly requestService: RequestService<SelectionScopedRequestPayload> = new UnsupportedRequestService<SelectionScopedRequestPayload>(),
+    private readonly executionService: ExecutionService = new UnsupportedExecutionService()
   ) {
     this.disposables.push(
       vscode.workspace.onDidChangeTextDocument((event) => {
@@ -155,7 +304,10 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
 
     webviewPanel.webview.options = {
       enableScripts: true,
-      localResourceRoots: [vscode.Uri.joinPath(this.extensionUri, 'media', 'markdownViewer')]
+      localResourceRoots: [
+        vscode.Uri.joinPath(this.extensionUri, 'media', 'markdownViewer'),
+        vscode.Uri.joinPath(this.extensionUri, 'node_modules', 'mermaid', 'dist')
+      ]
     };
 
     webviewPanel.webview.onDidReceiveMessage(
@@ -189,6 +341,13 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
         targetDocument,
         this.sessionController.getActiveRequestSession(targetDocument)
       );
+
+      if (state.kind === 'rendered') {
+        this.selectionMetadataByDocument.set(targetDocument.uri.toString(), state.selectionMetadata);
+      } else {
+        this.selectionMetadataByDocument.delete(targetDocument.uri.toString());
+      }
+
       webviewPanel.title = `${getDocumentTitle(targetDocument)} Preview`;
       webviewPanel.webview.html = getMarkdownViewerHtml(webviewPanel.webview, this.extensionUri, state);
     };
@@ -213,7 +372,11 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
   private syncActiveRequestWithDocument(document: vscode.TextDocument): void {
     const activeRequest = this.sessionController.getActiveRequestSession(document);
 
-    if (!activeRequest || activeRequest.documentVersion === document.version) {
+    if (
+      !activeRequest ||
+      activeRequest.documentVersion === document.version ||
+      activeRequest.validationState === 'applying'
+    ) {
       return;
     }
 
@@ -223,7 +386,8 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
       this.sessionController.setActiveRequestSession({
         ...activeRequest,
         validationState: 'invalid',
-        validationMessage: 'The document changed. Reselect before submitting.'
+        validationMessage: 'The document changed. Reselect before submitting.',
+        suggestion: undefined
       });
 
       return;
@@ -242,8 +406,15 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
       documentVersion: document.version,
       selectedTextPreview: document.getText().slice(revalidation.match.sourceStart, revalidation.match.sourceEnd),
       selectionAnchor: refreshedAnchor,
+      effectiveSelectionScope: shiftEffectiveSelectionScope(
+        activeRequest.effectiveSelectionScope,
+        revalidation.match.sourceStart - activeRequest.selectionAnchor.sourceStart,
+        revalidation.match.sourceStart,
+        revalidation.match.sourceEnd
+      ),
       validationState: 'drafting',
-      validationMessage: undefined
+      validationMessage: undefined,
+      suggestion: undefined
     });
   }
 
@@ -264,6 +435,12 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
         return;
       case 'request.cancel':
         this.sessionController.clearActiveRequestSession(message.sessionId);
+        return;
+      case 'suggestion.apply':
+        await this.applyActiveSuggestion(document, message.sessionId, message.proposalId, postMessageToViewer);
+        return;
+      case 'suggestion.reject':
+        await this.rejectActiveSuggestion(document, message.sessionId, message.proposalId, postMessageToViewer);
         return;
     }
   }
@@ -291,7 +468,9 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
       return;
     }
 
-    if (this.sessionController.getActiveRequestSession()) {
+    const existingActiveRequest = this.sessionController.getActiveRequestSession();
+
+    if (existingActiveRequest && blocksReplacementSelection(existingActiveRequest)) {
       await postMessageToViewer({
         type: 'selection.rejected',
         message: 'Finish or cancel the current request before starting another.'
@@ -299,8 +478,14 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
       return;
     }
 
+    if (existingActiveRequest) {
+      this.sessionController.clearActiveRequestSession(existingActiveRequest.sessionId);
+    }
+
     const markdownSource = document.getText();
-    const selectionRange = findSelectionRange(markdownSource, message.selectedText);
+    const selectionMetadata = this.selectionMetadataByDocument.get(document.uri.toString()) ??
+      renderMarkdownDocumentWithMetadata(document).selectionMetadata;
+    const selectionRange = resolveSelectionRangeFromMetadata(markdownSource, selectionMetadata, message);
 
     if (!selectionRange) {
       await postMessageToViewer({
@@ -317,15 +502,24 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
       sourceStart: selectionRange.sourceStart,
       sourceEnd: selectionRange.sourceEnd
     });
+    const effectiveSelectionScope: EffectiveSelectionScope = {
+      scopeKind: selectionRange.scopeKind,
+      visibleSourceStart: selectionRange.visibleSourceStart,
+      visibleSourceEnd: selectionRange.visibleSourceEnd,
+      effectiveSourceStart: selectionRange.sourceStart,
+      effectiveSourceEnd: selectionRange.sourceEnd,
+      selectedRegionIds: normalizeRenderedRegionIds(message.renderedRegionIds)
+    };
 
     this.sessionController.setActiveRequestSession({
       sessionId: `request-session-${this.requestSessionCounter++}`,
       documentUri: document.uri.toString(),
       documentVersion: document.version,
       selectedTextPreview: message.selectedText,
-      selectedRegionIds: normalizeRenderedRegionIds(message.renderedRegionIds),
+      selectedRegionIds: effectiveSelectionScope.selectedRegionIds,
       draftText: '',
       selectionAnchor,
+      effectiveSelectionScope,
       validationState: 'drafting'
     });
 
@@ -416,29 +610,204 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     }
 
     const selectedMarkdown = document.getText().slice(revalidation.match.sourceStart, revalidation.match.sourceEnd);
+    const effectiveSelectionScope = shiftEffectiveSelectionScope(
+      activeRequest.effectiveSelectionScope,
+      revalidation.match.sourceStart - activeRequest.selectionAnchor.sourceStart,
+      revalidation.match.sourceStart,
+      revalidation.match.sourceEnd
+    );
+    const refreshedAnchor = createSelectionAnchor({
+      documentUri: document.uri.toString(),
+      capturedDocumentVersion: document.version,
+      markdownSource: document.getText(),
+      sourceStart: revalidation.match.sourceStart,
+      sourceEnd: revalidation.match.sourceEnd
+    });
     const payload = buildSelectionScopedRequestPayload({
       documentUri: document.uri.toString(),
       documentVersion: document.version,
       requestText: draftText,
       selectedMarkdown,
-      selectionAnchor: activeRequest.selectionAnchor,
-      prefixMarkdown: activeRequest.selectionAnchor.prefixQuote,
-      suffixMarkdown: activeRequest.selectionAnchor.suffixQuote
+      documentMarkdown: document.getText(),
+      selectionAnchor: refreshedAnchor,
+      effectiveSelectionScope,
     });
 
     await this.requestService.submit(payload);
 
+    const availability = await this.executionService.checkAvailability();
+
+    if (!availability.available) {
+      this.sessionController.setActiveRequestSession({
+        ...activeRequest,
+        draftText,
+        selectedTextPreview: selectedMarkdown,
+        selectionAnchor: refreshedAnchor,
+        effectiveSelectionScope,
+        submittedPayload: payload,
+        validationState: 'unavailable',
+        validationMessage: availability.message ?? 'Execution is unavailable.',
+        suggestion: undefined
+      });
+
+      await postMessageToViewer({
+        type: 'request.unavailable',
+        sessionId,
+        message: availability.message ?? 'Execution is unavailable.'
+      });
+
+      return;
+    }
+
     this.sessionController.setActiveRequestSession({
       ...activeRequest,
       draftText,
-      validationState: 'submitted',
-      validationMessage: 'Request captured locally.'
+      selectedTextPreview: selectedMarkdown,
+      selectionAnchor: refreshedAnchor,
+      effectiveSelectionScope,
+      submittedPayload: payload,
+      validationState: 'executing',
+      validationMessage: 'Generating suggestion…',
+      suggestion: undefined
     });
 
     await postMessageToViewer({
-      type: 'request.submitted',
+      type: 'request.executing',
       sessionId,
-      message: 'Request captured locally.'
+      message: 'Generating suggestion…'
+    });
+
+    try {
+      const executionResult = await this.executionService.execute(payload);
+      const suggestion = normalizeSuggestedEdit(payload, executionResult);
+
+      this.sessionController.setActiveRequestSession({
+        ...activeRequest,
+        draftText,
+        selectedTextPreview: selectedMarkdown,
+        selectionAnchor: refreshedAnchor,
+        effectiveSelectionScope,
+        submittedPayload: payload,
+        validationState: 'review',
+        validationMessage: 'Suggestion ready.',
+        suggestion
+      });
+
+      await postMessageToViewer({
+        type: 'suggestion.ready',
+        sessionId,
+        proposal: {
+          proposalId: suggestion.proposalId,
+          previewMode: suggestion.previewMode,
+          replacementMarkdown: suggestion.replacementMarkdown
+        }
+      });
+
+      return;
+    } catch (error) {
+      const executionMessage = error instanceof Error ? error.message : 'Execution failed.';
+      const state = error instanceof ExecutionServiceError && error.reasonCode !== 'execution-error' ? 'unavailable' : 'failed';
+      const eventType = state === 'unavailable' ? 'request.unavailable' : 'request.failed';
+
+      this.sessionController.setActiveRequestSession({
+        ...activeRequest,
+        draftText,
+        selectedTextPreview: selectedMarkdown,
+        selectionAnchor: refreshedAnchor,
+        effectiveSelectionScope,
+        submittedPayload: payload,
+        validationState: state,
+        validationMessage: executionMessage,
+        suggestion: undefined
+      });
+
+      await postMessageToViewer({
+        type: eventType,
+        sessionId,
+        message: executionMessage
+      });
+
+      return;
+    }
+  }
+
+  private async applyActiveSuggestion(
+    document: vscode.TextDocument,
+    sessionId: string,
+    proposalId: string,
+    postMessageToViewer: (message: ExtensionToViewerMessage) => Promise<void>
+  ): Promise<void> {
+    const activeRequest = this.sessionController.getActiveRequestSession(document);
+
+    if (!activeRequest || activeRequest.sessionId !== sessionId || !activeRequest.suggestion) {
+      return;
+    }
+
+    if (activeRequest.suggestion.proposalId !== proposalId) {
+      return;
+    }
+
+    this.sessionController.setActiveRequestSession({
+      ...activeRequest,
+      validationState: 'applying',
+      validationMessage: 'Applying suggestion…'
+    });
+
+    try {
+      await applySuggestedEdit(document, activeRequest.suggestion);
+      this.sessionController.clearActiveRequestSession(sessionId);
+
+      await postMessageToViewer({
+        type: 'suggestion.applied',
+        sessionId,
+        message: 'Suggestion applied.'
+      });
+    } catch (error) {
+      const applyMessage = error instanceof Error ? error.message : 'The suggested edit could not be applied.';
+
+      this.sessionController.setActiveRequestSession({
+        ...activeRequest,
+        validationState: error instanceof EditApplicationError ? 'invalid' : 'failed',
+        validationMessage: applyMessage,
+        suggestion: undefined
+      });
+
+      await postMessageToViewer({
+        type: 'request.invalidated',
+        sessionId,
+        message: applyMessage
+      });
+    }
+  }
+
+  private async rejectActiveSuggestion(
+    document: vscode.TextDocument,
+    sessionId: string,
+    proposalId: string,
+    postMessageToViewer: (message: ExtensionToViewerMessage) => Promise<void>
+  ): Promise<void> {
+    const activeRequest = this.sessionController.getActiveRequestSession(document);
+
+    if (!activeRequest || activeRequest.sessionId !== sessionId || !activeRequest.suggestion) {
+      return;
+    }
+
+    if (activeRequest.suggestion.proposalId !== proposalId) {
+      return;
+    }
+
+    this.sessionController.setActiveRequestSession({
+      ...activeRequest,
+      validationState: 'drafting',
+      validationMessage: 'Suggestion dismissed.',
+      suggestion: undefined
+    });
+
+    await postMessageToViewer({
+      type: 'suggestion.rejected',
+      sessionId,
+      draftText: activeRequest.draftText,
+      message: 'Suggestion dismissed.'
     });
   }
 

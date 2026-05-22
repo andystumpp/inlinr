@@ -14,6 +14,48 @@ const markdownRenderer = new MarkdownIt({
   typographer: false
 });
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function isMermaidFence(info: string): boolean {
+  const language = info.trim().split(/\s+/, 1)[0]?.toLowerCase();
+  return language === 'mermaid';
+}
+
+const defaultFenceRenderer = markdownRenderer.renderer.rules.fence;
+
+markdownRenderer.renderer.rules.fence = (tokens, index, options, environment, self) => {
+  const token = tokens[index];
+
+  if (isMermaidFence(token.info)) {
+    const mermaidSource = token.content.trim();
+
+    return [
+      '<section class="mermaid-diagram-block" data-mermaid-block>',
+      '<div class="mermaid-diagram-surface" data-mermaid-render hidden></div>',
+      '<p class="mermaid-diagram-status" data-mermaid-status>Rendering Mermaid diagram...</p>',
+      '<section class="mermaid-diagram-fallback" data-mermaid-fallback hidden>',
+      '<p class="mermaid-diagram-fallback-title">Mermaid preview unavailable</p>',
+      '<pre class="mermaid-diagram-fallback-source" data-mermaid-fallback-source></pre>',
+      '</section>',
+      `<pre class="mermaid-diagram-source" data-mermaid-source hidden>${escapeHtml(mermaidSource)}</pre>`,
+      '</section>\n'
+    ].join('');
+  }
+
+  if (defaultFenceRenderer) {
+    return defaultFenceRenderer(tokens, index, options, environment, self);
+  }
+
+  return self.renderToken(tokens, index, options);
+};
+
 export class MarkdownRenderError extends Error {
   public readonly reasonCode: ViewerErrorReasonCode;
 
@@ -46,6 +88,8 @@ function getSourceOffsetForLine(lineStartOffsets: number[], lineNumber: number, 
 
 function toSupportedSelectionRegionKind(tokenType: string): SupportedSelectionRegionKind | null {
   switch (tokenType) {
+    case 'heading_open':
+      return 'heading';
     case 'paragraph_open':
       return 'paragraph';
     case 'blockquote_open':

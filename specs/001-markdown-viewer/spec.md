@@ -2,7 +2,8 @@
 
 **Feature Branch**: `001-markdown-viewer`  
 **Created**: 2026-05-19  
-**Status**: Draft  
+**Status**: Refined  
+**Refined**: 2026-05-22 — Added Mermaid diagram rendering requirements and safe fallback behavior for Mermaid blocks inside the Markdown viewer.  
 **Input**: User description: "Implement the feature specification based on the updated constitution. I want to build a markdown viewer for an md file in vs code as the first basic capability on which we will build upon later. Once md file is clicked, directly opened in markdown viewer window. this will also later become the editing window."
 
 ## Clarifications
@@ -14,6 +15,7 @@
 - Q: What should the Inlinr viewer show in v1 when a Markdown file opens? → A: A fully rendered Markdown preview only.
 - Q: When the Inlinr viewer cannot render a Markdown file in v1, what should happen? → A: Stay in the Inlinr viewer and show an error state only.
 - Q: What surface should host the Inlinr viewer in v1? → A: Replace the current editor tab content with the Inlinr viewer.
+- Q: How should Mermaid content be handled in the Markdown viewer? → A: Render Mermaid fenced blocks as diagrams in the viewer when they can be rendered locally, and fail safely in the viewer when a Mermaid block cannot be rendered.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -29,6 +31,7 @@ A user clicks or otherwise opens a Markdown file in VS Code and sees the documen
 
 1. **Given** a workspace contains a readable Markdown file, **When** the user opens that file, **Then** the file opens in the current editor tab as the Inlinr viewer surface immediately.
 2. **Given** the user opens a Markdown file from the VS Code Explorer, **When** the viewer appears, **Then** the viewer shows a rendered preview of that file and clearly identifies which file is being viewed.
+3. **Given** the opened Markdown file contains Mermaid fenced code blocks, **When** the viewer renders the document, **Then** those blocks are shown as rendered diagrams inside the viewer rather than left only as raw fenced source.
 
 ---
 
@@ -59,6 +62,7 @@ A user opening unsupported or unavailable content gets a clear outcome without t
 
 1. **Given** the user opens a non-Markdown file, **When** the open request is handled, **Then** the normal non-Markdown file behavior remains unchanged.
 2. **Given** the user opens a Markdown file that cannot be displayed, **When** the viewer cannot render it, **Then** the user remains in the Inlinr viewer, sees a clear error state there, and the document remains unmodified.
+3. **Given** the opened Markdown file contains an invalid or unsupported Mermaid block, **When** that Mermaid content cannot be rendered safely, **Then** the viewer remains open, preserves the rest of the document preview, and shows a clear in-viewer fallback for that diagram block rather than failing silently or sending content to an external service.
 
 ---
 
@@ -66,13 +70,14 @@ A user opening unsupported or unavailable content gets a clear outcome without t
 
 - What happens when the user opens a Markdown file that has no readable content, is extremely large, or cannot be loaded quickly enough for an immediate view?
 - How does the system handle a Markdown file open request when the file path is invalid, the file is deleted during open, or rendering fails after the viewer has started opening?
+- What happens when a Markdown file contains invalid Mermaid syntax, unsupported Mermaid features, or Mermaid content that cannot be rendered safely inside the viewer?
 
 ## Scope & Boundaries *(mandatory)*
 
 - **Selection Scope**: The scope for this feature is the single Markdown document the user explicitly opens in VS Code; the entire opened document is the active rendered viewing target in the current editor tab.
 - **Review Model**: This slice is read-only and preview-only. It does not create AI suggestions, expose source editing controls, or apply document edits, so no apply or reject step is required yet.
 - **Context Exposure**: Document content remains inside the local VS Code viewing experience for this feature. No Markdown content is sent to external providers or services as part of opening the viewer.
-- **Out of Scope**: Editing inside the viewer, source-mode viewing inside the Inlinr surface, AI-assisted rewrites, multi-file combined views, non-Markdown rendering, persisted comments or history, and background document processing.
+- **Out of Scope**: Editing inside the viewer, source-mode viewing inside the Inlinr surface, AI-assisted rewrites, multi-file combined views, non-Markdown rendering outside supported Markdown-embedded constructs such as Mermaid fenced blocks, persisted comments or history, and background document processing.
 
 ## Requirements *(mandatory)*
 
@@ -82,12 +87,15 @@ A user opening unsupported or unavailable content gets a clear outcome without t
 - **FR-002**: The system MUST replace the normal Markdown editor open behavior for `.md` files so the selected Markdown file opens directly in the product's Markdown viewer without requiring a separate preview command.
 - **FR-013**: The system MUST host the Inlinr viewer in the current editor tab rather than opening the viewer in a side-by-side column, panel, or separate window.
 - **FR-003**: The system MUST display the content of the opened Markdown file as a fully rendered Markdown preview.
+- **FR-003a**: The system MUST render supported Mermaid fenced code blocks as diagrams inside the Markdown viewer.
 - **FR-004**: The system MUST clearly indicate which underlying Markdown file is being viewed.
 - **FR-005**: The system MUST apply the same direct-to-viewer behavior consistently when the user opens another Markdown file during the same session.
 - **FR-010**: The system MUST apply this direct-to-viewer routing for Markdown files opened from the VS Code Explorer in v1; support for additional open paths may be added later.
 - **FR-006**: The system MUST leave the normal open behavior for non-Markdown files unchanged.
 - **FR-007**: The system MUST present a clear failure state inside the Inlinr viewer when a Markdown file cannot be displayed and MUST avoid modifying the file as part of that failure.
+- **FR-007a**: When a Mermaid block cannot be rendered safely, the system MUST preserve the surrounding Markdown preview and show a clear in-viewer fallback for that block instead of failing the entire viewer silently.
 - **FR-008**: Users MUST be able to open Markdown files in the viewer without sending document content to any external provider or service.
+- **FR-008a**: Mermaid rendering in this slice MUST remain local to the VS Code extension and viewer experience and MUST NOT depend on external provider or network calls.
 - **FR-009**: The system MUST keep this capability read-only so it can serve as the safe foundation for later editing features.
 - **FR-011**: The system MUST keep the v1 Inlinr viewer focused on rendered preview only and MUST NOT expose inline source editing controls in this slice.
 - **FR-012**: The system MUST NOT automatically fall back to the normal Markdown editor when the Inlinr viewer fails to render a Markdown file in v1.
@@ -95,6 +103,7 @@ A user opening unsupported or unavailable content gets a clear outcome without t
 ### Key Entities *(include if feature involves data)*
 
 - **Markdown Document**: The user-selected `.md` file that is being opened and rendered in the viewer.
+- **Mermaid Diagram Block**: A Mermaid fenced code block embedded in a Markdown document that the viewer can attempt to render as a diagram.
 - **Viewer Session**: The active viewing state that shows one Markdown document as rendered preview content and keeps that visible content associated with its source file.
 - **Open Request**: The user action that triggers file opening from the VS Code workspace or editor surface.
 - **Supported Open Path**: A VS Code file-open action that Inlinr explicitly guarantees for this slice; in v1 this means Markdown files opened from the Explorer.
@@ -104,6 +113,7 @@ A user opening unsupported or unavailable content gets a clear outcome without t
 ### Measurable Outcomes
 
 - **SC-001**: In acceptance testing, 95% of Markdown file opens display the requested document in the viewer within 2 seconds of the open action.
+- **SC-001a**: In acceptance testing, 95% of sampled Markdown files containing supported Mermaid blocks display those diagrams as rendered viewer content without requiring the user to leave the Inlinr viewer.
 - **SC-002**: In acceptance testing, 100% of sampled non-Markdown file opens continue to use their existing open behavior.
 - **SC-003**: In first-run usability testing, at least 90% of users can open and read a Markdown file in the viewer on their first attempt without being told to run a separate preview command.
 - **SC-005**: In acceptance testing, 100% of sampled Markdown file opens from the VS Code Explorer route opened Markdown files to the Inlinr viewer instead of the default Markdown editor.
@@ -119,5 +129,6 @@ A user opening unsupported or unavailable content gets a clear outcome without t
 - Existing VS Code behavior for non-Markdown files remains the default and should not be redesigned by this feature.
 - Explorer-triggered Markdown opens are sufficient for v1 acceptance even if other VS Code open paths are aligned later.
 - Viewer render failures can be handled inside the Inlinr viewer without forcing an automatic return to the default Markdown editor.
+- Supported Mermaid rendering can be performed locally within the extension and viewer trust boundary without introducing required external network access.
 - Replacing the current editor tab content with the Inlinr viewer is technically feasible within VS Code's document and editor model for this slice.
 - The viewer surface created here will later host editing capabilities, but those editing behaviors are not part of this specification.

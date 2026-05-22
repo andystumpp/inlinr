@@ -47,7 +47,8 @@
     "test:unit": "node ./out/tests/runTest.js unit"
   },
   "dependencies": {
-    "markdown-it": "^14.1.0"
+    "markdown-it": "^14.1.0",
+    "mermaid": "^11.15.0"
   },
   "devDependencies": {
     "@types/markdown-it": "^14.1.2",

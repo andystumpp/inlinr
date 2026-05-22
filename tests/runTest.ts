@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { runTests } from '@vscode/test-electron';
+import { TestRunFailedError, runTests } from '@vscode/test-electron';
 
 async function ensureTestRootPath(targetPath: string): Promise<string> {
   if (process.platform !== 'win32' || !targetPath.includes(' ')) {
@@ -15,6 +15,20 @@ async function ensureTestRootPath(targetPath: string): Promise<string> {
   await fs.symlink(targetPath, junctionPath, 'junction');
 
   return junctionPath;
+}
+
+async function runSuite(options: {
+  extensionDevelopmentPath: string;
+  extensionTestsPath: string;
+  workspacePath: string;
+  version?: 'insiders';
+}): Promise<void> {
+  await runTests({
+    extensionDevelopmentPath: options.extensionDevelopmentPath,
+    extensionTestsPath: options.extensionTestsPath,
+    launchArgs: [options.workspacePath, '--disable-extensions'],
+    ...(options.version ? { version: options.version } : {})
+  });
 }
 
 async function main(): Promise<void> {
@@ -31,11 +45,26 @@ async function main(): Promise<void> {
   );
   const workspacePath = path.join(extensionDevelopmentPath, 'tests', 'fixtures', 'workspace');
 
-  await runTests({
-    extensionDevelopmentPath,
-    extensionTestsPath,
-    launchArgs: [workspacePath, '--disable-extensions']
-  });
+  try {
+    await runSuite({
+      extensionDevelopmentPath,
+      extensionTestsPath,
+      workspacePath
+    });
+  } catch (error) {
+    if (!(error instanceof TestRunFailedError) || process.platform !== 'win32') {
+      throw error;
+    }
+
+    console.warn('Primary VS Code test host failed on Windows startup. Retrying with VS Code Insiders.');
+
+    await runSuite({
+      extensionDevelopmentPath,
+      extensionTestsPath,
+      workspacePath,
+      version: 'insiders'
+    });
+  }
 }
 
 main().catch((error) => {

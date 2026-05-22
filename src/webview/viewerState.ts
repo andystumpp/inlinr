@@ -3,6 +3,7 @@ import {
   assertValidRenderedSelectionMetadata,
   type RenderedSelectionMetadata
 } from '../rendering/renderedSelectionMetadata';
+import type { ActiveRequestState } from '../sessions/documentSessionController';
 
 export type ViewerErrorReasonCode =
   | 'missing-document'
@@ -10,15 +11,20 @@ export type ViewerErrorReasonCode =
   | 'render-failed'
   | 'unsupported-content';
 
-export type ActiveRequestValidationState = 'drafting' | 'invalid' | 'submitting' | 'submitted';
+export interface SuggestedEditViewState {
+  proposalId: string;
+  previewMode: 'blended-inline';
+  replacementMarkdown: string;
+}
 
 export interface ActiveRequestViewState {
   sessionId: string;
   selectedTextPreview: string;
   selectedRegionIds: string[];
-  validationState: ActiveRequestValidationState;
+  validationState: ActiveRequestState;
   validationMessage?: string;
   draftText: string;
+  suggestion?: SuggestedEditViewState;
 }
 
 export interface ViewerRenderedState {
@@ -56,6 +62,20 @@ function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every(isNonEmptyString);
 }
 
+function isSuggestedEditViewState(value: unknown): value is SuggestedEditViewState {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const candidate = value as Partial<SuggestedEditViewState>;
+
+  return (
+    isNonEmptyString(candidate.proposalId) &&
+    candidate.previewMode === 'blended-inline' &&
+    typeof candidate.replacementMarkdown === 'string'
+  );
+}
+
 export function isActiveRequestViewState(value: unknown): value is ActiveRequestViewState {
   if (!value || typeof value !== 'object') {
     return false;
@@ -69,7 +89,8 @@ export function isActiveRequestViewState(value: unknown): value is ActiveRequest
     isStringArray(candidate.selectedRegionIds) &&
     isNonEmptyString(candidate.validationState) &&
     typeof candidate.draftText === 'string' &&
-    (candidate.validationMessage === undefined || isNonEmptyString(candidate.validationMessage))
+    (candidate.validationMessage === undefined || isNonEmptyString(candidate.validationMessage)) &&
+    (candidate.suggestion === undefined || isSuggestedEditViewState(candidate.suggestion))
   );
 }
 

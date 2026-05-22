@@ -1,5 +1,15 @@
 import { randomUUID } from 'node:crypto';
+import { buildMarkedDocumentMarkdown } from './documentDraftMarkers';
 import type { SelectionAnchor } from './selectionAnchorResolver';
+
+export interface EffectiveSelectionScope {
+  scopeKind: 'exact-selection' | 'containing-list-item';
+  visibleSourceStart: number;
+  visibleSourceEnd: number;
+  effectiveSourceStart: number;
+  effectiveSourceEnd: number;
+  selectedRegionIds: string[];
+}
 
 export interface SelectionScopedRequestPayload {
   requestId: string;
@@ -7,11 +17,11 @@ export interface SelectionScopedRequestPayload {
   documentVersion: number;
   requestText: string;
   selectedMarkdown: string;
+  documentMarkdown: string;
+  selectionMarkerId: string;
+  markedDocumentMarkdown: string;
   selectionAnchor: SelectionAnchor;
-  surroundingContext: {
-    prefixMarkdown: string;
-    suffixMarkdown: string;
-  };
+  effectiveSelectionScope: EffectiveSelectionScope;
   createdAt: string;
 }
 
@@ -20,9 +30,9 @@ export interface BuildSelectionScopedRequestPayloadInput {
   documentVersion: number;
   requestText: string;
   selectedMarkdown: string;
+  documentMarkdown: string;
   selectionAnchor: SelectionAnchor;
-  prefixMarkdown: string;
-  suffixMarkdown: string;
+  effectiveSelectionScope: EffectiveSelectionScope;
 }
 
 function isNonEmptyString(value: unknown): value is string {
@@ -42,10 +52,12 @@ export function isSelectionScopedRequestPayload(value: unknown): value is Select
     typeof candidate.documentVersion === 'number' &&
     isNonEmptyString(candidate.requestText) &&
     isNonEmptyString(candidate.selectedMarkdown) &&
+    isNonEmptyString(candidate.documentMarkdown) &&
+    isNonEmptyString(candidate.selectionMarkerId) &&
+    isNonEmptyString(candidate.markedDocumentMarkdown) &&
     !!candidate.selectionAnchor &&
     typeof candidate.selectionAnchor === 'object' &&
-    !!candidate.surroundingContext &&
-    typeof candidate.surroundingContext === 'object' &&
+    isEffectiveSelectionScope(candidate.effectiveSelectionScope) &&
     typeof candidate.createdAt === 'string'
   );
 }
@@ -59,21 +71,48 @@ export function assertValidSelectionScopedRequestPayload(value: unknown): assert
 export function buildSelectionScopedRequestPayload(
   input: BuildSelectionScopedRequestPayloadInput
 ): SelectionScopedRequestPayload {
+  const requestId = randomUUID();
+  const selectionMarkerId = requestId;
   const payload: SelectionScopedRequestPayload = {
-    requestId: randomUUID(),
+    requestId,
     documentUri: input.documentUri,
     documentVersion: input.documentVersion,
     requestText: input.requestText,
     selectedMarkdown: input.selectedMarkdown,
+    documentMarkdown: input.documentMarkdown,
+    selectionMarkerId,
+    markedDocumentMarkdown: buildMarkedDocumentMarkdown(input.documentMarkdown, input.selectionAnchor, selectionMarkerId),
     selectionAnchor: input.selectionAnchor,
-    surroundingContext: {
-      prefixMarkdown: input.prefixMarkdown,
-      suffixMarkdown: input.suffixMarkdown
-    },
+    effectiveSelectionScope: input.effectiveSelectionScope,
     createdAt: new Date().toISOString()
   };
 
   assertValidSelectionScopedRequestPayload(payload);
 
   return payload;
+}
+
+function isEffectiveSelectionScope(value: unknown): value is EffectiveSelectionScope {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const candidate = value as Partial<EffectiveSelectionScope>;
+
+  return (
+    (candidate.scopeKind === 'exact-selection' || candidate.scopeKind === 'containing-list-item') &&
+    isFiniteNumber(candidate.visibleSourceStart) &&
+    isFiniteNumber(candidate.visibleSourceEnd) &&
+    isFiniteNumber(candidate.effectiveSourceStart) &&
+    isFiniteNumber(candidate.effectiveSourceEnd) &&
+    isStringArray(candidate.selectedRegionIds)
+  );
+}
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every(isNonEmptyString);
 }

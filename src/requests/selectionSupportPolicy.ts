@@ -21,14 +21,14 @@ export function evaluateSelectionSupport(message: SelectionCaptureMessage): Sele
   if (message.selectedText.trim().length === 0) {
     return {
       allowed: false,
-      reason: 'Select non-empty prose before opening a request.'
+      reason: 'Select non-empty content before opening a request.'
     };
   }
 
   if (normalizeRenderedRegionIds(message.renderedRegionIds).length === 0) {
     return {
       allowed: false,
-      reason: 'Select supported rendered prose before opening a request.'
+      reason: 'Select supported rendered content before opening a request.'
     };
   }
 

@@ -11,7 +11,9 @@
 See `architecture/adr-001-custom-markdown-editor-surface.md` for the decision to use a custom editor
 surface as the foundation for both the initial viewer and later inline editing flows. See
 `architecture/adr-002-inlinr-owned-request-capture-and-model-invocation.md` for the decision to keep
-request capture and model invocation under Inlinr control rather than automating another chat UI.
+request capture and model invocation under Inlinr control rather than automating another chat UI. See
+`architecture/adr-004-local-mermaid-rendering-in-markdown-viewer.md` for the decision to keep Mermaid
+diagram rendering local to the Markdown viewer boundary.
 
 ## Current component diagram
 
@@ -55,7 +57,7 @@ flowchart LR
 | Markdown Text Document | Holds the user-authored source text and remains the canonical document model. |
 | Inlinr Custom Editor Tab | Replaces the default Markdown editor surface for Inlinr-controlled document opens. |
 | Document Session Controller | Coordinates a text document, its visible Inlinr editor instance, refresh, and future editing state. |
-| Markdown Render Pipeline | Converts Markdown text into locally rendered preview content for the custom editor webview. |
+| Markdown Render Pipeline | Converts Markdown text into locally rendered preview content for the custom editor webview, including local Mermaid diagram handling. |
 | Selection and Anchor Logic | Tracks what text the request targets and keeps that intent stable as edits happen. |
 | Anchored Request Popup | Webview-owned transient overlay that appears near the live selection and keeps request entry inside the Inlinr surface while the extension host validates source-backed targeting. |
 | Scoped Request Builder | Packages the selected text and nearby context for an AI edit request. |

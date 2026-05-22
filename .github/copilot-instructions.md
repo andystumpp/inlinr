@@ -31,5 +31,5 @@
 
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
-shell commands, and other important information, read `specs/002-selection-scoped-edit-request/plan.md`
+shell commands, and other important information, read `specs/003-execute-selection-request/plan.md`
 <!-- SPECKIT END -->
