@@ -4,6 +4,7 @@
 **Created**: 2026-05-20  
 **Status**: Refined  
 **Refined**: 2026-05-21 — Clarified consecutive request cycles, broadened selection support to list items and chapters, simplified the request popup, and switched post-submit review to direct inline diff in the document.  
+**Refined**: 2026-05-22 — Clarified request-popup keyboard behavior so the input focuses immediately on open and Enter submits the request, and clarified that inline review should not show a side-by-side current/proposed comparison card.  
 **Input**: User description: "ok let's create the new spec on scope request execution where we execute the request via vs code copilot to actually make the changes to the doc"
 
 ## Clarifications
@@ -20,8 +21,9 @@
 - Q: What should happen after the user applies or rejects one suggestion and wants to keep editing? → A: The system should let the user immediately start another scoped request in the same editor session against the current document state.
 - Q: What document selections should open the request popup in v1? → A: Any non-empty contiguous selection in the document surface should open the request popup, including list items, numbered items, chapters, and multi-chapter selections.
 - Q: What should the popup show before submit in v1? → A: Show only the request input field and an "Ask for changes" action; do not repeat the selected text in the popup, and dismiss the popup when the user clicks elsewhere in the document.
-- Q: How should review appear after the user submits a request in v1? → A: Do not keep preview content in the popup; instead render the proposed diff directly in the document surface.
+- Q: How should review appear after the user submits a request in v1? → A: Do not keep preview content in the popup; instead render the proposed diff directly in the document surface without a side-by-side current-versus-proposed comparison card.
 - Q: How should deletion work for list items when the visible selection does not include the bullet or number marker? → A: If the request implies removing a list item, the system should remove the entire containing list item line or block and preserve valid surrounding list structure.
+- Q: How should keyboard interaction work when the request popup opens in v1? → A: Focus the request input immediately, and let Enter trigger submit from the input field.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -37,11 +39,13 @@ A user selects any contiguous range in the rendered Markdown document, including
 
 1. **Given** the user makes any non-empty contiguous selection in the document surface, **When** the selection is made, **Then** the system opens the request popup for that targeted range, including selections across multiple bullet items, numbered items, sections, or chapters.
 2. **Given** the request popup opens, **When** the user views it before submit, **Then** it shows only the request input field and an "Ask for changes" action and does not repeat the selected text.
-3. **Given** the request popup is open, **When** the user clicks elsewhere in the document without submitting, **Then** the popup dismisses without requiring a dedicated Cancel button.
-4. **Given** a submitted inline request, **When** the system executes it, **Then** it sends the selected Markdown, the user instruction, the durable target anchor, the full current Markdown document content, and explicit selection markers that delimit the targeted range.
-5. **Given** the execution completes successfully, **When** the result returns, **Then** the system validates that the returned full-document draft preserves the selection markers and can be mapped back to one bounded proposal for the targeted range before it enters review.
-6. **Given** a validated execution result, **When** the review state opens, **Then** the user sees the proposed diff directly in the document surface for the targeted range rather than preview content in the popup or a detached chat response.
-7. **Given** one request execution is already pending for the current document, **When** the user attempts to submit another request, **Then** the system prevents overlapping execution for the same editing session until the current request resolves or is dismissed.
+3. **Given** the request popup opens, **When** it becomes visible, **Then** the request input is focused immediately so the user can type without an extra click.
+4. **Given** the request popup is open and the user has entered a non-empty request, **When** the user presses Enter from the input field, **Then** the system triggers the same submit behavior as the "Ask for changes" action.
+5. **Given** the request popup is open, **When** the user clicks elsewhere in the document without submitting, **Then** the popup dismisses without requiring a dedicated Cancel button.
+6. **Given** a submitted inline request, **When** the system executes it, **Then** it sends the selected Markdown, the user instruction, the durable target anchor, the full current Markdown document content, and explicit selection markers that delimit the targeted range.
+7. **Given** the execution completes successfully, **When** the result returns, **Then** the system validates that the returned full-document draft preserves the selection markers and can be mapped back to one bounded proposal for the targeted range before it enters review.
+8. **Given** a validated execution result, **When** the review state opens, **Then** the user sees the proposed diff directly in the document surface for the targeted range rather than preview content in the popup or a detached chat response.
+9. **Given** one request execution is already pending for the current document, **When** the user attempts to submit another request, **Then** the system prevents overlapping execution for the same editing session until the current request resolves or is dismissed.
 
 ---
 
@@ -55,7 +59,7 @@ A user inspects the inline diff for the targeted Markdown range and explicitly c
 
 **Acceptance Scenarios**:
 
-1. **Given** a suggested edit is available for a targeted range, **When** the user reviews it, **Then** the product shows the proposed revision as an inline diff in the document for that selected scope with no duplicate preview kept in the popup.
+1. **Given** a suggested edit is available for a targeted range, **When** the user reviews it, **Then** the product shows the proposed revision as an inline diff in the document for that selected scope with no duplicate preview kept in the popup and no separate side-by-side current-versus-proposed comparison card.
 2. **Given** a suggested edit is available, **When** the user chooses Apply, **Then** the system updates only the intended Markdown range in the canonical document and refreshes the rendered view.
 3. **Given** a suggested edit is available, **When** the user chooses Reject, **Then** the document remains unchanged and the suggestion is dismissed without hidden side effects.
 4. **Given** a suggested edit is available, **When** the user applies it, **Then** the resulting document may restructure or remove content inside the targeted range but preserves Markdown content outside that range because only the selected range is mutated.
@@ -100,7 +104,7 @@ A user gets a clear recovery path when request execution fails, when the returne
 ## Scope & Boundaries *(mandatory)*
 
 - **Selection Scope**: This feature acts on one submitted inline request for one contiguous rendered-Markdown range in one open Markdown document. The selected range may span multiple adjacent blocks, list items, sections, or chapters, but disjoint multi-range selection remains out of scope.
-- **Popup Model**: On selection, the popup is only a lightweight request-entry surface. It should not repeat the selected text, and it should dismiss when the user clicks elsewhere in the document.
+- **Popup Model**: On selection, the popup is only a lightweight request-entry surface. It should not repeat the selected text, it should focus the request input immediately on open, it should support Enter-to-submit from that input, and it should dismiss when the user clicks elsewhere in the document.
 - **Review Model**: The user submits a scoped request, sees pending execution feedback, receives one full-document draft from the model, and then reviews an inline diff in the document that is extracted from the marked selected range only after host-side mapping succeeds. Successful execution in v1 MUST NOT auto-apply document changes.
 - **Context Exposure**: On explicit submit, the system sends the user request, the targeted Markdown range, its durable anchor, the full current Markdown document content, and explicit selection markers for scoped suggestion generation.
 - **Out of Scope**: Multi-file edits, disjoint multi-range selection, hidden or automatic apply without review, background autonomous editing loops, unsupported chat UI automation, direct whole-document apply from returned model drafts, persisted request history, and provider-specific chat-pane UX as the system of record.
@@ -116,6 +120,8 @@ A user gets a clear recovery path when request execution fails, when the returne
 - **FR-004**: The system MUST keep the targeted selection range visible while execution and review are in progress.
 - **FR-004a**: The request popup MUST show only request-entry controls before submit and MUST NOT repeat the currently selected text.
 - **FR-004b**: The request popup MUST dismiss when the user clicks elsewhere in the document without submitting.
+- **FR-004c**: When the request popup opens, the request input MUST receive focus immediately so the user can start typing without an extra click.
+- **FR-004d**: When the request popup is open and the request text is non-empty, pressing Enter from the request input MUST trigger the same submit behavior as the "Ask for changes" action.
 - **FR-005**: The system MUST send the selected Markdown, the user instruction, the durable anchor, the full current Markdown document content, and explicit selection markers that delimit the targeted range for scoped suggestion generation.
 - **FR-006**: The system MUST NOT route the primary execution path by programmatically writing to or sending from another extension-owned chat input UI.
 - **FR-006a**: The system MUST request one full Markdown document draft or equivalent document-complete representation from the execution path and MUST require the returned draft to preserve the explicit selection markers.
@@ -125,6 +131,7 @@ A user gets a clear recovery path when request execution fails, when the returne
 - **FR-008**: The system MUST block malformed, marker-missing, marker-duplicated, or otherwise unextractable execution results from entering the review or apply flow.
 - **FR-009**: The system MUST present the returned suggestion as an inline diff attached to the targeted selection inside the document experience.
 - **FR-009a**: Once the request is submitted, the popup MUST NOT remain the primary preview surface for the returned suggestion.
+- **FR-009b**: The inline review state MUST NOT introduce a separate side-by-side current-versus-proposed comparison card; the review surface should present only the proposed document-attached revision for the targeted scope.
 - **FR-010**: The system MUST require an explicit Apply action before mutating the Markdown document.
 - **FR-011**: The system MUST allow the user to reject a suggested edit without changing the document.
 - **FR-012**: The system MUST update only the intended Markdown range when the user applies a suggested edit.

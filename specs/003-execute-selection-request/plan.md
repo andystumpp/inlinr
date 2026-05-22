@@ -1,3 +1,5 @@
+> ⚠️ **STALE**: spec.md was refined on 2026-05-22. Run `/speckit.refine.propagate` to update this plan.
+
 # Implementation Plan: Execute Selection Request
 
 **Branch**: `003-execute-selection-request` | **Date**: 2026-05-20 | **Spec**: `/specs/003-execute-selection-request/spec.md`

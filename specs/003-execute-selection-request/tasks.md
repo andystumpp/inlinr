@@ -1,3 +1,5 @@
+> ⚠️ **STALE**: spec.md was refined on 2026-05-22. Run `/speckit.refine.propagate` to update this plan.
+
 # Tasks: Execute Selection Request
 
 **Input**: Design documents from `/specs/003-execute-selection-request/`

@@ -48,11 +48,10 @@
       return null;
     }
 
-    const selection = window.getSelection();
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     const viewportPadding = 12;
-    const popoverWidth = Math.min(420, Math.max(280, viewportWidth - viewportPadding * 2));
+    const popoverWidth = Math.min(560, Math.max(320, viewportWidth - viewportPadding * 2));
     const estimatedPopoverHeight = 260;
     const preferredTop = selectionRect.bottom + viewportPadding;
     const preferredLeft = selectionRect.left;
@@ -241,6 +240,19 @@
       activeRequest.draftText.trim().length === 0;
   }
 
+  function focusRequestTextarea(textarea) {
+    if (!(textarea instanceof HTMLTextAreaElement)) {
+      return;
+    }
+
+    requestAnimationFrame(function () {
+      textarea.focus();
+
+      const selectionEnd = textarea.value.length;
+      textarea.setSelectionRange(selectionEnd, selectionEnd);
+    });
+  }
+
   function isReviewState() {
     return !!activeRequest && activeRequest.validationState === 'review' && activeRequest.suggestion;
   }
@@ -307,16 +319,10 @@
       inlineReviewRoot.innerHTML = `
         <section class="selection-inline-review" aria-label="Selection review">
           <p class="selection-inline-review-kicker">Review suggestion</p>
-          <div class="selection-inline-review-grid">
-            <section class="selection-inline-review-block">
-              <p class="selection-inline-review-label">Current selection</p>
-              <pre class="selection-inline-review-content">${escapeHtml(activeRequest.selectedTextPreview)}</pre>
-            </section>
-            <section class="selection-inline-review-block selection-inline-review-block-proposed">
-              <p class="selection-inline-review-label">${escapeHtml(reviewSuggestion.label)}</p>
-              <pre class="selection-inline-review-content">${escapeHtml(reviewSuggestion.body)}</pre>
-            </section>
-          </div>
+          <section class="selection-inline-review-block selection-inline-review-block-proposed">
+            <p class="selection-inline-review-label">${escapeHtml(reviewSuggestion.label)}</p>
+            <pre class="selection-inline-review-content">${escapeHtml(reviewSuggestion.body)}</pre>
+          </section>
           <p class="selection-inline-review-status">${escapeHtml(activeRequest.validationMessage || 'Suggestion ready.')}</p>
           <div class="selection-inline-review-actions">
             <button type="button" class="selection-request-button selection-request-button-secondary" data-selection-request-reject>Reject</button>
@@ -442,6 +448,8 @@
     const submitButton = requestRoot.querySelector('[data-selection-request-submit]');
 
     if (textarea instanceof HTMLTextAreaElement) {
+      focusRequestTextarea(textarea);
+
       textarea.addEventListener('input', function () {
         if (!activeRequest) {
           return;
@@ -458,6 +466,37 @@
           type: 'request.draftChanged',
           sessionId: activeRequest.sessionId,
           draftText: textarea.value
+        });
+      });
+
+      textarea.addEventListener('keydown', function (event) {
+        if (!(event instanceof KeyboardEvent)) {
+          return;
+        }
+
+        if (event.key !== 'Enter' || event.shiftKey || event.isComposing) {
+          return;
+        }
+
+        if (!activeRequest || activeRequest.draftText.trim().length === 0) {
+          return;
+        }
+
+        event.preventDefault();
+
+        if (activeRequest.validationState === 'submitted' ||
+            activeRequest.validationState === 'submitting' ||
+            activeRequest.validationState === 'executing' ||
+            activeRequest.validationState === 'review') {
+          return;
+        }
+
+        activeRequest.validationState = 'submitting';
+        syncSubmitButtonState();
+        postMessage({
+          type: 'request.submit',
+          sessionId: activeRequest.sessionId,
+          draftText: activeRequest.draftText
         });
       });
     }
