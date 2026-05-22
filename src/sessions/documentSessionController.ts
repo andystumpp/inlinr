@@ -1,7 +1,21 @@
 import * as vscode from 'vscode';
+import type { EffectiveSelectionScope, SelectionScopedRequestPayload } from '../requests/requestPayloadBuilder';
 import type { SelectionAnchor } from '../requests/selectionAnchorResolver';
+import type { NormalizedSuggestedEdit } from '../requests/suggestionNormalizer';
 
 type RefreshSession = (document: vscode.TextDocument) => Promise<void> | void;
+
+export type ActiveRequestState =
+  | 'drafting'
+  | 'invalid'
+  | 'submitting'
+  | 'submitted'
+  | 'executing'
+  | 'review'
+  | 'failed'
+  | 'unavailable'
+  | 'applying'
+  | 'applied';
 
 export interface TrackedActiveRequestSession {
   sessionId: string;
@@ -11,8 +25,11 @@ export interface TrackedActiveRequestSession {
   selectedRegionIds: string[];
   draftText: string;
   selectionAnchor: SelectionAnchor;
-  validationState: 'drafting' | 'invalid' | 'submitting' | 'submitted';
+  effectiveSelectionScope: EffectiveSelectionScope;
+  validationState: ActiveRequestState;
   validationMessage?: string;
+  submittedPayload?: SelectionScopedRequestPayload;
+  suggestion?: NormalizedSuggestedEdit;
 }
 
 function getDocumentKey(documentOrUri: Pick<vscode.TextDocument, 'uri'> | vscode.Uri | string): string {

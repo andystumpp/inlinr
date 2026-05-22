@@ -1,12 +1,19 @@
 import assert from 'node:assert/strict';
-import { renderMarkdown, renderMarkdownDocument } from '../../src/rendering/markdownRenderer';
+import { renderMarkdown, renderMarkdownDocument, renderMarkdownWithMetadata } from '../../src/rendering/markdownRenderer';
 
 suite('Markdown renderer', () => {
   test('renders headings and emphasis into HTML', () => {
     const html = renderMarkdown('# Hello\n\nA *test* document.');
 
-    assert.match(html, /<h1>Hello<\/h1>/);
+    assert.match(html, /<h1[^>]*>Hello<\/h1>/);
     assert.match(html, /<em>test<\/em>/);
+  });
+
+  test('emits selectable metadata for headings and list items', () => {
+    const rendered = renderMarkdownWithMetadata('# Chapter\n\n- Alpha\n- Beta');
+
+    assert.ok(rendered.selectionMetadata.regions.some((region) => region.kind === 'heading'));
+    assert.ok(rendered.selectionMetadata.regions.some((region) => region.kind === 'list-item-prose'));
   });
 
   test('does not allow raw HTML passthrough', () => {

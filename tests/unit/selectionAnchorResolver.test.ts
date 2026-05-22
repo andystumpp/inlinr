@@ -44,4 +44,24 @@ suite('Selection anchor resolver', () => {
     assert.equal(revalidation.status, 'ambiguous');
     assert.equal(revalidation.match, null);
   });
+
+  test('reports missing when the original target no longer exists before apply', () => {
+    const source = 'Alpha line.\n\nTarget sentence.\n\nOmega line.';
+    const selectedText = 'Target sentence.';
+    const sourceStart = source.indexOf(selectedText);
+    const sourceEnd = sourceStart + selectedText.length;
+    const anchor = createSelectionAnchor({
+      documentUri: 'file:///workspace/selection-request-basic.md',
+      capturedDocumentVersion: 1,
+      markdownSource: source,
+      sourceStart,
+      sourceEnd
+    });
+    const removedTargetSource = 'Alpha line.\n\nChanged sentence.\n\nOmega line.';
+
+    const revalidation = revalidateSelectionAnchor(removedTargetSource, anchor);
+
+    assert.equal(revalidation.status, 'missing');
+    assert.equal(revalidation.match, null);
+  });
 });

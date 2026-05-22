@@ -1,6 +1,86 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import * as vscode from 'vscode';
+import {
+  ExecutionServiceError,
+  type ExecutionAvailability,
+  type ExecutionResult,
+  type ExecutionService
+} from '../../src/requests/executionService';
+import { extractMarkedDocumentRange, getSelectionMarkerTokens } from '../../src/requests/documentDraftMarkers';
+import type { SelectionScopedRequestPayload } from '../../src/requests/requestPayloadBuilder';
+
+export interface FakeExecutionOutcome {
+  kind: 'success' | 'failure' | 'unavailable';
+  replacementMarkdown?: string;
+  draftDocumentMarkdown?: string;
+  rangeDisposition?: 'contained' | 'out-of-range';
+  message?: string;
+}
+
+function buildDraftDocumentMarkdown(payload: SelectionScopedRequestPayload, replacementMarkdown: string): string {
+  const originalRange = extractMarkedDocumentRange(payload.markedDocumentMarkdown, payload.selectionMarkerId);
+  const { startMarker, endMarker } = getSelectionMarkerTokens(payload.selectionMarkerId);
+
+  return [
+    originalRange.beforeMarkdown,
+    startMarker,
+    replacementMarkdown,
+    endMarker,
+    originalRange.afterMarkdown
+  ].join('');
+}
+
+export class FakeExecutionService implements ExecutionService {
+  private readonly outcomes: FakeExecutionOutcome[];
+
+  public constructor(outcomes: FakeExecutionOutcome | FakeExecutionOutcome[]) {
+    this.outcomes = Array.isArray(outcomes) ? [...outcomes] : [outcomes];
+  }
+
+  public async checkAvailability(): Promise<ExecutionAvailability> {
+    const nextOutcome = this.outcomes[0];
+
+    if (nextOutcome?.kind === 'unavailable') {
+      return {
+        available: false,
+        reasonCode: 'missing-capability',
+        message: nextOutcome.message ?? 'Execution is unavailable.'
+      };
+    }
+
+    return {
+      available: true,
+      modelId: 'fake-copilot-model'
+    };
+  }
+
+  public async execute(payload: SelectionScopedRequestPayload): Promise<ExecutionResult> {
+    const nextOutcome = this.outcomes.shift() ?? {
+      kind: 'success',
+      replacementMarkdown: payload.selectedMarkdown
+    };
+
+    if (nextOutcome.kind === 'unavailable') {
+      throw new ExecutionServiceError('missing-capability', nextOutcome.message ?? 'Execution is unavailable.');
+    }
+
+    if (nextOutcome.kind === 'failure') {
+      throw new ExecutionServiceError('execution-error', nextOutcome.message ?? 'Execution failed.');
+    }
+
+    return {
+      requestId: payload.requestId,
+      draftDocumentMarkdown:
+        nextOutcome.draftDocumentMarkdown ??
+        (nextOutcome.rangeDisposition === 'out-of-range'
+          ? `Changed before. ${buildDraftDocumentMarkdown(payload, nextOutcome.replacementMarkdown ?? payload.selectedMarkdown)}`
+          : buildDraftDocumentMarkdown(payload, nextOutcome.replacementMarkdown ?? payload.selectedMarkdown)),
+      completedAt: new Date().toISOString(),
+      modelId: 'fake-copilot-model'
+    };
+  }
+}
 
 export async function closeAllEditors(): Promise<void> {
   await vscode.commands.executeCommand('workbench.action.closeAllEditors');
@@ -42,6 +122,51 @@ export async function waitFor<T>(
   }
 
   throw new Error(`Timed out after ${timeoutMs}ms.`);
+}
+
+export function findPostedMessage<T extends { type: string }>(
+  postedMessages: unknown[],
+  type: T['type']
+): T | undefined {
+  return postedMessages.find((message): message is T => {
+    return typeof message === 'object' && message !== null && 'type' in message && message.type === type;
+  });
+}
+
+export function createSuccessfulExecutionOutcome(replacementMarkdown: string): FakeExecutionOutcome {
+  return {
+    kind: 'success',
+    replacementMarkdown
+  };
+}
+
+export function createSuccessfulDraftExecutionOutcome(draftDocumentMarkdown: string): FakeExecutionOutcome {
+  return {
+    kind: 'success',
+    draftDocumentMarkdown
+  };
+}
+
+export function createOutOfRangeExecutionOutcome(replacementMarkdown: string): FakeExecutionOutcome {
+  return {
+    kind: 'success',
+    replacementMarkdown,
+    rangeDisposition: 'out-of-range'
+  };
+}
+
+export function createFailedExecutionOutcome(message: string): FakeExecutionOutcome {
+  return {
+    kind: 'failure',
+    message
+  };
+}
+
+export function createUnavailableExecutionOutcome(message: string): FakeExecutionOutcome {
+  return {
+    kind: 'unavailable',
+    message
+  };
 }
 
 export function getActiveCustomTabInput(): vscode.TabInputCustom | undefined {

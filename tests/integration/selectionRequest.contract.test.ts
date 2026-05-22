@@ -34,6 +34,16 @@ suite('Selection request contract', () => {
       {
         type: 'request.cancel',
         sessionId: 'request-session-0'
+      },
+      {
+        type: 'suggestion.apply',
+        sessionId: 'request-session-0',
+        proposalId: 'proposal-0'
+      },
+      {
+        type: 'suggestion.reject',
+        sessionId: 'request-session-0',
+        proposalId: 'proposal-0'
       }
     ];
 

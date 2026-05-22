@@ -18,6 +18,7 @@ function renderBody(state: ViewerState): string {
   if (state.kind === 'rendered') {
     return `
       <article class="viewer-document markdown-body" data-selection-mode="${state.selectionMode}">${state.html}</article>
+      <section class="selection-inline-review-root" data-selection-inline-review-root hidden></section>
       <aside class="selection-request-root" data-selection-request-root hidden></aside>
     `;
   }
@@ -74,7 +75,7 @@ export function getMarkdownViewerHtml(
     <link rel="stylesheet" href="${stylesheetUri}" />
     <title>${escapeHtml(state.title)}</title>
   </head>
-  <body class="viewer-shell" data-state-kind="${state.kind}">
+  <body class="viewer-shell" data-state-kind="${state.kind}" data-active-request-state="${state.kind === 'rendered' && state.activeRequest ? state.activeRequest.validationState : 'none'}">
     <header class="viewer-header">
       <p class="viewer-kicker">Inlinr Markdown Viewer</p>
       <h1 class="viewer-title">${escapeHtml(state.title)}</h1>

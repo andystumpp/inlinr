@@ -6,3 +6,9 @@ out/
 dist/
 build/
 .env*
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp

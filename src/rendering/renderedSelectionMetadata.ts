@@ -1,4 +1,5 @@
 export type SupportedSelectionRegionKind =
+  | 'heading'
   | 'paragraph'
   | 'blockquote'
   | 'table-cell'

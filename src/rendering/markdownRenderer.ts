@@ -46,6 +46,8 @@ function getSourceOffsetForLine(lineStartOffsets: number[], lineNumber: number, 
 
 function toSupportedSelectionRegionKind(tokenType: string): SupportedSelectionRegionKind | null {
   switch (tokenType) {
+    case 'heading_open':
+      return 'heading';
     case 'paragraph_open':
       return 'paragraph';
     case 'blockquote_open':
