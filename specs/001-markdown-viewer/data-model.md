@@ -1,5 +1,7 @@
 # Data Model: Markdown Viewer Opening
 
+**Propagated**: 2026-05-22 — Updated from spec.md refinement for local Mermaid diagram rendering and safe Mermaid block fallback behavior.
+
 ## MarkdownDocument
 
 - Purpose: Represents the canonical Markdown source that Inlinr opens and displays.
@@ -51,11 +53,27 @@
   - `documentVersion`: Source version used for the render.
   - `title`: Viewer title or document label.
   - `html`: Rendered preview HTML.
+  - `containsMermaid`: Whether the rendered preview includes Mermaid diagram blocks.
   - `generatedLocally`: Always `true` in v1.
 - Validation rules:
   - Must be derived only from local document content.
+  - May include locally rendered Mermaid diagrams or local Mermaid fallback blocks.
   - Must comply with the webview CSP and resource restrictions.
   - Must not require provider calls or external content generation.
+
+## MermaidDiagramBlock
+
+- Purpose: Represents one Mermaid fenced code block discovered during local Markdown rendering.
+- Fields:
+  - `documentUri`: Source document URI.
+  - `documentVersion`: Source version used for diagram handling.
+  - `sourceFence`: Original Mermaid fenced block source.
+  - `renderState`: `rendered | fallback`.
+  - `fallbackMessage`: Optional user-visible fallback text when the block cannot be rendered safely.
+- Validation rules:
+  - Must be derived only from local Markdown content.
+  - Must not trigger provider or network calls.
+  - `renderState = fallback` must preserve the rest of the surrounding Markdown preview.
 
 ## RenderFailure
 
@@ -76,6 +94,7 @@
 - One `MarkdownDocument` can have one or more `ViewerSession` instances.
 - One `OpenRequest` targets exactly one `MarkdownDocument`.
 - One `ViewerSession` resolves to either one `RenderedPreview` or one `RenderFailure` at any point in time.
+- One `RenderedPreview` may contain zero or more `MermaidDiagramBlock` instances.
 
 ## State Transitions
 

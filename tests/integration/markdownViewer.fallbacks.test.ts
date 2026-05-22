@@ -32,4 +32,17 @@ suite('Markdown viewer fallbacks', () => {
     assert.equal(state.reasonCode, 'unsupported-content');
     assert.equal(state.canFallbackToDefaultEditor, false);
   });
+
+  test('keeps invalid Mermaid content inside a rendered viewer state with block fallback markup', async () => {
+    const document = await vscode.workspace.openTextDocument({
+      language: 'markdown',
+      content: '# Diagram\n\n```mermaid\nthis is not valid mermaid\n```'
+    });
+
+    const state = createViewerStateForDocument(document);
+
+    assert.equal(state.kind, 'rendered');
+    assert.match(state.html, /data-mermaid-block/);
+    assert.match(state.html, /data-mermaid-fallback/);
+  });
 });

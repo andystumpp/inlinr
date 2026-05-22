@@ -304,7 +304,10 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
 
     webviewPanel.webview.options = {
       enableScripts: true,
-      localResourceRoots: [vscode.Uri.joinPath(this.extensionUri, 'media', 'markdownViewer')]
+      localResourceRoots: [
+        vscode.Uri.joinPath(this.extensionUri, 'media', 'markdownViewer'),
+        vscode.Uri.joinPath(this.extensionUri, 'node_modules', 'mermaid', 'dist')
+      ]
     };
 
     webviewPanel.webview.onDidReceiveMessage(

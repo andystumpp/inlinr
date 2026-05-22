@@ -106,6 +106,44 @@ body.viewer-shell {
   background: color-mix(in srgb, var(--vscode-editor-background) 80%, black);
 }
 
+.viewer-document .mermaid-diagram-block {
+  margin: 1.4rem 0;
+  padding: 18px;
+  border: 1px solid var(--viewer-border);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--viewer-surface) 97%, var(--vscode-editor-background));
+}
+
+.viewer-document .mermaid-diagram-surface {
+  overflow-x: auto;
+}
+
+.viewer-document .mermaid-diagram-surface svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.viewer-document .mermaid-diagram-status,
+.viewer-document .mermaid-diagram-fallback-title {
+  margin: 0;
+  color: var(--viewer-muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.viewer-document .mermaid-diagram-fallback {
+  display: grid;
+  gap: 10px;
+}
+
+.viewer-document .mermaid-diagram-fallback-source {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .viewer-document blockquote {
   margin-left: 0;
   padding-left: 16px;

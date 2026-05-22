@@ -52,6 +52,9 @@ export function getMarkdownViewerHtml(
   const stylesheetUri = webview.asWebviewUri(
     vscode.Uri.joinPath(extensionUri, 'media', 'markdownViewer', 'styles.css')
   );
+  const mermaidScriptUri = webview.asWebviewUri(
+    vscode.Uri.joinPath(extensionUri, 'node_modules', 'mermaid', 'dist', 'mermaid.min.js')
+  );
   const selectionScriptUri = webview.asWebviewUri(
     vscode.Uri.joinPath(extensionUri, 'media', 'markdownViewer', 'selectionRequest.js')
   );
@@ -85,6 +88,7 @@ export function getMarkdownViewerHtml(
       ${renderBody(state)}
     </main>
     <script id="inlinr-viewer-state" type="application/json">${serializedState}</script>
+    <script src="${mermaidScriptUri}" defer></script>
     <script src="${selectionScriptUri}" defer></script>
   </body>
 </html>`;

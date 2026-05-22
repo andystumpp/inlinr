@@ -2,9 +2,10 @@
 
 **Input**: Design documents from `/specs/001-markdown-viewer/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
+**Propagated**: 2026-05-22 — Updated from spec.md refinement for local Mermaid diagram rendering and safe Mermaid block fallback behavior.
 
 **Tests**: Include test tasks whenever the change affects user-visible behavior, contracts, anchoring,
-edit application, provider boundaries, or privacy and security behavior. If automation is not yet practical,
+edit application, provider boundaries, privacy and security behavior, or local Mermaid rendering and fallback behavior. If automation is not yet practical,
 include a manual verification task for the affected workflow.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
@@ -40,8 +41,8 @@ include a manual verification task for the affected workflow.
 - [ ] T005 Define the Markdown custom editor contribution and activation events in package.json
 - [ ] T006 [P] Define shared viewer state types and runtime validators in src/webview/viewerState.ts
 - [ ] T007 [P] Create the base viewer stylesheet and media folder in media/markdownViewer/styles.css
-- [ ] T008 [P] Implement the base webview HTML shell with strict CSP in src/webview/getMarkdownViewerHtml.ts
-- [ ] T009 [P] Implement the local Markdown rendering wrapper in src/rendering/markdownRenderer.ts
+- [ ] T008 [P] Implement the base webview HTML shell with strict CSP and the minimum capability surface needed for local viewer rendering in src/webview/getMarkdownViewerHtml.ts
+- [X] T009 [P] Implement the local Markdown rendering wrapper, including the local Mermaid rendering path, in src/rendering/markdownRenderer.ts
 - [ ] T010 Create the document session controller skeleton in src/sessions/documentSessionController.ts
 
 **Checkpoint**: Extension scaffold, custom editor shell, local renderer, and viewer contracts are ready for story work
@@ -52,24 +53,24 @@ include a manual verification task for the affected workflow.
 
 **Goal**: Open Markdown files directly in the current editor tab as an Inlinr-rendered preview surface
 
-**Independent Test**: Open a Markdown file from the VS Code Explorer and confirm the current editor tab becomes the Inlinr viewer with rendered content and file identity.
+**Independent Test**: Open a Markdown file from the VS Code Explorer and confirm the current editor tab becomes the Inlinr viewer with rendered content, file identity, and Mermaid diagrams rendered in place when present.
 
 ### Tests for User Story 1 ⚠️
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
 - [ ] T011 [P] [US1] Add an integration test for opening Markdown from the VS Code Explorer in the Inlinr custom editor in tests/integration/markdownViewer.opening.test.ts
-- [ ] T012 [P] [US1] Add a unit test for local Markdown rendering output in tests/unit/markdownRenderer.test.ts
-- [ ] T013 [P] [US1] Add a rendered viewer state contract test in tests/integration/viewerSession.rendered.contract.test.ts
+- [X] T012 [P] [US1] Add a unit test for local Markdown rendering output, including Mermaid fenced blocks, in tests/unit/markdownRenderer.test.ts
+- [X] T013 [P] [US1] Add a rendered viewer state contract test that covers rendered Markdown and Mermaid viewer output in tests/integration/viewerSession.rendered.contract.test.ts
 
 ### Implementation for User Story 1
 
 - [ ] T014 [US1] Register the Inlinr Markdown custom editor provider in src/extension.ts
-- [ ] T015 [US1] Implement custom editor resolution and initial preview rendering in src/editors/markdownCustomEditorProvider.ts
-- [ ] T016 [US1] Wire rendered viewer state and document identity into the webview shell in src/editors/markdownCustomEditorProvider.ts and src/webview/getMarkdownViewerHtml.ts
-- [ ] T017 [US1] Implement the current-tab preview presentation and document identity styling in media/markdownViewer/styles.css
+- [ ] T015 [US1] Implement custom editor resolution and initial preview rendering, including Mermaid-capable documents, in src/editors/markdownCustomEditorProvider.ts
+- [ ] T016 [US1] Wire rendered viewer state, Mermaid-capable viewer output, and document identity into the webview shell in src/editors/markdownCustomEditorProvider.ts and src/webview/getMarkdownViewerHtml.ts
+- [ ] T017 [US1] Implement the current-tab preview presentation, Mermaid diagram presentation, and document identity styling in media/markdownViewer/styles.css
 
-**Checkpoint**: At this point, Markdown files open directly in the Inlinr viewer and can be validated independently
+**Checkpoint**: At this point, Markdown files open directly in the Inlinr viewer, including local Mermaid diagram rendering when present, and can be validated independently
 
 ---
 
@@ -98,17 +99,17 @@ include a manual verification task for the affected workflow.
 
 **Goal**: Preserve non-Markdown behavior and keep Markdown render failures inside the Inlinr viewer with a clear error state
 
-**Independent Test**: Open a non-Markdown file and a Markdown file that fails to render, then confirm the normal non-Markdown flow stays unchanged and Markdown failures remain inside the Inlinr viewer.
+**Independent Test**: Open a non-Markdown file, a Markdown file that fails to render, and a Markdown file with invalid Mermaid content, then confirm the normal non-Markdown flow stays unchanged and viewer or diagram failures remain inside the Inlinr viewer.
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T023 [P] [US3] Add an integration test for non-Markdown behavior and render failures in tests/integration/markdownViewer.fallbacks.test.ts
-- [ ] T024 [P] [US3] Add an error viewer state contract test in tests/integration/viewerSession.error.contract.test.ts
+- [X] T023 [P] [US3] Add an integration test for non-Markdown behavior, document render failures, and invalid Mermaid block fallback in tests/integration/markdownViewer.fallbacks.test.ts
+- [ ] T024 [P] [US3] Add an error and fallback viewer state contract test for document and Mermaid-block failures in tests/integration/viewerSession.error.contract.test.ts
 
 ### Implementation for User Story 3
 
-- [ ] T025 [US3] Implement in-viewer error state rendering and failure reason mapping in src/webview/getMarkdownViewerHtml.ts and src/webview/viewerState.ts
-- [ ] T026 [US3] Handle unreadable or invalid Markdown documents without automatic fallback in src/editors/markdownCustomEditorProvider.ts and src/rendering/markdownRenderer.ts
+- [ ] T025 [US3] Implement in-viewer error state rendering and Mermaid block fallback presentation in src/webview/getMarkdownViewerHtml.ts and src/webview/viewerState.ts
+- [ ] T026 [US3] Handle unreadable or invalid Markdown documents and Mermaid render failures without automatic fallback in src/editors/markdownCustomEditorProvider.ts and src/rendering/markdownRenderer.ts
 - [ ] T027 [US3] Add a manual reopen-with-default-editor recovery command in src/commands/reopenWithDefaultEditor.ts and package.json
 
 **Checkpoint**: All user stories are now independently demonstrable with safe error handling boundaries in place
@@ -121,7 +122,7 @@ include a manual verification task for the affected workflow.
 
 - [ ] T028 [P] Document the extension setup and custom editor behavior in README.md
 - [ ] T029 Tighten theme and accessibility styling for the viewer in media/markdownViewer/styles.css
-- [ ] T030 [P] Update the manual verification flow with final implementation notes in specs/001-markdown-viewer/quickstart.md
+- [ ] T030 [P] Update the manual verification flow with final implementation notes, including Mermaid render and fallback checks, in specs/001-markdown-viewer/quickstart.md
 - [ ] T031 Validate privacy, CSP, and local resource restrictions in src/editors/markdownCustomEditorProvider.ts and src/webview/getMarkdownViewerHtml.ts
 
 ---
@@ -207,4 +208,4 @@ Task: "Implement the current-tab preview presentation and document identity styl
 - [Story] labels map each task to a specific user story for traceability
 - User Story 1 is the MVP slice and should be releasable on its own
 - User Story 2 and User Story 3 deliberately build on the same custom editor shell rather than creating alternative surfaces
-- Keep the viewer local, preview-only, and privacy-bounded throughout implementation
+- Keep the viewer local, preview-only, privacy-bounded, and locally Mermaid-rendered throughout implementation

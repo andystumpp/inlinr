@@ -5,6 +5,8 @@
   let pendingSelectionRect = null;
   let requestRoot = null;
   let inlineReviewRoot = null;
+  let mermaidInitialized = false;
+  let mermaidRenderSequence = 0;
 
   function parseViewerState() {
     const stateElement = document.getElementById('inlinr-viewer-state');
@@ -26,6 +28,121 @@
     }
 
     vscodeApi.postMessage(message);
+  }
+
+  function getMermaidApi() {
+    if (typeof window.mermaid !== 'object' || window.mermaid === null) {
+      return null;
+    }
+
+    return window.mermaid;
+  }
+
+  function ensureMermaidInitialized(mermaidApi) {
+    if (!mermaidApi || mermaidInitialized || typeof mermaidApi.initialize !== 'function') {
+      return;
+    }
+
+    mermaidApi.initialize({
+      startOnLoad: false,
+      securityLevel: 'strict'
+    });
+    mermaidInitialized = true;
+  }
+
+  function showMermaidFallback(block, source) {
+    if (!(block instanceof HTMLElement)) {
+      return;
+    }
+
+    const renderRoot = block.querySelector('[data-mermaid-render]');
+    const statusRoot = block.querySelector('[data-mermaid-status]');
+    const fallbackRoot = block.querySelector('[data-mermaid-fallback]');
+    const fallbackSourceRoot = block.querySelector('[data-mermaid-fallback-source]');
+
+    if (renderRoot instanceof HTMLElement) {
+      renderRoot.hidden = true;
+      renderRoot.innerHTML = '';
+    }
+
+    if (statusRoot instanceof HTMLElement) {
+      statusRoot.hidden = true;
+    }
+
+    if (fallbackSourceRoot instanceof HTMLElement) {
+      fallbackSourceRoot.textContent = source;
+    }
+
+    if (fallbackRoot instanceof HTMLElement) {
+      fallbackRoot.hidden = false;
+    }
+
+    block.dataset.mermaidState = 'fallback';
+  }
+
+  async function renderMermaidBlock(mermaidApi, block) {
+    if (!(block instanceof HTMLElement)) {
+      return;
+    }
+
+    const sourceRoot = block.querySelector('[data-mermaid-source]');
+    const renderRoot = block.querySelector('[data-mermaid-render]');
+    const statusRoot = block.querySelector('[data-mermaid-status]');
+    const fallbackRoot = block.querySelector('[data-mermaid-fallback]');
+    const source = sourceRoot instanceof HTMLElement ? sourceRoot.textContent.trim() : '';
+
+    if (!source || !(renderRoot instanceof HTMLElement)) {
+      showMermaidFallback(block, source);
+      return;
+    }
+
+    try {
+      const renderResult = await mermaidApi.render(`inlinr-mermaid-${++mermaidRenderSequence}`, source);
+      const svgMarkup = typeof renderResult === 'string' ? renderResult : renderResult.svg;
+
+      renderRoot.innerHTML = svgMarkup;
+      renderRoot.hidden = false;
+
+      if (statusRoot instanceof HTMLElement) {
+        statusRoot.hidden = true;
+      }
+
+      if (fallbackRoot instanceof HTMLElement) {
+        fallbackRoot.hidden = true;
+      }
+
+      if (renderResult && typeof renderResult === 'object' && typeof renderResult.bindFunctions === 'function') {
+        renderResult.bindFunctions(renderRoot);
+      }
+
+      block.dataset.mermaidState = 'rendered';
+    } catch {
+      showMermaidFallback(block, source);
+    }
+  }
+
+  function renderMermaidBlocks() {
+    const mermaidBlocks = Array.from(document.querySelectorAll('[data-mermaid-block]'));
+
+    if (mermaidBlocks.length === 0) {
+      return;
+    }
+
+    const mermaidApi = getMermaidApi();
+
+    if (!mermaidApi || typeof mermaidApi.render !== 'function') {
+      mermaidBlocks.forEach(function (block) {
+        const sourceRoot = block.querySelector('[data-mermaid-source]');
+        const source = sourceRoot instanceof HTMLElement ? sourceRoot.textContent.trim() : '';
+        showMermaidFallback(block, source);
+      });
+      return;
+    }
+
+    ensureMermaidInitialized(mermaidApi);
+    mermaidBlocks.forEach(function (block) {
+      void renderMermaidBlock(mermaidApi, block);
+    });
   }
 
   function getSelectionRectFromRange(range) {
@@ -695,6 +812,7 @@
     }
 
     document.body.dataset.selectionMode = viewerState.kind === 'rendered' ? viewerState.selectionMode : 'disabled';
+  renderMermaidBlocks();
     wireSelectionCapture(viewerState);
     hydrateActiveRequestFromViewerState(viewerState);
     renderOverlay();

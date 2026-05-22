@@ -9,6 +9,15 @@ suite('Markdown renderer', () => {
     assert.match(html, /<em>test<\/em>/);
   });
 
+  test('emits local Mermaid placeholder markup for Mermaid fences', () => {
+    const html = renderMarkdown('```mermaid\ngraph TD\n  A-->B\n```');
+
+    assert.match(html, /data-mermaid-block/);
+    assert.match(html, /data-mermaid-source/);
+    assert.match(html, /graph TD/);
+    assert.doesNotMatch(html, /language-mermaid/);
+  });
+
   test('emits selectable metadata for headings and list items', () => {
     const rendered = renderMarkdownWithMetadata('# Chapter\n\n- Alpha\n- Beta');
 

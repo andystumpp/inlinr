@@ -2,6 +2,7 @@
 
 **Branch**: `001-markdown-viewer` | **Date**: 2026-05-19 | **Spec**: `/specs/001-markdown-viewer/spec.md`
 **Input**: Feature specification from `/specs/001-markdown-viewer/spec.md`
+**Propagated**: 2026-05-22 — Updated from spec.md refinement for local Mermaid diagram rendering and safe Mermaid block fallback behavior.
 
 **Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/plan-template.md` for the execution workflow.
 
@@ -9,22 +10,23 @@
 
 Deliver the first Inlinr document surface as a VS Code custom Markdown editor that opens `.md`
 files directly into the current editor tab, renders Markdown locally as preview-only content,
-keeps the underlying `TextDocument` canonical, and shows an in-viewer error state instead of
-falling back to the default Markdown editor. Phase 0 research locks the VS Code extension stack,
-local render/security posture, and test approach; Phase 1 design defines the document/session
-model, the extension-to-webview contract, and the manual verification flow for the initial plugin.
+keeps the underlying `TextDocument` canonical, renders supported Mermaid fenced blocks as local
+viewer diagrams, and shows an in-viewer error state or diagram-block fallback instead of falling
+back to the default Markdown editor. Phase 0 research locks the VS Code extension stack, local
+render/security posture, and test approach; Phase 1 design defines the document/session model,
+the extension-to-webview contract, and the manual verification flow for the initial plugin.
 
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x for a VS Code extension running on the Node.js-based extension host  
-**Primary Dependencies**: `vscode`, `markdown-it`, webview HTML/CSS assets, `@vscode/test-cli`, `@vscode/test-electron`, Mocha  
+**Primary Dependencies**: `vscode`, `markdown-it`, a local Mermaid rendering path, webview HTML/CSS/JS assets, `@vscode/test-cli`, `@vscode/test-electron`, Mocha  
 **Storage**: N/A for persisted product state; canonical state lives in the open `TextDocument`  
 **Testing**: VS Code extension integration tests plus focused unit tests and manual editor verification  
 **Target Platform**: VS Code Desktop extension host on Windows, macOS, and Linux local workspaces
 **Project Type**: VS Code desktop extension with a custom text editor and webview UI  
-**Performance Goals**: Open and render typical Markdown documents within 2 seconds; refresh the visible viewer promptly after document changes  
-**Constraints**: Must replace the current editor tab for `.md` files; preview-only in v1; no provider or network calls on open; strict CSP and minimal webview capabilities; no automatic fallback to the default Markdown editor on render failure  
-**Scale/Scope**: Single Markdown document per viewer session; multiple editor instances may share one `TextDocument`; first slice is limited to viewing, refresh, identity, and failure states
+**Performance Goals**: Open and render typical Markdown documents within 2 seconds; refresh the visible viewer promptly after document changes; render supported Mermaid blocks without forcing the user to leave the viewer  
+**Constraints**: Must replace the current editor tab for `.md` files; preview-only in v1; no provider or network calls on open; Mermaid rendering must stay local; strict CSP and minimal webview capabilities except where local Mermaid rendering proves a stricter need; no automatic fallback to the default Markdown editor on render failure  
+**Scale/Scope**: Single Markdown document per viewer session; multiple editor instances may share one `TextDocument`; first slice is limited to viewing, refresh, identity, Mermaid block rendering, and failure states
 
 ## Constitution Check
 
