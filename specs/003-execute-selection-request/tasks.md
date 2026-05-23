@@ -1,12 +1,10 @@
-> ⚠️ **STALE**: spec.md was refined on 2026-05-22. Run `/speckit.refine.propagate` to update this plan.
-
 # Tasks: Execute Selection Request
 
 **Input**: Design documents from `/specs/003-execute-selection-request/`
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/
-**Propagated**: 2026-05-21 — Updated from spec.md refinement for broader selection scope, lightweight popup request entry, document-first inline diff review, and list-item deletion semantics
+**Propagated**: 2026-05-23 — Updated from spec.md refinement to require that returned suggestions render in the main document flow at the targeted location itself rather than in a detached review card or popup-like review surface, with the original targeted passage remaining visible and struck through during review.
 
-**Tests**: Keep automated coverage for markerized payload construction, full-document draft execution, bounded extraction, deletion proposals, list-item effective-scope removal, popup-opening across list and chapter selections, document-inline diff review, review/apply, consecutive request cycles, drift handling, unavailable capability, and ignored out-of-range draft changes. Keep manual quickstart verification for the live editor flow.
+**Tests**: Keep automated coverage for markerized payload construction, full-document draft execution, bounded extraction, deletion proposals, list-item effective-scope removal, popup-opening across list and chapter selections, document-inline diff review rendered in the main document flow at the targeted location with the original targeted passage struck through, review/apply, consecutive request cycles, drift handling, unavailable capability, and ignored out-of-range draft changes. Keep manual quickstart verification for the live editor flow.
 
 **Organization**: Tasks are grouped by phase and user story so the full-document draft architecture can be delivered and verified incrementally.
 
@@ -30,32 +28,32 @@
 
 ## Phase 2: User Story 1 - Open And Submit Any Contiguous Selection Request (Priority: P1) 🎯 MVP
 
-**Goal**: Open a lightweight request popup for any contiguous Markdown selection, including list items and chapter-scale selections, submit the request, and surface one extracted proposal or deletion for that selection as an inline diff without mutating the document.
+**Goal**: Open a lightweight request popup for any contiguous Markdown selection, including list items and chapter-scale selections, submit the request, and surface one extracted proposal or deletion for that selection as an inline diff rendered in the main document flow at the targeted location without mutating the document.
 
-**Independent Test**: Select contiguous content that spans multiple list items, one list item, one section, or multiple chapters, confirm the request popup opens with only an input field and an "Ask for changes" action, submit a request, and confirm the viewer shows pending feedback followed by one proposal-ready inline diff extracted from a full-document draft, with no document mutation before Apply.
+**Independent Test**: Select contiguous content that spans multiple list items, one list item, one section, or multiple chapters, confirm the request popup opens with only an input field and an "Ask for changes" action, submit a request, and confirm the viewer shows pending feedback followed by one proposal-ready inline diff extracted from a full-document draft and rendered in the main document flow at the targeted location itself, with no document mutation before Apply.
 
 ### Tests for User Story 1
 
 - [X] T010 [US1] Update submit-to-review integration coverage for list selections, chapter-scale selections, popup-opening behavior, ignored out-of-range draft changes, and deletion proposals in tests/integration/selectionScopedEditRequest.test.ts
-- [ ] T011 [US1] Validate the live execute flow against the revised quickstart, including input-only popup behavior, click-away dismissal, and document-inline diff review, in specs/003-execute-selection-request/quickstart.md
+- [ ] T011 [US1] Validate the live execute flow against the revised quickstart, including input-only popup behavior, click-away dismissal, and in-flow document-inline diff review at the targeted location rather than in a detached review card, in specs/003-execute-selection-request/quickstart.md
 
 ### Implementation for User Story 1
 
 - [X] T012 [US1] Expand selection capture and submit-time anchoring to support contiguous list-item, section, and chapter-scale selections in src/editors/markdownCustomEditorProvider.ts and src/requests/selectionSupportPolicy.ts
 - [X] T013 [US1] Materialize extracted proposal state for document-first inline diff review, including empty replacements and effective selection scope metadata, in src/requests/suggestionNormalizer.ts and src/sessions/documentSessionController.ts
-- [X] T014 [US1] Replace the preview-heavy popup with an input-only request-entry popup that dismisses on outside click and hands off review to document-inline diff rendering in media/markdownViewer/selectionRequest.js and src/webview/viewerProtocol.ts
-- [X] T015 [US1] Restyle the lightweight request-entry popup and document-inline diff review states in media/markdownViewer/styles.css
+- [X] T014 [US1] Replace the preview-heavy popup with an input-only request-entry popup that dismisses on outside click and hands off review to in-flow document-inline diff rendering at the targeted location in media/markdownViewer/selectionRequest.js and src/webview/viewerProtocol.ts
+- [X] T015 [US1] Restyle the lightweight request-entry popup and in-flow document-inline diff review states so they read as part of the document rather than as a detached review card, with the original targeted passage visibly struck through during review, in media/markdownViewer/styles.css
 - [X] T028 [US1] Extend rendered selection metadata so any non-empty contiguous visible selection, including multi-item lists and chapter-scale selections, can open the request popup in src/rendering/renderedSelectionMetadata.ts and src/requests/selectionSupportPolicy.ts
 
-**Checkpoint**: User Story 1 is functional when any supported contiguous selection opens the lightweight popup and submit produces one reviewable inline diff proposal or deletion derived from a marker-preserving full-document draft.
+**Checkpoint**: User Story 1 is functional when any supported contiguous selection opens the lightweight popup and submit produces one reviewable inline diff proposal or deletion derived from a marker-preserving full-document draft and rendered in the main document flow at the targeted location itself.
 
 ---
 
 ## Phase 3: User Story 2 - Review, Apply, And Continue Editing (Priority: P2)
 
-**Goal**: Let the user review the proposed revision or deletion as an inline diff, explicitly reject it, or apply it only to the revalidated effective selection scope, then start another scoped request cycle in the same editor session.
+**Goal**: Let the user review the proposed revision or deletion as an inline diff rendered in the main document flow at the targeted location, explicitly reject it, or apply it only to the revalidated effective selection scope, then start another scoped request cycle in the same editor session.
 
-**Independent Test**: Execute a valid request against list content and chapter-scale content, review the inline diff, confirm Reject leaves the document unchanged, confirm Apply updates only the revalidated intended scope including full list-item deletion when required, and then confirm a second supported selection can start a fresh request cycle without reloading the editor.
+**Independent Test**: Execute a valid request against list content and chapter-scale content, review the inline diff rendered in the main document flow at the targeted location, confirm Reject leaves the document unchanged, confirm Apply updates only the revalidated intended scope including full list-item deletion when required, and then confirm a second supported selection can start a fresh request cycle without reloading the editor.
 
 ### Tests for User Story 2
 
@@ -65,10 +63,10 @@
 ### Implementation for User Story 2
 
 - [X] T017 [US2] Preserve bounded apply behavior while resolving effective list-item scope and clearing obsolete proposal and request state after apply, reject, or dismissal in src/requests/editApplicationService.ts, src/editors/markdownCustomEditorProvider.ts, and src/sessions/documentSessionController.ts
-- [X] T018 [US2] Keep document-inline diff review behavior, apply/reject controls, and selection-capture reset behavior aligned with the refined UX across consecutive cycles in src/webview/viewerProtocol.ts and media/markdownViewer/selectionRequest.js
+- [X] T018 [US2] Keep document-inline diff review behavior rendered in the main document flow at the targeted location, plus apply/reject controls and selection-capture reset behavior aligned with the refined UX across consecutive cycles in src/webview/viewerProtocol.ts and media/markdownViewer/selectionRequest.js
 - [X] T029 [US2] Apply list-item removal requests to the full containing list item when needed to preserve valid list structure in src/requests/selectionAnchorResolver.ts, src/requests/requestPayloadBuilder.ts, and src/requests/editApplicationService.ts
 
-**Checkpoint**: User Stories 1 and 2 are functional when inline diff proposals or deletions can be reviewed, rejected, or applied without unintended boundary widening, full list-item deletion works when appropriate, and a follow-up request can start cleanly from the current document state.
+**Checkpoint**: User Stories 1 and 2 are functional when inline diff proposals or deletions can be reviewed in-flow at the targeted document location, rejected, or applied without unintended boundary widening, full list-item deletion works when appropriate, and a follow-up request can start cleanly from the current document state.
 
 ---
 
@@ -148,5 +146,5 @@
 ## Notes
 
 - The completed tasks above reflect the architecture pivot from replacement-only output to full-document draft validation.
-- The remaining open tasks now represent the next implementation slice required to align code with the revised requirements around broader contiguous selection support, lightweight popup UX, document-inline diff review, list-item deletion semantics, and consecutive request cycles, not a test-environment blocker.
+- The remaining open tasks now represent the next implementation slice required to align code with the revised requirements around broader contiguous selection support, lightweight popup UX, in-flow document-inline diff review at the targeted location, list-item deletion semantics, and consecutive request cycles, not a test-environment blocker.
 - User Story 1 remains the recommended MVP milestone for this feature.

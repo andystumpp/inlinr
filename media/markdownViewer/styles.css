@@ -84,6 +84,11 @@ body.viewer-shell {
 .viewer-document [data-selection-region-id].selection-request-target-review {
   background: color-mix(in srgb, var(--viewer-accent) 14%, transparent);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--viewer-accent) 24%, transparent);
+  color: color-mix(in srgb, var(--viewer-muted) 82%, var(--vscode-editor-foreground));
+  text-decoration-line: line-through;
+  text-decoration-color: color-mix(in srgb, var(--viewer-muted) 75%, var(--vscode-editor-foreground));
+  text-decoration-thickness: 2px;
+  text-decoration-skip-ink: none;
 }
 
 .viewer-document > :first-child {
@@ -221,23 +226,23 @@ body.viewer-shell {
 }
 
 .selection-inline-review-root {
-  margin: 18px 0 0;
+  margin: 0;
 }
 
 .selection-inline-review {
-  padding: 18px;
-  border: 1px solid color-mix(in srgb, var(--viewer-accent) 26%, var(--viewer-border));
-  border-radius: 18px;
-  background: color-mix(in srgb, var(--viewer-surface) 96%, var(--vscode-editor-background));
-  box-shadow: var(--viewer-shadow);
+  margin: 0.35rem 0 1.1rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .selection-inline-review-pending {
-  border-style: dashed;
+  margin-top: 0.55rem;
 }
 
 .selection-inline-review-kicker {
-  margin: 0 0 12px;
+  margin: 0 0 0.35rem;
   color: var(--viewer-accent);
   font-size: 0.76rem;
   font-weight: 700;
@@ -245,28 +250,33 @@ body.viewer-shell {
   text-transform: uppercase;
 }
 
-.selection-inline-review-block {
-  padding: 14px;
-  border: 1px solid var(--viewer-border);
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--vscode-editor-background) 82%, transparent);
+.selection-inline-review-rendered {
+  display: grid;
+  gap: 0.4rem;
 }
 
-.selection-inline-review-block-proposed {
-  border-color: color-mix(in srgb, var(--viewer-accent) 36%, var(--viewer-border));
-  background: color-mix(in srgb, var(--viewer-accent) 10%, var(--vscode-editor-background));
+.selection-inline-review-rendered > :first-child {
+  margin-top: 0;
 }
 
-.selection-inline-review-label {
-  margin: 0 0 8px;
-  color: var(--viewer-muted);
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+.selection-inline-review-rendered > :last-child {
+  margin-bottom: 0;
 }
 
-.selection-inline-review-content {
+.selection-inline-review-rendered > * {
+  margin-left: 0;
+  margin-right: 0;
+  padding: 0.22rem 0.4rem;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--viewer-accent) 10%, transparent);
+}
+
+.selection-inline-review-rendered pre,
+.selection-inline-review-rendered code {
+  background: transparent;
+}
+
+.selection-inline-review-empty {
   margin: 0;
   white-space: pre-wrap;
   word-break: break-word;
@@ -275,7 +285,7 @@ body.viewer-shell {
 }
 
 .selection-inline-review-status {
-  margin: 14px 0 0;
+  margin: 0.4rem 0 0;
   color: color-mix(in srgb, var(--viewer-accent) 85%, var(--vscode-editor-foreground));
   font-size: 0.88rem;
   font-weight: 600;
@@ -283,9 +293,11 @@ body.viewer-shell {
 
 .selection-inline-review-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
-  margin-top: 16px;
+  margin-top: 0.55rem;
 }
 
 .selection-request-root {
