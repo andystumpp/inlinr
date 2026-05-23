@@ -21,7 +21,7 @@ safe-outputs:
   create-pull-request:
     title-prefix: "[monitoring-scenarios] "
     max: 1
-    draft: true
+    draft: false
     allowed-files:
       - "monitoring/monitoring-scenarios.md"
 ---
@@ -98,11 +98,12 @@ Each scenario should use this format:
 - Edit only `monitoring/monitoring-scenarios.md`.
 - Make meaningful content changes only; do not churn wording for minor style preferences.
 - If the file is already current, do nothing.
-- Before creating a PR, check for an open PR that already updates the monitoring scenarios catalog in a materially similar way. If one already exists, do not create another.
+- Before creating a PR, check for open PRs that already cover the same monitoring-scenarios update. Do not create a duplicate PR for materially similar changes.
 
 ## Output rules
 
 - Output only through `create_pull_request`.
 - Create at most one pull request.
+- Use non-draft pull requests.
 - Do not open issues, comments, or discussions.
 - Keep the PR focused on the monitoring scenarios document only.
