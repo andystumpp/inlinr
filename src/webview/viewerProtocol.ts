@@ -104,6 +104,7 @@ export interface SuggestionReadyMessage {
     proposalId: string;
     previewMode: 'blended-inline';
     replacementMarkdown: string;
+    renderedReplacementHtml: string;
   };
 }
 

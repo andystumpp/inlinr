@@ -1,6 +1,7 @@
 import path from 'node:path';
 import * as vscode from 'vscode';
 import {
+  renderMarkdown,
   renderMarkdownDocumentWithMetadata,
   toViewerError
 } from '../rendering/markdownRenderer';
@@ -54,10 +55,24 @@ function toActiveRequestViewState(activeRequest: TrackedActiveRequestSession | n
       ? {
           proposalId: activeRequest.suggestion.proposalId,
           previewMode: activeRequest.suggestion.previewMode,
-          replacementMarkdown: activeRequest.suggestion.replacementMarkdown
+          replacementMarkdown: activeRequest.suggestion.replacementMarkdown,
+          renderedReplacementHtml: renderSuggestionHtml(activeRequest.suggestion.replacementMarkdown)
         }
       : undefined
   };
+}
+
+function renderSuggestionHtml(replacementMarkdown: string): string {
+  if (replacementMarkdown.length === 0) {
+    return '<p class="selection-inline-review-empty">Selected content will be removed.</p>';
+  }
+
+  return renderMarkdown(replacementMarkdown)
+    .replace(/\sdata-selection-region-id="[^"]*"/g, '')
+    .replace(/\sdata-selection-kind="[^"]*"/g, '')
+    .replace(/\sdata-selection-start-marker="[^"]*"/g, '')
+    .replace(/\sdata-selection-end-marker="[^"]*"/g, '')
+    .replace(/\sdata-selection-selectable="[^"]*"/g, '');
 }
 
 function findSelectionRange(markdownSource: string, selectedText: string): { sourceStart: number; sourceEnd: number } | null {
@@ -699,7 +714,8 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
         proposal: {
           proposalId: suggestion.proposalId,
           previewMode: suggestion.previewMode,
-          replacementMarkdown: suggestion.replacementMarkdown
+          replacementMarkdown: suggestion.replacementMarkdown,
+          renderedReplacementHtml: renderSuggestionHtml(suggestion.replacementMarkdown)
         }
       });
 

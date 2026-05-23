@@ -1,6 +1,7 @@
 node_modules/
 out/
 .vscode-test/
+.github/aw/logs/
 *.vsix
 *.log
 dist/

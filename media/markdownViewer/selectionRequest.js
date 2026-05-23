@@ -435,16 +435,15 @@
 
       inlineReviewRoot.innerHTML = `
         <section class="selection-inline-review" aria-label="Selection review">
-          <p class="selection-inline-review-kicker">Review suggestion</p>
-          <section class="selection-inline-review-block selection-inline-review-block-proposed">
-            <p class="selection-inline-review-label">${escapeHtml(reviewSuggestion.label)}</p>
-            <pre class="selection-inline-review-content">${escapeHtml(reviewSuggestion.body)}</pre>
+          <p class="selection-inline-review-kicker">${escapeHtml(reviewSuggestion.kicker)}</p>
+          <section class="selection-inline-review-rendered" data-selection-inline-review-rendered>
+            ${reviewSuggestion.renderedHtml}
           </section>
-          <p class="selection-inline-review-status">${escapeHtml(activeRequest.validationMessage || 'Suggestion ready.')}</p>
           <div class="selection-inline-review-actions">
             <button type="button" class="selection-request-button selection-request-button-secondary" data-selection-request-reject>Reject</button>
             <button type="button" class="selection-request-button" data-selection-request-apply>Apply</button>
           </div>
+          <p class="selection-inline-review-status">${escapeHtml(activeRequest.validationMessage || 'Suggestion ready.')}</p>
         </section>`;
 
       const rejectButton = inlineReviewRoot.querySelector('[data-selection-request-reject]');
@@ -495,23 +494,20 @@
     if (!activeRequest || !activeRequest.suggestion) {
       return {
         kicker: 'Proposed revision',
-        label: 'Proposed revision',
-        body: ''
+        renderedHtml: ''
       };
     }
 
     if (activeRequest.suggestion.replacementMarkdown.length === 0) {
       return {
         kicker: 'Proposed deletion',
-        label: 'Proposed result',
-        body: '[Selected content will be removed]'
+        renderedHtml: activeRequest.suggestion.renderedReplacementHtml
       };
     }
 
     return {
       kicker: 'Proposed revision',
-      label: 'Proposed revision',
-      body: activeRequest.suggestion.replacementMarkdown
+      renderedHtml: activeRequest.suggestion.renderedReplacementHtml
     };
   }
 
@@ -659,7 +655,7 @@
       draftText: currentViewerState.activeRequest.draftText || '',
       validationState: currentViewerState.activeRequest.validationState,
       validationMessage: currentViewerState.activeRequest.validationMessage,
-      suggestion: currentViewerState.activeRequest.suggestion,
+        suggestion: currentViewerState.activeRequest.suggestion,
       selectionRect: getSelectionRectFromRegionIds(currentViewerState.activeRequest.selectedRegionIds)
     };
   }

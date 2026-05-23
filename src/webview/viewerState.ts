@@ -15,6 +15,7 @@ export interface SuggestedEditViewState {
   proposalId: string;
   previewMode: 'blended-inline';
   replacementMarkdown: string;
+  renderedReplacementHtml: string;
 }
 
 export interface ActiveRequestViewState {
@@ -72,7 +73,8 @@ function isSuggestedEditViewState(value: unknown): value is SuggestedEditViewSta
   return (
     isNonEmptyString(candidate.proposalId) &&
     candidate.previewMode === 'blended-inline' &&
-    typeof candidate.replacementMarkdown === 'string'
+    typeof candidate.replacementMarkdown === 'string' &&
+    isNonEmptyString(candidate.renderedReplacementHtml)
   );
 }
 
