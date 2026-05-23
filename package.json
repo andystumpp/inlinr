@@ -1,6 +1,6 @@
 {
   "name": "inlinr",
-  "displayName": "Inlinr",
+  "displayName": "Inlinr Markdown Editor",
   "description": "Make targeted AI edits to selected Markdown directly in VS Code.",
   "version": "0.0.1",
   "publisher": "AndyStumpp",
