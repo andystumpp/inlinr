@@ -1,20 +1,41 @@
 {
   "name": "inlinr",
   "displayName": "Inlinr",
-  "description": "A custom Markdown viewer for VS Code.",
+  "description": "Make targeted AI edits to selected Markdown directly in VS Code.",
   "version": "0.0.1",
-  "publisher": "inlinr",
-  "private": true,
+  "publisher": "AndyStumpp",
+  "preview": true,
   "engines": {
     "vscode": "^1.90.0"
   },
   "categories": [
+    "Machine Learning",
     "Other"
   ],
+  "keywords": [
+    "markdown",
+    "ai",
+    "editing",
+    "inline",
+    "copilot"
+  ],
+  "icon": "media/inlinr-icon.png",
+  "license": "MIT",
+  "homepage": "https://github.com/andystumpp/inlinr#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/andystumpp/inlinr.git"
+  },
+  "bugs": {
+    "url": "https://github.com/andystumpp/inlinr/issues"
+  },
   "main": "./out/src/extension.js",
   "files": [
-    "out",
-    "media"
+    "out/src",
+    "media",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
   ],
   "contributes": {
     "commands": [
@@ -42,9 +63,11 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile",
+    "package:vsix": "node -e \"require('fs').mkdirSync('dist', { recursive: true })\" && npx --yes @vscode/vsce@3.9.1 package --out dist/inlinr.vsix",
     "test": "npm run test:integration && npm run test:unit",
     "test:integration": "node ./out/tests/runTest.js integration",
-    "test:unit": "node ./out/tests/runTest.js unit"
+    "test:unit": "node ./out/tests/runTest.js unit",
+    "verify:release": "npm run compile && npm test && npm run package:vsix"
   },
   "dependencies": {
     "markdown-it": "^14.1.0",
