@@ -11,7 +11,7 @@ permissions:
 strict: true
 timeout-minutes: 15
 network:
-  allowed: [defaults, github, openai.com, anthropic.com, cursor.com, code.visualstudio.com]
+  allowed: [defaults, github, openai.com, anthropic.com, cursor.com, code.visualstudio.com, "*.reddit.com"]
 tools:
   github:
     mode: gh-proxy
@@ -71,7 +71,7 @@ Build your point of view from the repository first, then sharpen it with targete
 4. Inspect the current implementation surface in `src/`, `media/`, `tests/`, and `package.json` so you understand what users can likely do now versus what is only planned.
 5. Review open issues and open pull requests to understand known gaps, planned work, and what has already been discussed.
 6. Review recent repository movement from commits or changed files so you understand momentum.
-7. Use `web-fetch` for lightweight external research from a small number of recent, high-signal official sources on allowed domains such as GitHub, OpenAI, Anthropic, Cursor, and VS Code.
+7. Use `web-fetch` for lightweight external research from a small number of recent, high-signal sources on allowed domains such as GitHub, OpenAI, Anthropic, Cursor, VS Code, and public Reddit discussions when you need practitioner sentiment.
 
 Use external research to answer questions like:
 
@@ -80,6 +80,8 @@ Use external research to answer questions like:
 - What product qualities are becoming table stakes versus differentiators?
 - What features or workflow improvements are likely to save users meaningful time?
 - What product capabilities are likely to matter for eventual willingness to pay?
+
+Use Reddit sparingly as workflow signal, not as product truth. Prefer recent threads with concrete developer complaints, comparisons, or workflow examples, and never let a few comments outweigh repository evidence.
 
 Do not produce generic market commentary. Use research only to strengthen or reprioritize repository-backed product opportunities.
 
