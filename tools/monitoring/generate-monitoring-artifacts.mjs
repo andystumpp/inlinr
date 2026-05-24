@@ -142,7 +142,6 @@ function createScheduledQuerySpec(policy, alert, sourceLabel, sourceIndex) {
     kind: 'LogAlert',
     evaluationFrequency: alert.evaluation_frequency,
     windowSize: alert.window,
-    autoMitigate: true,
     timeAggregation: 'Maximum',
     metricMeasureColumn: 'metricValue',
     operator,
