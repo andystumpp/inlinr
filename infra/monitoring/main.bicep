@@ -64,7 +64,6 @@ resource scheduledQueryRules 'Microsoft.Insights/scheduledQueryRules@2026-03-01'
 		enabled: true
 		evaluationFrequency: rule.evaluationFrequency
 		windowSize: rule.windowSize
-		autoMitigate: rule.autoMitigate
 		skipQueryValidation: false
 		scopes: [
 			applicationInsightsComponentResourceId
