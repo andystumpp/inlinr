@@ -2,14 +2,14 @@
 
 ## Purpose
 
-Use this workflow to move from product intent to implementation without skipping product, UX, or boundary decisions.
+Use this workflow to move from product intent to implementation without skipping product, UX, editor-surface, or boundary decisions.
 
 ## Default sequence
 
 1. **User scenario**
-   Capture the user-facing behavior in `product/user-scenarios.md`.
+   Capture the user-facing behavior in `product/user-scenarios.md`, including Markdown authoring, rendered-view, and AI-assisted editing workflows when relevant.
 2. **Lightweight architecture check**
-   Decide whether the scenario changes extension boundaries, provider integration, persisted state, privacy posture, or command flow.
+   Decide whether the scenario changes extension boundaries, rendered-view synchronization, provider integration, persisted state, privacy posture, or command flow.
 3. **Feature spec**
    Create a focused spec in `specs/` for the slice that is ready to build.
 4. **Plan and tasks**
@@ -22,6 +22,7 @@ Use this workflow to move from product intent to implementation without skipping
 Do the architecture check immediately after the user scenario when the scenario introduces any of the following:
 
 - persisted comments, anchors, or history
+- render pipeline, preview synchronization, or editor surface changes that affect how source and rendered views stay aligned
 - background jobs or long-running AI workflows
 - new provider abstractions or fallback behavior
 - privacy-sensitive document handling or telemetry
@@ -46,7 +47,7 @@ In these cases, update `architecture/high-level-architecture.md` first and add a
 
 - Test behavior at the right layer instead of leaning only on editor-level end-to-end tests.
 - Prefer fast, deterministic tests over brittle or slow tests.
-- Cover selection anchoring, diff application, Markdown integrity, and privacy boundaries first.
+- Cover rendered-view alignment, selection anchoring, diff application, Markdown integrity, and privacy boundaries first.
 - Once user scenarios are formally captured, preserve them or intentionally update the source docs and related tests.
 - Bug fixes should add or update a test that would have caught the issue.
 
@@ -54,7 +55,7 @@ In these cases, update `architecture/high-level-architecture.md` first and add a
 
 - **Unit tests:** anchoring, context building, diff generation, validation, and formatting logic.
 - **Integration tests:** VS Code command flow, provider adapters, document update flow, and persistence boundaries.
-- **UI tests:** inline action surfaces, diff presentation, and error handling for core editing flows.
+- **UI tests:** inline action surfaces, rendered-view behavior, diff presentation, and error handling for core editing flows.
 - **Manual verification:** targeted editor walkthroughs for critical UX paths when automation is not enough.
 
 ## Verification commands
