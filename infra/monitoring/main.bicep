@@ -40,12 +40,12 @@ resource actionGroups 'Microsoft.Insights/actionGroups@2023-01-01' = [for defini
 		logicAppReceivers: []
 		smsReceivers: [for receiver in (definition.?smsReceivers ?? []): {
 			name: receiver.name
-			countryCode: receiver.countryCode
+			countryCode: replace(string(receiver.countryCode), '+', '')
 			phoneNumber: receiver.phoneNumber
 		}]
 		voiceReceivers: [for receiver in (definition.?voiceReceivers ?? []): {
 			name: receiver.name
-			countryCode: receiver.countryCode
+			countryCode: replace(string(receiver.countryCode), '+', '')
 			phoneNumber: receiver.phoneNumber
 		}]
 	}
