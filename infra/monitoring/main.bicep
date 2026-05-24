@@ -85,7 +85,6 @@ resource scheduledQueryRules 'Microsoft.Insights/scheduledQueryRules@2026-03-01'
 					operator: rule.operator
 					threshold: int(rule.threshold)
 					timeAggregation: rule.timeAggregation
-					resourceIdColumn: '_ResourceId'
 					failingPeriods: {
 						numberOfEvaluationPeriods: int(rule.failingPeriods.numberOfEvaluationPeriods)
 						minFailingPeriodsToAlert: int(rule.failingPeriods.minFailingPeriodsToAlert)
