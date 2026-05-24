@@ -13,7 +13,7 @@
     "smsReceivers": [
       {
         "name": "pager-sms",
-        "countryCode": "+1",
+        "countryCode": "1",
         "phoneNumber": "4254438431"
       }
     ],
