@@ -13,7 +13,10 @@ surface as the foundation for both the initial viewer and later inline editing f
 `architecture/adr-002-inlinr-owned-request-capture-and-model-invocation.md` for the decision to keep
 request capture and model invocation under Inlinr control rather than automating another chat UI. See
 `architecture/adr-004-local-mermaid-rendering-in-markdown-viewer.md` for the decision to keep Mermaid
-diagram rendering local to the Markdown viewer boundary.
+diagram rendering local to the Markdown viewer boundary. See
+`architecture/adr-005-repo-owned-monitoring-alert-management.md` for the decision to manage Azure
+monitoring alerts as repo-owned declarative infrastructure deployed by workflows rather than as
+manual portal state.
 
 ## Current component diagram
 
@@ -35,6 +38,7 @@ flowchart LR
         provider[AI Provider Client]
         normalize[Suggestion Normalizer]
         apply[Edit Application Service]
+        telemetry[Telemetry and Monitoring Adapter]
     end
 
     user --> markdown
@@ -48,6 +52,12 @@ flowchart LR
     normalize --> review
     review --> apply
     apply --> markdown
+    session --> telemetry
+    render --> telemetry
+    anchor --> telemetry
+    request --> telemetry
+    provider --> telemetry
+    apply --> telemetry
 ```
 
 ## Core components
@@ -65,6 +75,7 @@ flowchart LR
 | Suggestion Normalizer | Converts provider output into a predictable suggested edit shape. |
 | Suggestion Review and Apply Flow | Shows the proposed change and lets the user accept, reject, or refine it. |
 | Edit Application Service | Applies the approved edit to the intended range in the document. |
+| Telemetry and Monitoring Adapter | Emits sanitized scenario, checkpoint, dependency, and failure telemetry for monitoring and alerting without exposing document content. |
 
 ## Architecture principles
 
@@ -72,6 +83,8 @@ flowchart LR
 - Keep the editing loop precise and selection-scoped.
 - Keep transient overlay state in the webview and keep source-backed validation in the extension host.
 - Keep provider details behind a stable contract.
+- Keep telemetry scenario-based, sanitized, and emitted from the extension-host boundary.
+- Keep monitoring alert configuration repo-owned and workflow-deployed rather than manually managed in Azure.
 - Prefer extension-owned UI and supported APIs over automating other extension surfaces.
 - Preserve document integrity and user trust.
 - Favor simple local extension flows before adding background orchestration.

@@ -1,0 +1,60 @@
+[
+  {
+    "routeRef": "pager_core",
+    "name": "ag-inlinr-pager-core-prod",
+    "shortName": "inlrpgprd",
+    "emailReceivers": [
+      {
+        "name": "pager-email",
+        "emailAddress": "oncall@example.com",
+        "useCommonAlertSchema": true
+      }
+    ],
+    "smsReceivers": [
+      {
+        "name": "pager-sms",
+        "countryCode": "+1",
+        "phoneNumber": "4254438431"
+      }
+    ],
+    "voiceReceivers": [],
+    "webhookReceivers": []
+  },
+  {
+    "routeRef": "team_non_paging",
+    "name": "ag-inlinr-team-prod",
+    "shortName": "inlrteampr",
+    "emailReceivers": [
+      {
+        "name": "team-email",
+        "emailAddress": "team@example.com",
+        "useCommonAlertSchema": true
+      }
+    ],
+    "smsReceivers": [],
+    "voiceReceivers": [],
+    "webhookReceivers": []
+  },
+  {
+    "routeRef": "diagnostics_backlog",
+    "name": "ag-inlinr-diag-prod",
+    "shortName": "inlrdiagpr",
+    "emailReceivers": [
+      {
+        "name": "diagnostics-email",
+        "emailAddress": "diagnostics@example.com",
+        "useCommonAlertSchema": true
+      }
+    ],
+    "smsReceivers": [],
+    "voiceReceivers": [],
+    "webhookReceivers": [
+      {
+        "name": "diagnostics-webhook",
+        "serviceUri": "https://example.invalid/monitoring/diagnostics",
+        "useCommonAlertSchema": true,
+        "useAadAuth": false
+      }
+    ]
+  }
+]

@@ -28,8 +28,9 @@
 - Keep docs concise, decision-oriented, and easy for future agents to apply.
 - Do not invent build, test, or lint commands until the corresponding tooling exists in the repo.
 - If a task changes product or architecture direction, update the relevant source doc instead of leaving the decision only in code or chat history.
+- For scenario monitoring work, keep `monitoring/monitoring-scenarios.md` and `monitoring/telemetry-guidelines.md` aligned with the runtime behavior, especially privacy-safe property allowlists, scenario status classification, and Azure fail-open rules.
 
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
-shell commands, and other important information, read `specs/003-execute-selection-request/plan.md`
+shell commands, and other important information, read `specs/004-scenario-monitoring/plan.md`
 <!-- SPECKIT END -->

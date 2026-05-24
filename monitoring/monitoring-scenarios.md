@@ -2,6 +2,8 @@
 
 `product/user-scenarios.md` remains the product source of truth. This file is the operational source for the user-visible scenarios that should drive automated monitoring for Inlinr.
 
+Use `monitoring/telemetry-guidelines.md` to map each scenario into telemetry, Application Insights usage, and alerting.
+
 Each scenario stays crisp and monitoring-oriented: a real user journey, the key checkpoints that must keep working, and the specific kind of breakage the monitoring story should catch.
 
 ## Core scenarios
@@ -79,4 +81,6 @@ Each scenario stays crisp and monitoring-oriented: a real user journey, the key 
 2. Review and apply are blocked when the target is unsafe.
 3. The document content is preserved without hidden mutation.
 **Monitoring intent:** Catch failures where unsafe execution results leak into review or mutate the wrong text.
+
+**Classification guidance:** Treat missing or ambiguous target revalidation as `blocked_safe` rather than an outage-level `failure`. Reserve `failure` for true execution or mutation defects where the product attempted the operation and still could not complete it correctly.
 

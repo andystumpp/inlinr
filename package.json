@@ -63,6 +63,8 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile",
+    "monitoring:validate": "npm run compile && node ./tools/monitoring/validate-alert-policies.mjs",
+    "monitoring:generate": "npm run compile && node ./tools/monitoring/generate-monitoring-artifacts.mjs",
     "package:vsix": "node -e \"require('fs').mkdirSync('dist', { recursive: true })\" && npx --yes @vscode/vsce@3.9.1 package --out dist/inlinr.vsix",
     "test": "npm run test:integration && npm run test:unit",
     "test:integration": "node ./out/tests/runTest.js integration",
@@ -70,6 +72,7 @@
     "verify:release": "npm run compile && npm test && npm run package:vsix"
   },
   "dependencies": {
+    "@azure/monitor-opentelemetry": "^1.18.0",
     "markdown-it": "^14.1.0",
     "mermaid": "^11.15.0"
   },
@@ -81,6 +84,7 @@
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
     "mocha": "^11.2.2",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "yaml": "^2.8.1"
   }
 }
