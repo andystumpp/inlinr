@@ -33,6 +33,11 @@ import {
   type ViewerToExtensionMessage
 } from '../webview/viewerProtocol';
 import { createErrorState, createRenderedState, type ViewerState } from '../webview/viewerState';
+import type {
+  ScenarioAttemptHandle,
+  TelemetryAdapter
+} from '../telemetry/telemetryAdapter';
+import type { ScenarioStatus, TelemetryFailureClass, TelemetryProperties } from '../telemetry/telemetryContract';
 
 function getDocumentTitle(document: vscode.TextDocument): string {
   const filePath = document.uri.scheme === 'untitled' ? document.uri.path : document.uri.fsPath;
@@ -290,6 +295,7 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
 
   private readonly disposables: vscode.Disposable[] = [];
   private readonly selectionMetadataByDocument = new Map<string, RenderedSelectionMetadata>();
+  private readonly readyForNextRequestCycleByDocument = new Set<string>();
   private sessionCounter = 0;
   private requestSessionCounter = 0;
 
@@ -297,7 +303,8 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     private readonly extensionUri: vscode.Uri,
     private readonly sessionController: DocumentSessionController,
     private readonly requestService: RequestService<SelectionScopedRequestPayload> = new UnsupportedRequestService<SelectionScopedRequestPayload>(),
-    private readonly executionService: ExecutionService = new UnsupportedExecutionService()
+    private readonly executionService: ExecutionService = new UnsupportedExecutionService(),
+    private readonly telemetryAdapter?: TelemetryAdapter
   ) {
     this.disposables.push(
       vscode.workspace.onDidChangeTextDocument((event) => {
@@ -316,6 +323,7 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     token: vscode.CancellationToken
   ): Promise<void> {
     let pendingMessage = Promise.resolve();
+    let hasRenderedInitialState = false;
 
     webviewPanel.webview.options = {
       enableScripts: true,
@@ -361,6 +369,13 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
         this.selectionMetadataByDocument.set(targetDocument.uri.toString(), state.selectionMetadata);
       } else {
         this.selectionMetadataByDocument.delete(targetDocument.uri.toString());
+      }
+
+      if (!hasRenderedInitialState) {
+        hasRenderedInitialState = true;
+        this.recordInitialViewerTelemetry(targetDocument, state);
+      } else if (state.kind === 'error') {
+        this.recordRenderFailureTelemetry(targetDocument, state.reasonCode);
       }
 
       webviewPanel.title = `${getDocumentTitle(targetDocument)} Preview`;
@@ -465,9 +480,13 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     message: SelectionCaptureMessage,
     postMessageToViewer: (message: ExtensionToViewerMessage) => Promise<void>
   ): Promise<void> {
+    const popupAttempt = this.startScenarioAttempt(document, 'show_inline_request_popup');
     const selectionDecision = evaluateSelectionSupport(message);
 
     if (!selectionDecision.allowed) {
+      this.completeScenarioAttempt(popupAttempt, 'blocked_safe', {
+        reasonCode: 'selection-not-supported'
+      });
       await postMessageToViewer({
         type: 'selection.rejected',
         message: selectionDecision.reason ?? 'Select supported rendered prose before opening a request.'
@@ -476,6 +495,10 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     }
 
     if (message.documentVersion !== document.version) {
+      this.completeScenarioAttempt(popupAttempt, 'blocked_safe', {
+        failureClass: 'selection_resolution_failure',
+        reasonCode: 'document-version-changed'
+      });
       await postMessageToViewer({
         type: 'selection.rejected',
         message: 'The document changed. Reselect before opening a request.'
@@ -486,6 +509,9 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     const existingActiveRequest = this.sessionController.getActiveRequestSession();
 
     if (existingActiveRequest && blocksReplacementSelection(existingActiveRequest)) {
+      this.completeScenarioAttempt(popupAttempt, 'blocked_safe', {
+        reasonCode: 'request-already-active'
+      });
       await postMessageToViewer({
         type: 'selection.rejected',
         message: 'Finish or cancel the current request before starting another.'
@@ -503,6 +529,10 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     const selectionRange = resolveSelectionRangeFromMetadata(markdownSource, selectionMetadata, message);
 
     if (!selectionRange) {
+      this.completeScenarioAttempt(popupAttempt, 'blocked_safe', {
+        failureClass: 'selection_resolution_failure',
+        reasonCode: 'selection-range-unresolved'
+      });
       await postMessageToViewer({
         type: 'selection.rejected',
         message: 'The selected text could not be mapped safely. Reselect and try again.'
@@ -544,6 +574,25 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
       return;
     }
 
+    this.emitScenarioCheckpoint(popupAttempt, 'selection_recognized', 'pass');
+    this.emitScenarioCheckpoint(popupAttempt, 'popup_shown', 'pass');
+    this.emitScenarioCheckpoint(popupAttempt, 'scope_accurate', 'pass', {
+      properties: {
+        scope_kind: selectionRange.scopeKind
+      }
+    });
+    this.completeScenarioAttempt(popupAttempt, 'success');
+
+    if (this.readyForNextRequestCycleByDocument.has(document.uri.toString())) {
+      const nextCycleAttempt = this.startScenarioAttempt(document, 'start_next_request_cycle');
+
+      this.emitScenarioCheckpoint(nextCycleAttempt, 'first_cycle_cleared', 'pass');
+      this.emitScenarioCheckpoint(nextCycleAttempt, 'fresh_selection_starts_popup', 'pass');
+      this.emitScenarioCheckpoint(nextCycleAttempt, 'current_state_reused', 'pass');
+      this.completeScenarioAttempt(nextCycleAttempt, 'success');
+      this.readyForNextRequestCycleByDocument.delete(document.uri.toString());
+    }
+
     await postMessageToViewer({
       type: 'selection.accepted',
       sessionId: activeRequest.sessionId,
@@ -577,12 +626,18 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     postMessageToViewer: (message: ExtensionToViewerMessage) => Promise<void>
   ): Promise<void> {
     const activeRequest = this.sessionController.getActiveRequestSession(document);
+    const submitAttempt = this.startScenarioAttempt(document, 'submit_request_receive_review', {
+      sessionId
+    });
 
     if (!activeRequest || activeRequest.sessionId !== sessionId) {
       return;
     }
 
     if (draftText.trim().length === 0) {
+      this.completeScenarioAttempt(submitAttempt, 'blocked_safe', {
+        reasonCode: 'empty-request'
+      });
       this.sessionController.setActiveRequestSession({
         ...activeRequest,
         draftText,
@@ -604,10 +659,15 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
       validationState: 'submitting',
       validationMessage: undefined
     });
+    this.emitScenarioCheckpoint(submitAttempt, 'request_submitted', 'pass');
 
     const revalidation = revalidateSelectionAnchor(document.getText(), activeRequest.selectionAnchor);
 
     if (!revalidation.match || revalidation.status === 'ambiguous' || revalidation.status === 'missing') {
+      this.completeScenarioAttempt(submitAttempt, 'blocked_safe', {
+        failureClass: 'anchor_revalidation_failure',
+        reasonCode: revalidation.status
+      });
       this.sessionController.setActiveRequestSession({
         ...activeRequest,
         draftText,
@@ -653,6 +713,11 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     const availability = await this.executionService.checkAvailability();
 
     if (!availability.available) {
+      this.completeScenarioAttempt(submitAttempt, 'blocked_safe', {
+        failureClass: 'provider_unavailable',
+        reasonCode: availability.reasonCode ?? 'missing-capability'
+      });
+      this.recordExecutionFailureScenario(document, sessionId, 'blocked_safe', 'provider_unavailable', availability.reasonCode);
       this.sessionController.setActiveRequestSession({
         ...activeRequest,
         draftText,
@@ -691,9 +756,22 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
       sessionId,
       message: 'Generating suggestion…'
     });
+    this.emitScenarioCheckpoint(submitAttempt, 'pending_visible', 'pass');
+
+    const executionStartedAt = Date.now();
 
     try {
       const executionResult = await this.executionService.execute(payload);
+      this.emitDependency(submitAttempt, {
+        operationName: 'execute_selection_request',
+        dependencyType: 'copilot_language_model',
+        status: 'success',
+        durationMs: Math.max(0, Date.now() - executionStartedAt),
+        resultCode: executionResult.modelId ?? 'success',
+        properties: {
+          provider_kind: 'copilot'
+        }
+      });
       const suggestion = normalizeSuggestedEdit(payload, executionResult);
 
       this.sessionController.setActiveRequestSession({
@@ -719,11 +797,46 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
         }
       });
 
+      this.emitScenarioCheckpoint(submitAttempt, 'review_rendered_inline', 'pass');
+      this.completeScenarioAttempt(submitAttempt, 'success');
+
       return;
     } catch (error) {
       const executionMessage = error instanceof Error ? error.message : 'Execution failed.';
       const state = error instanceof ExecutionServiceError && error.reasonCode !== 'execution-error' ? 'unavailable' : 'failed';
       const eventType = state === 'unavailable' ? 'request.unavailable' : 'request.failed';
+      const failureClass = this.toExecutionFailureClass(error);
+
+      this.emitDependency(submitAttempt, {
+        operationName: 'execute_selection_request',
+        dependencyType: 'copilot_language_model',
+        status: 'failure',
+        durationMs: Math.max(0, Date.now() - executionStartedAt),
+        resultCode: error instanceof ExecutionServiceError ? error.reasonCode : 'execution-error',
+        properties: {
+          provider_kind: 'copilot'
+        }
+      });
+      this.emitException(submitAttempt, {
+        operationName: 'execute_selection_request',
+        errorClass: error instanceof Error ? error.name : 'UnknownError',
+        handled: true,
+        severity: state === 'unavailable' ? 'warning' : 'error',
+        properties: {
+          reason_code: error instanceof ExecutionServiceError ? error.reasonCode : 'execution-error'
+        }
+      });
+      this.completeScenarioAttempt(submitAttempt, state === 'unavailable' ? 'blocked_safe' : 'failure', {
+        failureClass,
+        reasonCode: error instanceof ExecutionServiceError ? error.reasonCode : 'execution-error'
+      });
+      this.recordExecutionFailureScenario(
+        document,
+        sessionId,
+        state === 'unavailable' ? 'blocked_safe' : 'failure',
+        failureClass,
+        error instanceof ExecutionServiceError ? error.reasonCode : 'execution-error'
+      );
 
       this.sessionController.setActiveRequestSession({
         ...activeRequest,
@@ -754,6 +867,9 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     postMessageToViewer: (message: ExtensionToViewerMessage) => Promise<void>
   ): Promise<void> {
     const activeRequest = this.sessionController.getActiveRequestSession(document);
+    const applyAttempt = this.startScenarioAttempt(document, 'apply_suggested_change', {
+      sessionId
+    });
 
     if (!activeRequest || activeRequest.sessionId !== sessionId || !activeRequest.suggestion) {
       return;
@@ -768,9 +884,14 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
       validationState: 'applying',
       validationMessage: 'Applying suggestion…'
     });
+    this.emitScenarioCheckpoint(applyAttempt, 'apply_available', 'pass');
 
     try {
       await applySuggestedEdit(document, activeRequest.suggestion);
+      this.emitScenarioCheckpoint(applyAttempt, 'mutate_targeted_range', 'pass');
+      this.emitScenarioCheckpoint(applyAttempt, 'render_refresh', 'pass');
+      this.completeScenarioAttempt(applyAttempt, 'success');
+      this.readyForNextRequestCycleByDocument.add(document.uri.toString());
       this.sessionController.clearActiveRequestSession(sessionId);
 
       await postMessageToViewer({
@@ -780,10 +901,22 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
       });
     } catch (error) {
       const applyMessage = error instanceof Error ? error.message : 'The suggested edit could not be applied.';
+      const reasonCode = error instanceof EditApplicationError ? error.reasonCode : 'apply-failed';
+      const isTargetResolutionSafeBlock = reasonCode === 'missing-target' || reasonCode === 'ambiguous-target';
+      const failureClass = isTargetResolutionSafeBlock ? 'anchor_revalidation_failure' : 'apply_failure';
+
+      this.completeScenarioAttempt(applyAttempt, isTargetResolutionSafeBlock ? 'blocked_safe' : 'failure', {
+        failureClass,
+        reasonCode
+      });
+
+      if (isTargetResolutionSafeBlock) {
+        this.recordExecutionFailureScenario(document, sessionId, 'blocked_safe', failureClass, reasonCode);
+      }
 
       this.sessionController.setActiveRequestSession({
         ...activeRequest,
-        validationState: error instanceof EditApplicationError ? 'invalid' : 'failed',
+        validationState: isTargetResolutionSafeBlock ? 'invalid' : 'failed',
         validationMessage: applyMessage,
         suggestion: undefined
       });
@@ -803,6 +936,9 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     postMessageToViewer: (message: ExtensionToViewerMessage) => Promise<void>
   ): Promise<void> {
     const activeRequest = this.sessionController.getActiveRequestSession(document);
+    const rejectAttempt = this.startScenarioAttempt(document, 'reject_suggested_change', {
+      sessionId
+    });
 
     if (!activeRequest || activeRequest.sessionId !== sessionId || !activeRequest.suggestion) {
       return;
@@ -818,6 +954,11 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
       validationMessage: 'Suggestion dismissed.',
       suggestion: undefined
     });
+    this.emitScenarioCheckpoint(rejectAttempt, 'reject_available', 'pass');
+    this.emitScenarioCheckpoint(rejectAttempt, 'document_unchanged', 'pass');
+    this.emitScenarioCheckpoint(rejectAttempt, 'review_dismissed', 'pass');
+    this.completeScenarioAttempt(rejectAttempt, 'cancelled_user');
+    this.readyForNextRequestCycleByDocument.add(document.uri.toString());
 
     await postMessageToViewer({
       type: 'suggestion.rejected',
@@ -831,5 +972,165 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     while (this.disposables.length > 0) {
       this.disposables.pop()?.dispose();
     }
+  }
+
+  private recordInitialViewerTelemetry(document: vscode.TextDocument, state: ViewerState): void {
+    if (state.kind === 'rendered') {
+      const attempt = this.startScenarioAttempt(document, 'load_markdown_preview');
+
+      this.emitScenarioCheckpoint(attempt, 'route_to_viewer', 'pass');
+      this.emitScenarioCheckpoint(attempt, 'render_markdown', 'pass');
+      this.emitScenarioCheckpoint(attempt, 'viewer_usable', 'pass');
+      this.completeScenarioAttempt(attempt, 'success');
+      return;
+    }
+
+    this.recordRenderFailureTelemetry(document, state.reasonCode);
+  }
+
+  private recordRenderFailureTelemetry(document: vscode.TextDocument, reasonCode: string): void {
+    const attempt = this.startScenarioAttempt(document, 'stable_viewer_on_render_failure');
+
+    this.emitScenarioCheckpoint(attempt, 'viewer_remains_active', 'pass');
+    this.emitScenarioCheckpoint(attempt, 'failure_state_visible', 'pass', {
+      reasonCode
+    });
+    this.emitScenarioCheckpoint(attempt, 'document_preserved', 'pass');
+    this.completeScenarioAttempt(attempt, 'blocked_safe', {
+      failureClass: 'render_failure',
+      reasonCode
+    });
+  }
+
+  private recordExecutionFailureScenario(
+    document: vscode.TextDocument,
+    sessionId: string,
+    status: ScenarioStatus,
+    failureClass: TelemetryFailureClass,
+    reasonCode?: string
+  ): void {
+    const attempt = this.startScenarioAttempt(document, 'preserve_document_on_execution_failure', {
+      sessionId
+    });
+
+    this.emitScenarioCheckpoint(attempt, 'failure_visible', 'pass', {
+      failureClass,
+      reasonCode
+    });
+    this.emitScenarioCheckpoint(attempt, 'review_apply_blocked', 'pass');
+    this.emitScenarioCheckpoint(attempt, 'document_preserved', 'pass');
+    this.completeScenarioAttempt(attempt, status, {
+      failureClass,
+      reasonCode
+    });
+  }
+
+  private startScenarioAttempt(
+    document: vscode.TextDocument,
+    scenarioId: string,
+    options: {
+      sessionId?: string;
+      parentId?: string;
+      properties?: TelemetryProperties;
+    } = {}
+  ): ScenarioAttemptHandle | undefined {
+    return this.telemetryAdapter?.startScenarioAttempt({
+      scenarioId,
+      sessionId: options.sessionId ?? document.uri.toString(),
+      parentId: options.parentId,
+      properties: {
+        surface: 'custom_editor',
+        ...(options.properties ?? {})
+      }
+    });
+  }
+
+  private emitScenarioCheckpoint(
+    attempt: ScenarioAttemptHandle | undefined,
+    checkpointId: string,
+    status: 'pass' | 'failure' | 'blocked_safe' | 'degraded',
+    options: {
+      failureClass?: TelemetryFailureClass;
+      reasonCode?: string;
+      durationMs?: number;
+      properties?: TelemetryProperties;
+    } = {}
+  ): void {
+    if (!attempt || !this.telemetryAdapter) {
+      return;
+    }
+
+    this.telemetryAdapter.emitScenarioCheckpoint(attempt, {
+      checkpointId,
+      status,
+      failureClass: options.failureClass,
+      reasonCode: options.reasonCode,
+      durationMs: options.durationMs,
+      properties: options.properties
+    });
+  }
+
+  private completeScenarioAttempt(
+    attempt: ScenarioAttemptHandle | undefined,
+    status: ScenarioStatus,
+    options: {
+      failureClass?: TelemetryFailureClass;
+      reasonCode?: string;
+      properties?: TelemetryProperties;
+    } = {}
+  ): void {
+    if (!attempt || !this.telemetryAdapter) {
+      return;
+    }
+
+    this.telemetryAdapter.completeScenarioAttempt(attempt, {
+      status,
+      failureClass: options.failureClass,
+      reasonCode: options.reasonCode,
+      properties: options.properties
+    });
+  }
+
+  private emitDependency(
+    attempt: ScenarioAttemptHandle | undefined,
+    options: {
+      operationName: string;
+      dependencyType: string;
+      status: 'success' | 'failure';
+      durationMs: number;
+      resultCode?: string;
+      properties?: TelemetryProperties;
+    }
+  ): void {
+    if (!attempt || !this.telemetryAdapter) {
+      return;
+    }
+
+    this.telemetryAdapter.emitDependency(attempt, options);
+  }
+
+  private emitException(
+    attempt: ScenarioAttemptHandle | undefined,
+    options: {
+      operationName: string;
+      errorClass: string;
+      handled: boolean;
+      severity: 'warning' | 'error' | 'critical';
+      properties?: TelemetryProperties;
+    }
+  ): void {
+    if (!attempt || !this.telemetryAdapter) {
+      return;
+    }
+
+    this.telemetryAdapter.emitException(attempt, options);
+  }
+
+  private toExecutionFailureClass(error: unknown): TelemetryFailureClass {
+    if (error instanceof ExecutionServiceError) {
+      return error.reasonCode === 'execution-error' ? 'unexpected_exception' : 'provider_unavailable';
+    }
+
+    return 'unexpected_exception';
   }
 }

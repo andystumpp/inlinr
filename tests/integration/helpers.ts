@@ -9,6 +9,8 @@ import {
 } from '../../src/requests/executionService';
 import { extractMarkedDocumentRange, getSelectionMarkerTokens } from '../../src/requests/documentDraftMarkers';
 import type { SelectionScopedRequestPayload } from '../../src/requests/requestPayloadBuilder';
+import { RecordingTelemetrySink } from '../../src/telemetry/applicationInsightsSink';
+import { createTelemetryAdapter } from '../../src/telemetry/telemetryAdapter';
 
 export interface FakeExecutionOutcome {
   kind: 'success' | 'failure' | 'unavailable';
@@ -176,6 +178,18 @@ export function getActiveCustomTabInput(): vscode.TabInputCustom | undefined {
 
 export function getExtensionUri(): vscode.Uri {
   return vscode.Uri.file(path.resolve(__dirname, '..', '..', '..'));
+}
+
+export function createRecordingTelemetryHarness() {
+  const sink = new RecordingTelemetrySink();
+
+  return {
+    sink,
+    adapter: createTelemetryAdapter({
+      mode: 'recording',
+      recordingSink: sink
+    })
+  };
 }
 
 export function createMockWebviewPanel(): {

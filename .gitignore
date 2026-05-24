@@ -13,3 +13,5 @@ build/
 Thumbs.db
 *.tmp
 *.swp
+infra/monitoring/generated/
+infra/monitoring/main.json
