@@ -44,8 +44,7 @@ function createScenarioResultFailureQuery(runtimeScenarioId) {
 | where name == 'scenario_result'
 | where tostring(customDimensions.scenarioId) == '${escapedScenarioId}'
 | extend scenarioStatus = tostring(customDimensions.status)
-| summarize totalSamples = count(), failedSamples = countif(scenarioStatus != 'success' and scenarioStatus != 'cancelled_user'), resourceId = any(_ResourceId)
-| project _ResourceId = resourceId, totalSamples, failedSamples`;
+| summarize totalSamples = count(), failedSamples = countif(scenarioStatus != 'success' and scenarioStatus != 'cancelled_user')`;
 }
 
 function createCheckpointFailureQuery(runtimeScenarioId, checkpointId) {
@@ -56,8 +55,8 @@ function createCheckpointFailureQuery(runtimeScenarioId, checkpointId) {
 | where tostring(customDimensions.scenarioId) == '${escapedScenarioId}'
 | where tostring(customDimensions.checkpointId) == '${escapedCheckpointId}'
 | extend checkpointStatus = tostring(customDimensions.status)
-| summarize failureCount = countif(checkpointStatus != 'pass'), resourceId = any(_ResourceId)
-| project _ResourceId = resourceId, metricValue = todouble(failureCount)`;
+| summarize failureCount = countif(checkpointStatus != 'pass')
+| project metricValue = todouble(failureCount)`;
 }
 
 function createLatencyQuery(runtimeScenarioId, checkpointId, minimumSampleSize) {
@@ -67,17 +66,17 @@ function createLatencyQuery(runtimeScenarioId, checkpointId, minimumSampleSize) 
 | where name == 'scenario_checkpoint'
 | where tostring(customDimensions.scenarioId) == '${escapedScenarioId}'
 | where tostring(customDimensions.checkpointId) == '${escapedCheckpointId}'
-| summarize sampleSize = count(), p95DurationMs = percentile(todouble(customMeasurements.duration_ms), 95), resourceId = any(_ResourceId)
+| summarize sampleSize = count(), p95DurationMs = percentile(todouble(customMeasurements.duration_ms), 95)
 | extend metricValue = iff(sampleSize >= ${minimumSampleSize}, p95DurationMs, 0.0)
-| project _ResourceId = resourceId, metricValue`;
+| project metricValue`;
 }
 
 function createExceptionQuery(runtimeScenarioId) {
   const escapedScenarioId = escapeKustoString(runtimeScenarioId);
   return `exceptions
 | where tostring(customDimensions.scenarioId) == '${escapedScenarioId}'
-| summarize exceptionCount = count(), resourceId = any(_ResourceId)
-| project _ResourceId = resourceId, metricValue = todouble(exceptionCount)`;
+| summarize exceptionCount = count()
+| project metricValue = todouble(exceptionCount)`;
 }
 
 function createScheduledQuerySpec(policy, alert, sourceLabel, sourceIndex) {
@@ -93,14 +92,14 @@ function createScheduledQuerySpec(policy, alert, sourceLabel, sourceIndex) {
     case 'synthetic_availability': {
       query = `${createScenarioResultFailureQuery(runtimeScenarioId)}
 | extend metricValue = iff(totalSamples >= ${alert.threshold.minimum_sample_size}, todouble(failedSamples), 0.0)
-| project _ResourceId, metricValue`;
+| project metricValue`;
       thresholdValue = alert.threshold.consecutive_failures;
       break;
     }
     case 'real_user_failure_rate': {
       query = `${createScenarioResultFailureQuery(runtimeScenarioId)}
 | extend metricValue = iff(totalSamples >= ${alert.threshold.minimum_sample_size}, (todouble(failedSamples) * 100.0) / todouble(totalSamples), 0.0)
-| project _ResourceId, metricValue`;
+| project metricValue`;
       thresholdValue = alert.threshold.failure_rate_percent;
       break;
     }
