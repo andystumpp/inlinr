@@ -55,7 +55,7 @@ The flow is therefore:
 3. `monitoring/alert-policies.yaml` captures the intended alert posture for those monitored business scenarios, even if runtime instrumentation is not complete yet.
 4. [src/telemetry/scenarioRegistry.ts](../src/telemetry/scenarioRegistry.ts) defines the runtime-emitted scenario IDs and checkpoints for scenarios that are implemented in code.
 5. `infra/monitoring/` converts the deployable subset of alert intent into Bicep deployment artifacts.
-6. GitHub Actions validates, generates, deploys, and verifies Azure resources.
+6. GitHub Actions validates and generates monitoring artifacts on monitoring changes, and the release workflow deploys and verifies production Azure resources.
 
 This means:
 
@@ -125,7 +125,7 @@ Each alert intent object should capture, at minimum:
 
 - Use Bicep as the default Azure infrastructure format for alert resources.
 - Store alert modules and parameters in a repo-owned infrastructure path, for example `infra/monitoring/`.
-- Deploy Azure resources through GitHub Actions using Azure OIDC and least-privilege permissions.
+- Deploy Azure resources through GitHub Actions using Azure OIDC and least-privilege permissions. For production, treat monitoring deployment as a gated release stage rather than a detached post-release task.
 - Prefer deterministic generation and idempotent deployment so agents can change monitoring intent through pull requests.
 
 ### Recommended workflow stages
@@ -139,15 +139,19 @@ Recommended stages:
 	- Fail if any core scenario lacks a primary alert definition.
 	- Fail if any deployable alert references an unknown runtime scenario ID, checkpoint ID, or unsupported signal type.
 	- Allow non-deployable alert intent entries to exist before runtime instrumentation is complete.
+ 	- Run on monitoring pull requests, monitoring-related pushes to `main`, and release candidates.
 2. `monitoring-generate`
 	- Generate or refresh Bicep parameters or generated deployment artifacts from the deployable subset of the alert intent layer.
 	- Fail if generated output is stale relative to committed source files.
+ 	- Run in the standalone monitoring workflow and again in the release workflow before prod deployment.
 3. `monitoring-deploy-dev`
 	- Deploy alerts to a non-production Azure target for smoke validation.
+ 	- Keep this as an optional manual path for non-production validation.
 4. `monitoring-deploy-prod`
-	- Deploy alerts to the production monitoring resource after protected-environment approval or equivalent branch protection.
+	- Deploy alerts to the production monitoring resource as part of the release workflow, after build, test, and packaging succeed and before marketplace publication.
 5. `monitoring-verify`
 	- Run post-deploy Azure queries or smoke checks to confirm expected rules exist and are scoped to the intended Application Insights component or workspace.
+	- Gate marketplace publication on successful production verification.
 
 This workflow sequence is part of the decision. Agents are expected to work through repo changes that feed these stages rather than treating Azure as the authoring interface.
 
