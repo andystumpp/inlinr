@@ -7,7 +7,7 @@ on:
       - "v*"
 
 jobs:
-  publish-marketplace:
+  build-test-package:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -50,6 +50,167 @@ jobs:
           name: inlinr-vsix
           path: dist/inlinr.vsix
           if-no-files-found: error
+
+  monitoring-validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate monitoring alert intent
+        run: npm run monitoring:validate
+
+  monitoring-generate:
+    runs-on: ubuntu-latest
+    needs: monitoring-validate
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate monitoring deployment artifacts
+        run: npm run monitoring:generate
+
+      - name: Upload generated monitoring artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: monitoring-artifacts
+          path: infra/monitoring/generated/alert-policies.generated.json
+          if-no-files-found: error
+
+  monitoring-deploy-prod:
+    runs-on: ubuntu-latest
+    needs:
+      - build-test-package
+      - monitoring-generate
+    environment: monitoring-prod
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download monitoring deployment artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: monitoring-artifacts
+          path: infra/monitoring/generated
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Validate prod deployment inputs
+        env:
+          MONITORING_RESOURCE_GROUP: ${{ vars.INLINR_MONITORING_PROD_RESOURCE_GROUP }}
+          APPLICATION_INSIGHTS_COMPONENT_RESOURCE_ID: ${{ vars.INLINR_MONITORING_PROD_APPLICATION_INSIGHTS_RESOURCE_ID }}
+          MONITORING_LOCATION: ${{ vars.INLINR_MONITORING_LOCATION }}
+          ACTION_GROUP_DEFINITIONS_JSON: ${{ secrets.INLINR_MONITORING_PROD_ACTION_GROUPS_JSON }}
+        run: |
+          test -n "$MONITORING_RESOURCE_GROUP" || (echo "Missing vars.INLINR_MONITORING_PROD_RESOURCE_GROUP" && exit 1)
+          test -n "$APPLICATION_INSIGHTS_COMPONENT_RESOURCE_ID" || (echo "Missing vars.INLINR_MONITORING_PROD_APPLICATION_INSIGHTS_RESOURCE_ID" && exit 1)
+          test -n "$MONITORING_LOCATION" || (echo "Missing vars.INLINR_MONITORING_LOCATION" && exit 1)
+          test -n "$ACTION_GROUP_DEFINITIONS_JSON" || (echo "Missing secrets.INLINR_MONITORING_PROD_ACTION_GROUPS_JSON" && exit 1)
+
+      - name: Deploy monitoring alerts to prod
+        env:
+          MONITORING_RESOURCE_GROUP: ${{ vars.INLINR_MONITORING_PROD_RESOURCE_GROUP }}
+          APPLICATION_INSIGHTS_COMPONENT_RESOURCE_ID: ${{ vars.INLINR_MONITORING_PROD_APPLICATION_INSIGHTS_RESOURCE_ID }}
+          MONITORING_LOCATION: ${{ vars.INLINR_MONITORING_LOCATION }}
+          ACTION_GROUP_DEFINITIONS_JSON: ${{ secrets.INLINR_MONITORING_PROD_ACTION_GROUPS_JSON }}
+        run: |
+          az deployment group create \
+            --resource-group "$MONITORING_RESOURCE_GROUP" \
+            --template-file infra/monitoring/main.bicep \
+            --parameters \
+              environmentName=prod \
+              monitoringLocation="$MONITORING_LOCATION" \
+              applicationInsightsComponentResourceId="$APPLICATION_INSIGHTS_COMPONENT_RESOURCE_ID" \
+              actionGroupDefinitions="$ACTION_GROUP_DEFINITIONS_JSON"
+
+  monitoring-verify-prod:
+    runs-on: ubuntu-latest
+    needs: monitoring-deploy-prod
+    environment: monitoring-prod
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download monitoring deployment artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: monitoring-artifacts
+          path: infra/monitoring/generated
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Verify prod scheduled query rules
+        env:
+          MONITORING_RESOURCE_GROUP: ${{ vars.INLINR_MONITORING_PROD_RESOURCE_GROUP }}
+        run: |
+          expected_count=$(node -p "require('./infra/monitoring/generated/alert-policies.generated.json').alertRules.length")
+          actual_count=$(az resource list --resource-group "$MONITORING_RESOURCE_GROUP" --resource-type Microsoft.Insights/scheduledQueryRules --query "[?starts_with(name, 'prod-inlinr-')] | length(@)" -o tsv)
+          echo "Expected scheduled query rule count: $expected_count"
+          echo "Actual scheduled query rule count: $actual_count"
+          test "$actual_count" -ge "$expected_count"
+
+  publish-marketplace:
+    runs-on: ubuntu-latest
+    needs:
+      - build-test-package
+      - monitoring-verify-prod
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Publish to Visual Studio Marketplace
         env:
