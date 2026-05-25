@@ -4,6 +4,7 @@ import {
   generatedArtifactsDir,
   validateAlertPolicies
 } from './alertPolicyUtils.mjs';
+import { compileAlertPolicies, readScenarioContract } from './generate-alert-policies-from-contract.mjs';
 
 function slugify(value) {
   return value
@@ -168,7 +169,19 @@ function buildAlertRules(deployableScenarios) {
 }
 
 async function main() {
-  const result = await validateAlertPolicies();
+  const contract = await readScenarioContract();
+  const compileResult = compileAlertPolicies(contract);
+
+  if (compileResult.errors.length > 0) {
+    for (const error of compileResult.errors) {
+      console.error(`Error: ${error}`);
+    }
+
+    process.exitCode = 1;
+    return;
+  }
+
+  const result = await validateAlertPolicies(compileResult.alertPolicies);
 
   if (result.errors.length > 0) {
     for (const error of result.errors) {

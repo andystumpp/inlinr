@@ -1,0 +1,568 @@
+# Canonical monitoring contract.
+#
+# This contract is the machine-readable source of truth for readable scenarios,
+# runtime coverage, and deployable alert intent.
+
+schema_version: 1
+
+defaults:
+  deployable_readiness_states:
+    - deployable
+
+  route_refs:
+    pager_core:
+      description: Page on confirmed core scenario outages or unsafe behavior.
+    team_non_paging:
+      description: Notify the owning team without paging.
+    diagnostics_backlog:
+      description: Record diagnostic-only signals for later review.
+
+  alert_profiles:
+    core_viewer_availability:
+      primary_alert:
+        kind: scheduled_query
+        signal_type: synthetic_availability
+        severity: page
+        route_ref: pager_core
+        rule_kind: log_search_alert
+        window: PT15M
+        evaluation_frequency: PT5M
+        threshold:
+          consecutive_failures: 2
+          minimum_sample_size: 2
+      supporting_alert_templates:
+        - template_id: failure_rate
+          kind: scheduled_query
+          signal_type: real_user_failure_rate
+          severity: non_paging
+          route_ref: team_non_paging
+          rule_kind: log_search_alert
+          window: PT30M
+          evaluation_frequency: PT5M
+          threshold:
+            failure_rate_percent: 5
+            minimum_sample_size: 10
+        - template_id: checkpoint_spike
+          kind: scheduled_query
+          signal_type: checkpoint_spike
+          severity: non_paging
+          route_ref: team_non_paging
+          rule_kind: log_search_alert
+          window: PT30M
+          evaluation_frequency: PT5M
+          threshold:
+            failure_count: 3
+          requires_checkpoint_id: true
+
+    core_selection_availability:
+      primary_alert:
+        kind: scheduled_query
+        signal_type: synthetic_availability
+        severity: page
+        route_ref: pager_core
+        rule_kind: log_search_alert
+        window: PT15M
+        evaluation_frequency: PT5M
+        threshold:
+          consecutive_failures: 2
+          minimum_sample_size: 2
+      supporting_alert_templates:
+        - template_id: checkpoint_spike
+          kind: scheduled_query
+          signal_type: checkpoint_spike
+          severity: non_paging
+          route_ref: team_non_paging
+          rule_kind: log_search_alert
+          window: PT30M
+          evaluation_frequency: PT5M
+          threshold:
+            failure_count: 3
+          requires_checkpoint_id: true
+
+    core_request_execution:
+      primary_alert:
+        kind: scheduled_query
+        signal_type: real_user_failure_rate
+        severity: page
+        route_ref: pager_core
+        rule_kind: log_search_alert
+        window: PT15M
+        evaluation_frequency: PT5M
+        threshold:
+          failure_rate_percent: 10
+          minimum_sample_size: 10
+      supporting_alert_templates:
+        - template_id: latency
+          kind: scheduled_query
+          signal_type: latency
+          severity: non_paging
+          route_ref: team_non_paging
+          rule_kind: log_search_alert
+          window: PT30M
+          evaluation_frequency: PT5M
+          threshold:
+            p95_duration_ms: 15000
+            minimum_sample_size: 10
+          requires_checkpoint_id: true
+        - template_id: checkpoint_spike
+          kind: scheduled_query
+          signal_type: checkpoint_spike
+          severity: non_paging
+          route_ref: team_non_paging
+          rule_kind: log_search_alert
+          window: PT30M
+          evaluation_frequency: PT5M
+          threshold:
+            failure_count: 3
+          requires_checkpoint_id: true
+
+    core_apply_integrity:
+      primary_alert:
+        kind: scheduled_query
+        signal_type: real_user_failure_rate
+        severity: page
+        route_ref: pager_core
+        rule_kind: log_search_alert
+        window: PT15M
+        evaluation_frequency: PT5M
+        threshold:
+          failure_rate_percent: 5
+          minimum_sample_size: 10
+      supporting_alert_templates:
+        - template_id: checkpoint_spike
+          kind: scheduled_query
+          signal_type: checkpoint_spike
+          severity: non_paging
+          route_ref: team_non_paging
+          rule_kind: log_search_alert
+          window: PT30M
+          evaluation_frequency: PT5M
+          threshold:
+            failure_count: 2
+          requires_checkpoint_id: true
+
+    core_reject_diagnostic:
+      primary_alert:
+        kind: scheduled_query
+        signal_type: synthetic_availability
+        severity: diagnostic_only
+        route_ref: diagnostics_backlog
+        rule_kind: log_search_alert
+        window: PT30M
+        evaluation_frequency: PT5M
+        threshold:
+          consecutive_failures: 3
+          minimum_sample_size: 3
+      supporting_alert_templates:
+        - template_id: checkpoint_spike
+          kind: scheduled_query
+          signal_type: checkpoint_spike
+          severity: non_paging
+          route_ref: team_non_paging
+          rule_kind: log_search_alert
+          window: PT30M
+          evaluation_frequency: PT5M
+          threshold:
+            failure_count: 2
+          requires_checkpoint_id: true
+
+    important_session_continuity:
+      primary_alert:
+        kind: scheduled_query
+        signal_type: synthetic_availability
+        severity: non_paging
+        route_ref: team_non_paging
+        rule_kind: log_search_alert
+        window: PT30M
+        evaluation_frequency: PT5M
+        threshold:
+          consecutive_failures: 3
+          minimum_sample_size: 3
+      supporting_alert_templates:
+        - template_id: checkpoint_spike
+          kind: scheduled_query
+          signal_type: checkpoint_spike
+          severity: diagnostic_only
+          route_ref: diagnostics_backlog
+          rule_kind: log_search_alert
+          window: PT30M
+          evaluation_frequency: PT5M
+          threshold:
+            failure_count: 3
+          requires_checkpoint_id: true
+
+    important_viewer_recovery:
+      primary_alert:
+        kind: scheduled_query
+        signal_type: synthetic_availability
+        severity: non_paging
+        route_ref: team_non_paging
+        rule_kind: log_search_alert
+        window: PT30M
+        evaluation_frequency: PT5M
+        threshold:
+          consecutive_failures: 3
+          minimum_sample_size: 3
+      supporting_alert_templates:
+        - template_id: checkpoint_spike
+          kind: scheduled_query
+          signal_type: checkpoint_spike
+          severity: non_paging
+          route_ref: team_non_paging
+          rule_kind: log_search_alert
+          window: PT30M
+          evaluation_frequency: PT5M
+          threshold:
+            failure_count: 3
+          requires_checkpoint_id: true
+
+    important_execution_recovery:
+      primary_alert:
+        kind: scheduled_query
+        signal_type: real_user_failure_rate
+        severity: non_paging
+        route_ref: team_non_paging
+        rule_kind: log_search_alert
+        window: PT30M
+        evaluation_frequency: PT5M
+        threshold:
+          failure_rate_percent: 10
+          minimum_sample_size: 5
+      supporting_alert_templates:
+        - template_id: checkpoint_spike
+          kind: scheduled_query
+          signal_type: checkpoint_spike
+          severity: page
+          route_ref: pager_core
+          rule_kind: log_search_alert
+          window: PT15M
+          evaluation_frequency: PT5M
+          threshold:
+            failure_count: 1
+          requires_checkpoint_id: true
+        - template_id: exception_spike
+          kind: scheduled_query
+          signal_type: exception_spike
+          severity: diagnostic_only
+          route_ref: diagnostics_backlog
+          rule_kind: log_search_alert
+          window: PT30M
+          evaluation_frequency: PT5M
+          threshold:
+            failure_count: 3
+
+scenarios:
+  - scenario_id: load_markdown_preview
+    title: Load a Markdown file into the Inlinr preview
+    criticality: core
+    journey:
+      start_condition: A user opens a Markdown file into Inlinr.
+      success_condition: The viewer renders the correct Markdown content and remains usable.
+      safe_block_condition: The viewer stays active and shows a visible failure state without mutating the document.
+    runtime:
+      readiness: deployable
+      scenario_version: '1'
+      owner_surface: custom_editor
+      owner_component: viewer
+      checkpoints:
+        - checkpoint_id: route_to_viewer
+          order: 1
+          description: Opening a .md file routes into the Inlinr viewer.
+          component: viewer
+        - checkpoint_id: render_markdown
+          order: 2
+          description: The document renders as Markdown rather than raw source.
+          component: viewer
+          latency_sensitive: true
+        - checkpoint_id: viewer_usable
+          order: 3
+          description: The viewer shows correct content and remains usable for the next interaction.
+          component: viewer
+    telemetry:
+      result_event: scenario_result
+      safe_block_status: blocked_safe
+      allowed_supporting_signals:
+        - checkpoint
+        - latency
+        - exception
+    alerting:
+      profile: core_viewer_availability
+      overrides:
+        supporting_alerts:
+          - template_id: checkpoint_spike
+            checkpoint_id: render_markdown
+
+  - scenario_id: show_inline_request_popup
+    title: Show the inline request popup for a rendered selection
+    criticality: core
+    journey:
+      start_condition: A user makes a non-empty rendered selection.
+      success_condition: A single anchored popup appears for the intended selection scope.
+      safe_block_condition: Selection is rejected safely without mutating the document.
+    runtime:
+      readiness: deployable
+      scenario_version: '1'
+      owner_surface: custom_editor
+      owner_component: selection
+      checkpoints:
+        - checkpoint_id: selection_recognized
+          order: 1
+          description: A non-empty rendered selection is recognized.
+          component: selection
+        - checkpoint_id: popup_shown
+          order: 2
+          description: The popup appears near the selected text.
+          component: selection
+          latency_sensitive: true
+        - checkpoint_id: scope_accurate
+          order: 3
+          description: The popup opens for the intended scope rather than drifting.
+          component: selection
+    telemetry:
+      result_event: scenario_result
+      safe_block_status: blocked_safe
+      allowed_supporting_signals:
+        - checkpoint
+        - exception
+    alerting:
+      profile: core_selection_availability
+      overrides:
+        supporting_alerts:
+          - template_id: checkpoint_spike
+            checkpoint_id: scope_accurate
+
+  - scenario_id: submit_request_receive_review
+    title: Submit a request and receive inline review state
+    criticality: core
+    journey:
+      start_condition: A user submits a request from the inline popup.
+      success_condition: Pending feedback appears and a reviewable inline suggestion is rendered at the targeted document location.
+      safe_block_condition: Execution or targeting fails visibly and the document remains unchanged.
+    runtime:
+      readiness: deployable
+      scenario_version: '1'
+      owner_surface: custom_editor
+      owner_component: request_execution
+      checkpoints:
+        - checkpoint_id: request_submitted
+          order: 1
+          description: The request input accepts text and submits successfully.
+          component: request_execution
+        - checkpoint_id: pending_visible
+          order: 2
+          description: The system shows a visible pending state while work is in progress.
+          component: request_execution
+          latency_sensitive: true
+        - checkpoint_id: review_rendered_inline
+          order: 3
+          description: A reviewable inline suggestion appears at the targeted document location.
+          component: request_execution
+    telemetry:
+      result_event: scenario_result
+      safe_block_status: blocked_safe
+      allowed_supporting_signals:
+        - checkpoint
+        - dependency
+        - latency
+        - exception
+    alerting:
+      profile: core_request_execution
+      overrides:
+        supporting_alerts:
+          - template_id: latency
+            checkpoint_id: pending_visible
+          - template_id: checkpoint_spike
+            checkpoint_id: review_rendered_inline
+
+  - scenario_id: apply_suggested_change
+    title: Apply a suggested change into the document
+    criticality: core
+    journey:
+      start_condition: A user chooses Apply from inline review state.
+      success_condition: Only the intended range mutates and the rendered document refreshes.
+      safe_block_condition: Apply is blocked safely when the target is no longer trustworthy.
+    runtime:
+      readiness: deployable
+      scenario_version: '1'
+      owner_surface: custom_editor
+      owner_component: apply
+      checkpoints:
+        - checkpoint_id: apply_available
+          order: 1
+          description: Apply is available from the inline review state.
+          component: apply
+        - checkpoint_id: mutate_targeted_range
+          order: 2
+          description: The targeted range mutates only after explicit apply.
+          component: apply
+        - checkpoint_id: render_refresh
+          order: 3
+          description: The rendered document refreshes to the newly integrated content.
+          component: viewer
+          latency_sensitive: true
+    telemetry:
+      result_event: scenario_result
+      safe_block_status: blocked_safe
+      allowed_supporting_signals:
+        - checkpoint
+        - exception
+    alerting:
+      profile: core_apply_integrity
+      overrides:
+        supporting_alerts:
+          - template_id: checkpoint_spike
+            checkpoint_id: mutate_targeted_range
+
+  - scenario_id: reject_suggested_change
+    title: Reject a suggested change without side effects
+    criticality: core
+    journey:
+      start_condition: A user chooses Reject from inline review state.
+      success_condition: The document remains unchanged and the temporary review state is dismissed.
+      safe_block_condition: The product leaves stale UI or hidden mutation after rejection.
+    runtime:
+      readiness: deployable
+      scenario_version: '1'
+      owner_surface: custom_editor
+      owner_component: apply
+      checkpoints:
+        - checkpoint_id: reject_available
+          order: 1
+          description: Reject is available from the inline review state.
+          component: apply
+        - checkpoint_id: document_unchanged
+          order: 2
+          description: The document content remains unchanged after rejection.
+          component: apply
+        - checkpoint_id: review_dismissed
+          order: 3
+          description: The temporary review state is dismissed cleanly.
+          component: session
+    telemetry:
+      result_event: scenario_result
+      safe_block_status: blocked_safe
+      allowed_supporting_signals:
+        - checkpoint
+        - exception
+    alerting:
+      profile: core_reject_diagnostic
+      overrides:
+        supporting_alerts:
+          - template_id: checkpoint_spike
+            checkpoint_id: document_unchanged
+
+  - scenario_id: start_next_request_cycle
+    title: Start another request cycle in the same session
+    criticality: important
+    journey:
+      start_condition: A user completes an apply or reject and makes another selection in the same session.
+      success_condition: A new popup flow starts using current document state.
+      safe_block_condition: The previous cycle remains stuck or stale but does not mutate content.
+    runtime:
+      readiness: deployable
+      scenario_version: '1'
+      owner_surface: custom_editor
+      owner_component: session
+      checkpoints:
+        - checkpoint_id: first_cycle_cleared
+          order: 1
+          description: The first request cycle ends cleanly after apply or reject.
+          component: session
+        - checkpoint_id: fresh_selection_starts_popup
+          order: 2
+          description: A fresh selection can start a new popup flow.
+          component: selection
+        - checkpoint_id: current_state_reused
+          order: 3
+          description: The next request uses current document state rather than stale review state.
+          component: session
+    telemetry:
+      result_event: scenario_result
+      safe_block_status: blocked_safe
+      allowed_supporting_signals:
+        - checkpoint
+        - exception
+    alerting:
+      profile: important_session_continuity
+      overrides:
+        supporting_alerts:
+          - template_id: checkpoint_spike
+            checkpoint_id: current_state_reused
+
+  - scenario_id: stable_viewer_on_render_failure
+    title: Keep the viewer stable when preview rendering fails
+    criticality: important
+    journey:
+      start_condition: Preview rendering fails while a Markdown file is open in Inlinr.
+      success_condition: The viewer stays active, shows a clear failure state, and the document stays unchanged.
+      safe_block_condition: The product prevents unsafe fallback or mutation while rendering is unavailable.
+    runtime:
+      readiness: deployable
+      scenario_version: '1'
+      owner_surface: custom_editor
+      owner_component: viewer
+      checkpoints:
+        - checkpoint_id: viewer_remains_active
+          order: 1
+          description: The viewer remains the active surface on render failure.
+          component: viewer
+        - checkpoint_id: failure_state_visible
+          order: 2
+          description: A visible failure state appears in the viewer.
+          component: viewer
+        - checkpoint_id: document_preserved
+          order: 3
+          description: The underlying document remains unchanged.
+          component: viewer
+    telemetry:
+      result_event: scenario_result
+      safe_block_status: blocked_safe
+      allowed_supporting_signals:
+        - checkpoint
+        - exception
+    alerting:
+      profile: important_viewer_recovery
+      overrides:
+        supporting_alerts:
+          - template_id: checkpoint_spike
+            checkpoint_id: failure_state_visible
+
+  - scenario_id: preserve_document_on_execution_failure
+    title: Keep the document unchanged when execution or targeting fails
+    criticality: important
+    journey:
+      start_condition: Request execution fails, returns unusable output, or can no longer resolve the intended target safely.
+      success_condition: A clear recovery path is visible and the document remains unchanged.
+      safe_block_condition: Review and apply are blocked when the target is unsafe.
+    runtime:
+      readiness: deployable
+      scenario_version: '1'
+      owner_surface: custom_editor
+      owner_component: request_execution
+      checkpoints:
+        - checkpoint_id: failure_visible
+          order: 1
+          description: The failure state is visible to the user.
+          component: request_execution
+        - checkpoint_id: review_apply_blocked
+          order: 2
+          description: Review and apply are blocked when the target is unsafe.
+          component: request_execution
+        - checkpoint_id: document_preserved
+          order: 3
+          description: The document content is preserved without hidden mutation.
+          component: apply
+    telemetry:
+      result_event: scenario_result
+      safe_block_status: blocked_safe
+      allowed_supporting_signals:
+        - checkpoint
+        - dependency
+        - exception
+    alerting:
+      profile: important_execution_recovery
+      overrides:
+        supporting_alerts:
+          - template_id: checkpoint_spike
+            checkpoint_id: document_preserved
+          - template_id: exception_spike
