@@ -1,14 +1,11 @@
-import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import YAML from 'yaml';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export const projectRoot = path.resolve(__dirname, '..', '..');
-export const alertPoliciesPath = path.join(projectRoot, 'monitoring', 'alert-policies.yaml');
 export const generatedArtifactsDir = path.join(projectRoot, 'infra', 'monitoring', 'generated');
 export const generatedAlertPoliciesPath = path.join(generatedArtifactsDir, 'alert-policies.generated.json');
 
@@ -83,17 +80,6 @@ function validateAlertDefinition(alert, pathLabel, errors) {
   }
 }
 
-export async function readAlertPolicies() {
-  const fileText = await fs.readFile(alertPoliciesPath, 'utf8');
-  const parsed = YAML.parse(fileText);
-
-  if (!isPlainObject(parsed)) {
-    throw new Error('monitoring/alert-policies.yaml must parse to an object.');
-  }
-
-  return parsed;
-}
-
 export async function loadRuntimeRegistry() {
   const require = createRequire(import.meta.url);
   const registryModulePath = path.join(projectRoot, 'out', 'src', 'telemetry', 'scenarioRegistry.js');
@@ -101,18 +87,22 @@ export async function loadRuntimeRegistry() {
   return registryModule.CURRENT_MONITORING_SCENARIOS;
 }
 
-export async function validateAlertPolicies() {
-  const alertPolicies = await readAlertPolicies();
+export async function validateAlertPolicies(inputAlertPolicies) {
+  if (!isPlainObject(inputAlertPolicies)) {
+    throw new Error('Compiled monitoring alert policies must be provided to validateAlertPolicies().');
+  }
+
+  const alertPolicies = inputAlertPolicies;
   const runtimeScenarios = await loadRuntimeRegistry();
   const errors = [];
   const warnings = [];
 
   if (alertPolicies.schema_version !== 1) {
-    pushError(errors, 'monitoring/alert-policies.yaml schema_version must be 1.');
+    pushError(errors, 'Compiled monitoring alert policies schema_version must be 1.');
   }
 
   if (!isPlainObject(alertPolicies.defaults)) {
-    pushError(errors, 'monitoring/alert-policies.yaml defaults must be an object.');
+    pushError(errors, 'Compiled monitoring alert policies defaults must be an object.');
   }
 
   const deployableReadinessStates = Array.isArray(alertPolicies.defaults?.deployable_readiness_states)
@@ -122,7 +112,7 @@ export async function validateAlertPolicies() {
   const policies = Array.isArray(alertPolicies.scenarios) ? alertPolicies.scenarios : [];
 
   if (policies.length === 0) {
-    pushError(errors, 'monitoring/alert-policies.yaml must define at least one scenario alert policy.');
+    pushError(errors, 'Compiled monitoring alert policies must define at least one scenario alert policy.');
   }
 
   const runtimeScenarioById = new Map(runtimeScenarios.map((scenario) => [scenario.scenarioId, scenario]));

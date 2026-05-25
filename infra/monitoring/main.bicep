@@ -7,7 +7,7 @@ param monitoringLocation string
 @description('Application Insights component resource ID that alert rules should target.')
 param applicationInsightsComponentResourceId string
 
-@description('Action group definitions keyed by routeRef from monitoring/alert-policies.yaml.')
+@description('Action group definitions keyed by routeRef from the generated monitoring alert spec.')
 param actionGroupDefinitions array = []
 
 var generatedAlertSpec = loadJsonContent('./generated/alert-policies.generated.json')
