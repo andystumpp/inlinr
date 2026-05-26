@@ -22,9 +22,24 @@ Today the repository has a minimal pull request path:
 - [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) is the main PR check and covers compile, tests, packaging, and artifact upload.
 - Pull request review is still primarily manual.
 - Copilot can participate in review, but there is no repository-specific review policy that makes security, code quality, and merge-readiness the primary outputs.
-- `main` is not branch protected.
-- Repository auto-merge is disabled.
+- `main` is branch protected requiring `build-test-package`, `dependency-review`, and `conclusion` (agentic security review).
+- Repository auto-merge is enabled.
+- An agentic security reviewer runs on every PR and classifies it as `merge-ready`, `needs-human-review`, or `blocked`.
 - The repository effectively operates with one time-constrained human reviewer.
+
+### Current gate inventory and gaps
+
+| Area | Already have | Still needed for ADR 006 |
+|---|---|---|
+| **Core CI gate** | `.github/workflows/ci.yml` runs on `pull_request` and `push` and does `npm ci`, `npm run compile`, `npm test`, and `npm run package:vsix`; `build-test-package` is now a required status check on `main` | Add the remaining required checks after dependency review, code scanning, and gatekeeper workflows exist |
+| **Specialized deterministic gate** | `.github/workflows/monitoring-alerts.yml` validates and generates monitoring artifacts for monitoring-related PRs | Decide whether it becomes a required check for its path scope |
+| **Branch protection** | **Present** on `main`, requiring `build-test-package`, `dependency-review`, and `conclusion` (agentic security review) | — |
+| **Repository auto-merge** | **Enabled** (`allow_auto_merge: true`) | — |
+| **Dependency review gate** | `.github/workflows/dependency-review.yml` exists; `dependency-review` is a required status check on `main` alongside `build-test-package` | — |
+| **Code scanning / security gate** | **Consciously skipped** — CodeQL requires GitHub Advanced Security (paid) on private repos; dependency review covers the dependency risk class | Logic and security vulnerabilities covered by the agentic review gatekeeper instead |
+| **Agentic review gatekeeper** | `.github/workflows/pr-security-review.md` + compiled `.lock.yml`; reviews all PRs against 12 Inlinr-specific security patterns; classifies as `merge-ready` (APPROVE), `needs-human-review` (COMMENT), or `blocked` (REQUEST_CHANGES); `conclusion` check is required on `main` | Add maintainability review pass; configure auto-approval for `merge-ready` low-risk PRs |
+| **Auto-approval for low-risk PRs** | **Not present** | Add only after low-risk and protected-path policy exists |
+| **Protected-file / high-risk routing policy** | Defined in ADR 006 conceptually, not implemented as repo policy/workflow | Encode the actual path/risk rules and route those PRs to human review |
 
 ### Target state
 
@@ -134,7 +149,7 @@ The rollout path is intentionally staged.
 1. **Current**
    - CI exists
    - PR review is mostly manual
-   - no branch protection
+   - branch protection is enabled with CI required
    - no repo-specific agentic PR gatekeeper
 2. **Near-term target**
    - deterministic PR gates cover compile, tests, dependency review, and code scanning
