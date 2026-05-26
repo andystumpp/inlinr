@@ -4,11 +4,10 @@ description: Reviews PR diffs for maintainability and architectural drift risks 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  roles: all
 permissions:
   contents: read
   pull-requests: read
-strict: true
-timeout-minutes: 15
 network:
   allowed: [defaults, github]
 tools:

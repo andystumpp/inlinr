@@ -4,11 +4,10 @@ description: Reviews PR diffs for security and trust boundary concerns specific 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  roles: all
 permissions:
   contents: read
   pull-requests: read
-strict: true
-timeout-minutes: 15
 network:
   allowed: [defaults, github]
 tools:
