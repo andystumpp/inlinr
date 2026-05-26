@@ -32,6 +32,7 @@
   "main": "./out/src/extension.js",
   "files": [
     "out/src",
+    "prompts",
     "media",
     "README.md",
     "CHANGELOG.md",

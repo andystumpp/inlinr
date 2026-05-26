@@ -13,6 +13,7 @@ export interface ValidatedExecutionDraft {
   selectionMarkerId: string;
   validatedAt: string;
   modelId?: string;
+  promptVersion?: string;
 }
 
 export interface NormalizedSuggestedEdit {
@@ -28,6 +29,7 @@ export interface NormalizedSuggestedEdit {
   rangeChangeStatus: 'contained' | 'out-of-range';
   createdAt: string;
   modelId?: string;
+  promptVersion?: string;
 }
 
 export function normalizeSuggestedEdit(
@@ -52,7 +54,8 @@ export function normalizeSuggestedEdit(
     replacementMarkdown,
     selectionMarkerId: payload.selectionMarkerId,
     validatedAt: new Date().toISOString(),
-    modelId: result.modelId
+    modelId: result.modelId,
+    promptVersion: result.promptVersion
   };
 
   return {
@@ -71,6 +74,7 @@ export function normalizeSuggestedEdit(
         ? 'contained'
         : 'contained',
     createdAt: new Date().toISOString(),
-    modelId: result.modelId
+    modelId: result.modelId,
+    promptVersion: result.promptVersion
   };
 }

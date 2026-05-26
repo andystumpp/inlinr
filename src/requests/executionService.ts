@@ -1,4 +1,6 @@
+import path from 'node:path';
 import * as vscode from 'vscode';
+import { PromptLoader } from './promptLoader';
 import type { SelectionScopedRequestPayload } from './requestPayloadBuilder';
 
 export type ExecutionFailureReasonCode =
@@ -19,6 +21,7 @@ export interface ExecutionResult {
   draftDocumentMarkdown: string;
   completedAt: string;
   modelId?: string;
+  promptVersion?: string;
 }
 
 export interface ExecutionService {
@@ -37,28 +40,6 @@ export class ExecutionServiceError extends Error {
 }
 
 type ChatModelResolver = () => Thenable<readonly vscode.LanguageModelChat[] | vscode.LanguageModelChat[]>;
-
-function buildExecutionPrompt(payload: SelectionScopedRequestPayload): string {
-  return [
-    'Rewrite only the Markdown content inside the explicit selection markers according to the user request.',
-    'You may restructure content inside the selection markers if needed.',
-    'Do not change any Markdown content outside the selection markers.',
-    'Return the full Markdown document and preserve the selection markers exactly.',
-    'Do not include commentary or code fences.',
-    '',
-    'User request:',
-    payload.requestText,
-    '',
-    'Selected Markdown:',
-    payload.selectedMarkdown,
-    '',
-    'Selection marker id:',
-    payload.selectionMarkerId,
-    '',
-    'Marked full document Markdown:',
-    payload.markedDocumentMarkdown
-  ].join('\n');
-}
 
 function toExecutionServiceError(error: unknown): ExecutionServiceError {
   if (error instanceof ExecutionServiceError) {
@@ -108,7 +89,10 @@ export class UnsupportedExecutionService implements ExecutionService {
 export class VscodeLanguageModelExecutionService implements ExecutionService {
   public constructor(
     private readonly extensionContext: vscode.ExtensionContext,
-    private readonly resolveChatModels: ChatModelResolver = () => vscode.lm.selectChatModels({ vendor: 'copilot' })
+    private readonly resolveChatModels: ChatModelResolver = () => vscode.lm.selectChatModels({ vendor: 'copilot' }),
+    private readonly promptLoader: PromptLoader = new PromptLoader(
+      path.join(extensionContext.extensionPath ?? process.cwd(), 'prompts')
+    )
   ) {}
 
   public async checkAvailability(): Promise<ExecutionAvailability> {
@@ -135,10 +119,16 @@ export class VscodeLanguageModelExecutionService implements ExecutionService {
     token: vscode.CancellationToken = new vscode.CancellationTokenSource().token
   ): Promise<ExecutionResult> {
     const model = await this.resolveModel();
+    const renderedPrompt = this.promptLoader.render('selection-scoped-edit', {
+      requestText: payload.requestText,
+      selectedMarkdown: payload.selectedMarkdown,
+      selectionMarkerId: payload.selectionMarkerId,
+      markedDocumentMarkdown: payload.markedDocumentMarkdown
+    });
 
     try {
       const response = await model.sendRequest(
-        [vscode.LanguageModelChatMessage.User(buildExecutionPrompt(payload))],
+        [vscode.LanguageModelChatMessage.User(renderedPrompt.promptText)],
         {
           justification: 'Generate a selection-scoped Markdown rewrite for text the user explicitly selected in Inlinr.'
         },
@@ -161,7 +151,8 @@ export class VscodeLanguageModelExecutionService implements ExecutionService {
         requestId: payload.requestId,
         draftDocumentMarkdown: normalizedDraft,
         completedAt: new Date().toISOString(),
-        modelId: model.id
+        modelId: model.id,
+        promptVersion: renderedPrompt.promptVersion
       };
     } catch (error) {
       throw toExecutionServiceError(error);
