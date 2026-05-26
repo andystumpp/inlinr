@@ -4,11 +4,10 @@ description: Reviews PR diffs for security and trust boundary concerns specific 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  roles: all
 permissions:
   contents: read
   pull-requests: read
-strict: true
-timeout-minutes: 15
 network:
   allowed: [defaults, github]
 tools:
@@ -101,5 +100,7 @@ A finding is **needs-human-review** if it:
 If no pattern applies and no protected path is modified: classify as `merge-ready`.
 
 ## Output style
+
+Always start the review body with `**[Security Review]**` followed by the outcome — e.g. `**[Security Review] BLOCKED:**`, `**[Security Review] Cleared:**`, `**[Security Review] Needs human review:**`. This prefix is required so reviewers can identify which agent posted the comment.
 
 Be concise. One short paragraph or a tight bulleted list. Lead with the classification and the key finding (or absence of one). Do not write a long essay. Prioritize signal over volume.
