@@ -62,9 +62,9 @@ The main tradeoff is therefore where to place each responsibility:
 Use an auto-merge-first PR governance model optimized for reviewer time reduction and exception-based human review.
 
 1. Keep objective PR gates as conventional GitHub Actions checks.
-2. Enable branch protection and repository auto-merge early, not as a later-stage optimization.
-3. Add a focused agentic gatekeeper that decides whether a PR is merge-ready, needs human review, or is blocked.
-4. Use automated approval only where branch protection requires approval and the PR is explicitly classified as low-risk.
+2. Keep branch protection minimal and machine-oriented, and pair it with repository auto-merge so routine PRs do not wait on manual merge clicks.
+3. Add focused agentic review workflows that decide whether a PR is merge-ready, needs human review, or is blocked.
+4. Use automation to enable auto-merge for PRs explicitly classified as low-risk or merge-ready, and use automated approval only where branch protection requires approval.
 
 The intended control model is:
 
@@ -73,8 +73,10 @@ The intended control model is:
   - a concise merge-readiness summary
   - only high-confidence security or quality findings
   - a clear statement of what, if anything, still needs human review
-- **Auto-approval** is allowed only for low-risk PRs after deterministic checks pass and the agentic reviewer finds no blockers.
-- **Auto-merge** is part of the intended near-term path. Most PRs should reach merge automatically once required checks pass and the gatekeeper classifies them as merge-ready.
+- **Branch protection** should remain a minimal machine-enforced baseline for required checks, not a manual-review throttle for routine PRs.
+- **Auto-merge enabler automation** should turn on auto-merge for PRs that pass deterministic and agentic review and are classified as low-risk or merge-ready.
+- **Auto-approval** is allowed only for low-risk PRs where branch protection still requires an approval.
+- **Auto-merge** is the intended default path. Most PRs should reach merge automatically without a human pressing merge.
 
 ### Merge routing model
 
@@ -82,10 +84,11 @@ The default path should be:
 
 1. PR opens
 2. deterministic checks run
-3. gatekeeper classifies the PR
-4. if the PR is `merge-ready`, enable auto-merge immediately
-5. if branch protection requires approval and the PR is low-risk, the automation may also add an approval
-6. only `needs-human-review` or `blocked` PRs should wait on manual review
+3. agentic review workflows such as security and maintainability classify the PR
+4. if the PR is `merge-ready` or low-risk, an auto-merge enabler workflow turns on auto-merge
+5. if branch protection still requires approval and the PR is low-risk, the automation may also add an approval
+6. GitHub merges automatically once the required checks are green
+7. only `needs-human-review` or `blocked` PRs should wait on manual review
 
 ### Review output standard
 
@@ -172,7 +175,7 @@ The rollout path is intentionally staged.
 - "AI slop" is treated as a governance concern, not just a coding concern; the review architecture is expected to filter it before merge.
 - Approval automation must stay narrowly scoped to low-risk PRs and protected file boundaries.
 - Additional workflow, label, and protected-file policy is required for review routing.
-- Branch protection and auto-merge settings become part of the effective architecture for the merge path.
+- Branch protection should stay as a thin machine gate, while auto-merge automation carries most of the merge-path speedup.
 - The repository must define what counts as low-risk versus always-human-review work.
 - The repository must define what maintainability problems are blocking, escalatory, or advisory.
 
@@ -224,10 +227,10 @@ Use this checklist when defining or evaluating the PR governance flow.
 
 ### Conditions for auto-merge
 
-- branch protection enabled
-- required checks configured
 - repository auto-merge enabled
-- PR labeled as low-risk / merge-ready
+- required deterministic and agentic checks configured
+- auto-merge enabler workflow runs for eligible PRs
+- PR labeled or classified as low-risk / merge-ready
 - no unresolved human-review findings
 - no protected-file or high-risk-path changes
 
