@@ -38,7 +38,7 @@ Today the repository has a minimal pull request path:
 | **Dependency review gate** | **Not present** — `dependency-review-action` requires GitHub Advanced Security on private repos; workflow removed | **Blocked** — no practical replacement yet; package-manifest changes should default to human review until an `npm audit` step is added to CI |
 | **Code scanning / security gate** | **Consciously skipped** — CodeQL requires GitHub Advanced Security (paid) on private repos | Logic and security vulnerabilities covered by the agentic review gatekeeper instead |
 | **Agentic review gatekeeper** | `.github/workflows/pr-security-review.md` + compiled `.lock.yml`; reviews all PRs against 12 Inlinr-specific security patterns; classifies as `merge-ready` (APPROVE), `needs-human-review` (COMMENT), or `blocked` (REQUEST_CHANGES); `conclusion` check is required on `main` | Add maintainability review pass; configure auto-approval for `merge-ready` low-risk PRs |
-| **Auto-approval for low-risk PRs** | **Not present** | Add only after low-risk and protected-path policy exists |
+| **Auto-approval for low-risk PRs** | **Not present** | Add a small auto-merge enabler workflow: deterministic checks run first, then agentic review workflows such as security and maintainability add PR feedback and return pass/fail results; if the PR is classified as low-risk or merge-ready with no protected-path or unresolved human-review findings, the workflow enables auto-merge and GitHub merges once all required checks are green |
 | **Protected-file / high-risk routing policy** | Defined in ADR 006 conceptually, not implemented as repo policy/workflow | Encode the actual path/risk rules and route those PRs to human review |
 
 ### Target state
