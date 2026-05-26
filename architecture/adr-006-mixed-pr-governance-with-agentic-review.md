@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Accepted
 
 ## Context
 
@@ -22,9 +22,11 @@ Today the repository has a minimal pull request path:
 - [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) is the main PR check and covers compile, tests, packaging, and artifact upload.
 - Pull request review is still primarily manual.
 - Copilot can participate in review, but there is no repository-specific review policy that makes security, code quality, and merge-readiness the primary outputs.
-- `main` is branch protected requiring `build-test-package` and `conclusion` (agentic security review).
+- `main` is branch protected requiring `build-test-package` and `conclusion` (agentic security and maintainability review).
 - Repository auto-merge is enabled.
-- An agentic security reviewer runs on every PR and classifies it as `merge-ready`, `needs-human-review`, or `blocked`.
+- An agentic security reviewer and an agentic maintainability reviewer run on every PR and classify it as cleared, needs-review, or blocked.
+- The auto-merge enabler workflow enables auto-merge for PRs where both reviewers clear and no protected paths are changed.
+- Both agentic workflows use `roles: all` so Copilot coding agent PRs are not skipped at the team-membership gate.
 - The repository effectively operates with one time-constrained human reviewer.
 
 ### Current gate inventory and gaps
@@ -37,8 +39,9 @@ Today the repository has a minimal pull request path:
 | **Repository auto-merge** | **Enabled** (`allow_auto_merge: true`) | — |
 | **Dependency review gate** | **Not present** — `dependency-review-action` requires GitHub Advanced Security on private repos; workflow removed | **Blocked** — no practical replacement yet; package-manifest changes should default to human review until an `npm audit` step is added to CI |
 | **Code scanning / security gate** | **Consciously skipped** — CodeQL requires GitHub Advanced Security (paid) on private repos | Logic and security vulnerabilities covered by the agentic review gatekeeper instead |
-| **Agentic review gatekeeper** | `.github/workflows/pr-security-review.md` + compiled `.lock.yml`; reviews all PRs against 12 Inlinr-specific security patterns; classifies as `merge-ready` (APPROVE), `needs-human-review` (COMMENT), or `blocked` (REQUEST_CHANGES); `conclusion` check is required on `main` | Add maintainability review pass; configure auto-approval for `merge-ready` low-risk PRs |
-| **Auto-approval for low-risk PRs** | **Not present** | Add a small auto-merge enabler workflow: deterministic checks run first, then agentic review workflows such as security and maintainability add PR feedback and return pass/fail results; if the PR is classified as low-risk or merge-ready with no protected-path or unresolved human-review findings, the workflow enables auto-merge and GitHub merges once all required checks are green |
+| **Agentic review gatekeeper** | `.github/workflows/pr-security-review.md` + compiled `.lock.yml`; reviews all PRs against 12 Inlinr-specific security patterns; classifies as `security-cleared` (APPROVE), `security-needs-review` (COMMENT), or `security-blocked` (REQUEST_CHANGES); `conclusion` check is required on `main`. `.github/workflows/pr-maintainability-review.md` + compiled `.lock.yml`; reviews all PRs against boundary integrity, complexity, duplication, test adequacy, scope hygiene, YAGNI, and contract fit; classifies as `maintainability-cleared`, `maintainability-needs-review`, or `maintainability-blocked`. Both workflows use `roles: all` so Copilot coding agent PRs are not gated by team membership. Review comments are prefixed with `[Security Review]` or `[Maintainability Review]` for clarity. | — |
+| **Auto-approval for low-risk PRs** | **Removed** — branch protection no longer requires approval; auto-approval was deadlocked in a solo repo where the PR author equals the token owner | — |
+| **Auto-merge enabler** | `.github/workflows/pr-auto-merge.yml`; triggers on `labeled`; enables auto-merge when both `security-cleared` and `maintainability-cleared` labels are present and no protected paths are changed; disables auto-merge if a blocking label is added | — |
 | **Protected-file / high-risk routing policy** | Defined in ADR 006 conceptually, not implemented as repo policy/workflow | Encode the actual path/risk rules and route those PRs to human review |
 
 ### Target state
@@ -64,7 +67,7 @@ Use an auto-merge-first PR governance model optimized for reviewer time reductio
 1. Keep objective PR gates as conventional GitHub Actions checks.
 2. Keep branch protection minimal and machine-oriented, and pair it with repository auto-merge so routine PRs do not wait on manual merge clicks.
 3. Add focused agentic review workflows that decide whether a PR is merge-ready, needs human review, or is blocked.
-4. Use automation to enable auto-merge for PRs explicitly classified as low-risk or merge-ready, and use automated approval only where branch protection requires approval.
+4. Use automation to enable auto-merge for PRs explicitly classified as low-risk or merge-ready by both the security and maintainability reviewers.
 
 The intended control model is:
 
@@ -74,8 +77,8 @@ The intended control model is:
   - only high-confidence security or quality findings
   - a clear statement of what, if anything, still needs human review
 - **Branch protection** should remain a minimal machine-enforced baseline for required checks, not a manual-review throttle for routine PRs.
-- **Auto-merge enabler automation** should turn on auto-merge for PRs that pass deterministic and agentic review and are classified as low-risk or merge-ready.
-- **Auto-approval** is allowed only for low-risk PRs where branch protection still requires an approval.
+- **Auto-merge enabler automation** should turn on auto-merge for PRs that pass deterministic and agentic review and are classified as cleared by both the security and maintainability reviewers.
+- **Auto-approval** is not used — branch protection does not require approval in this solo-repo setup, removing the deadlock where the PR author equals the token owner.
 - **Auto-merge** is the intended default path. Most PRs should reach merge automatically without a human pressing merge.
 
 ### Merge routing model
@@ -84,11 +87,10 @@ The default path should be:
 
 1. PR opens
 2. deterministic checks run
-3. agentic review workflows such as security and maintainability classify the PR
-4. if the PR is `merge-ready` or low-risk, an auto-merge enabler workflow turns on auto-merge
-5. if branch protection still requires approval and the PR is low-risk, the automation may also add an approval
-6. GitHub merges automatically once the required checks are green
-7. only `needs-human-review` or `blocked` PRs should wait on manual review
+3. agentic security and maintainability review workflows classify the PR
+4. if both reviewers clear the PR, the auto-merge enabler workflow enables auto-merge
+5. GitHub merges automatically once all required checks are green
+6. only `needs-human-review` or `blocked` PRs should wait on manual review
 
 ### Review output standard
 
@@ -109,9 +111,10 @@ The gatekeeper should evaluate these dimensions:
 |---|---|---|
 | **Boundary integrity** | logic moving into the wrong layer, hidden coupling, wrong-owner code | clearer responsibilities, safer changes, easier reasoning |
 | **Complexity control** | giant functions, branching growth, hidden state machines, overgrown controllers | simpler flows, explicit state, easier debugging |
-| **Duplication control** | AI copy-paste slop, rule divergence, repeated bug surfaces | shared helpers, single rule definitions, more consistent behavior |
+| **Duplication / DRY control** | AI copy-paste slop, rule divergence, repeated bug surfaces | shared helpers, single rule definitions, more consistent behavior |
 | **Test adequacy** | shallow happy-path tests, false confidence, behavior changes without regression protection | tests at the right layer, edge-case coverage, trustworthy checks |
 | **Scope hygiene** | unrelated cleanup, hidden risk, bloated PRs, review fatigue | reviewable slices, clearer history, faster human decisions |
+| **YAGNI discipline** | speculative abstractions, premature extension points, generic frameworks added without a real current need | lean implementations, deferred complexity, changes that do not exceed their stated purpose |
 
 ### SOLID in this policy
 
@@ -122,6 +125,8 @@ SOLID remains part of the review lens, but only when it materially affects maint
 - **Liskov Substitution** matters where provider, renderer, or service contracts are expected to remain interchangeable.
 - **Interface Segregation** matters when broad interfaces force unrelated consumers to depend on methods or data they should not need.
 - **Dependency Inversion** matters when policy and orchestration start depending directly on concrete provider, UI, or infrastructure details instead of stable contracts.
+- **DRY** matters when important rules are reimplemented across multiple files and can drift independently.
+- **YAGNI** matters when a PR adds speculative flexibility or abstraction without a real current need, increasing future change cost and review surface.
 
 The goal is not to produce generic SOLID commentary. The goal is to detect concrete maintainability risks that map to SOLID concerns.
 
@@ -154,13 +159,13 @@ The rollout path is intentionally staged.
    - PR review is mostly manual
    - branch protection is enabled with CI required
    - no repo-specific agentic PR gatekeeper
-2. **Near-term target**
+2. **Near-term target (current)**
    - deterministic PR gates cover compile, tests, and packaging
-   - branch protection is enabled
+   - branch protection is enabled (no required approval — removed to unblock solo-repo auto-merge)
    - repository auto-merge is enabled
-   - an agentic reviewer summarizes security, quality, maintainability, and merge readiness
-   - most PRs are marked merge-ready and flow into auto-merge
-   - low-risk PRs can be auto-approved where needed
+   - agentic security and maintainability reviewers run on every PR including Copilot-agent PRs (`roles: all`)
+   - review comments are prefixed with `[Security Review]` or `[Maintainability Review]` for clarity
+   - most PRs labeled `security-cleared` + `maintainability-cleared` flow into auto-merge automatically
    - human review is reserved for escalated files and decisions
 3. **Later target**
    - merge readiness policy is tuned from real PR results
@@ -207,7 +212,7 @@ Use this checklist when defining or evaluating the PR governance flow.
 - produce one short merge-readiness summary
 - flag concrete security concerns before style concerns
 - identify missing or shallow tests for behavior-changing PRs
-- evaluate maintainability using boundary integrity, complexity control, duplication control, test adequacy, and scope hygiene
+- evaluate maintainability using boundary integrity, complexity control, duplication / DRY control, test adequacy, scope hygiene, YAGNI discipline, and contract fit
 - call out SOLID concerns only when they map to a concrete maintainability problem
 - explicitly say which files or decisions still need human review
 
