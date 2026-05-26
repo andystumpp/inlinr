@@ -31,12 +31,12 @@ Today the repository has a minimal pull request path:
 
 | Area | Already have | Still needed for ADR 006 |
 |---|---|---|
-| **Core CI gate** | `.github/workflows/ci.yml` runs on `pull_request` and `push` and does `npm ci`, `npm run compile`, `npm test`, and `npm run package:vsix`; `build-test-package` is now a required status check on `main` | Add the remaining required checks after dependency review, code scanning, and gatekeeper workflows exist |
+| **Core CI gate** | `.github/workflows/ci.yml` runs on `pull_request` and `push` and does `npm ci`, `npm run compile`, `npm test`, and `npm run package:vsix`; `build-test-package` is now a required status check on `main` | Add the remaining required checks after code scanning and gatekeeper workflows exist |
 | **Specialized deterministic gate** | `.github/workflows/monitoring-alerts.yml` validates and generates monitoring artifacts for monitoring-related PRs | Decide whether it becomes a required check for its path scope |
 | **Branch protection** | **Present** on `main`, requiring `build-test-package` and `conclusion` (agentic security review) | — |
 | **Repository auto-merge** | **Enabled** (`allow_auto_merge: true`) | — |
-| **Dependency review gate** | `.github/workflows/dependency-review.yml` exists; runs on all PRs | `dependency-review-action` requires GitHub Advanced Security on private repos — same constraint as CodeQL. Check is NOT required. Workflow remains as informational; a future `npm audit` step in CI is the practical alternative |
-| **Code scanning / security gate** | **Consciously skipped** — CodeQL requires GitHub Advanced Security (paid) on private repos; dependency review covers the dependency risk class | Logic and security vulnerabilities covered by the agentic review gatekeeper instead |
+| **Dependency review gate** | **Not present** — `dependency-review-action` requires GitHub Advanced Security on private repos; workflow removed | **Blocked** — no practical replacement yet; package-manifest changes should default to human review until an `npm audit` step is added to CI |
+| **Code scanning / security gate** | **Consciously skipped** — CodeQL requires GitHub Advanced Security (paid) on private repos | Logic and security vulnerabilities covered by the agentic review gatekeeper instead |
 | **Agentic review gatekeeper** | `.github/workflows/pr-security-review.md` + compiled `.lock.yml`; reviews all PRs against 12 Inlinr-specific security patterns; classifies as `merge-ready` (APPROVE), `needs-human-review` (COMMENT), or `blocked` (REQUEST_CHANGES); `conclusion` check is required on `main` | Add maintainability review pass; configure auto-approval for `merge-ready` low-risk PRs |
 | **Auto-approval for low-risk PRs** | **Not present** | Add a small auto-merge enabler workflow: deterministic checks run first, then agentic review workflows such as security and maintainability add PR feedback and return pass/fail results; if the PR is classified as low-risk or merge-ready with no protected-path or unresolved human-review findings, the workflow enables auto-merge and GitHub merges once all required checks are green |
 | **Protected-file / high-risk routing policy** | Defined in ADR 006 conceptually, not implemented as repo policy/workflow | Encode the actual path/risk rules and route those PRs to human review |
@@ -53,7 +53,7 @@ The repository needs a pull request operating model where:
 
 The main tradeoff is therefore where to place each responsibility:
 
-- deterministic checks such as build, tests, dependency, and code-scanning results
+- deterministic checks such as build, tests, and code-scanning results
 - judgment-heavy review such as security reasoning, design quality, SOLID-style concerns, and whether a PR really needs human attention
 - approval and merge automation once a PR appears safe
 
@@ -68,7 +68,7 @@ Use an auto-merge-first PR governance model optimized for reviewer time reductio
 
 The intended control model is:
 
-- **Deterministic checks** handle compile, tests, packaging, dependency review, and code scanning. These remain the hard baseline because they are objective and reviewable.
+- **Deterministic checks** handle compile, tests, and packaging. These remain the hard baseline because they are objective and reviewable.
 - **Agentic PR review** acts as a repository-tuned gatekeeper. Its job is not to generate lots of comments. Its job is to reduce reviewer reading time by producing:
   - a concise merge-readiness summary
   - only high-confidence security or quality findings
@@ -152,7 +152,7 @@ The rollout path is intentionally staged.
    - branch protection is enabled with CI required
    - no repo-specific agentic PR gatekeeper
 2. **Near-term target**
-   - deterministic PR gates cover compile, tests, dependency review, and code scanning
+   - deterministic PR gates cover compile, tests, and packaging
    - branch protection is enabled
    - repository auto-merge is enabled
    - an agentic reviewer summarizes security, quality, maintainability, and merge readiness
@@ -195,7 +195,7 @@ Use this checklist when defining or evaluating the PR governance flow.
 
 - compile must pass
 - automated unit and integration tests must pass
-- dependency review must run on package-manifest changes
+- package-manifest changes (`package.json`, `package-lock.json`) should default to human review until an `npm audit` step exists in CI
 - code scanning should run for repository-supported languages
 - packaging should succeed for release-relevant changes
 
