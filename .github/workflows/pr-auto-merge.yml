@@ -7,7 +7,6 @@ on:
     types: [labeled]
 
 permissions:
-  pull-requests: write
   contents: write
 
 jobs:
@@ -54,11 +53,7 @@ jobs:
           elif [ "$HAS_SECURITY_CLEARED" = "true" ] \
             && [ "$HAS_MAINTAINABILITY_CLEARED" = "true" ] \
             && [ "$PROTECTED_COUNT" = "0" ]; then
-            echo "✅ Eligible for auto-merge. Approving and enabling auto-merge."
-            gh pr review "$PR_NUMBER" \
-              --approve \
-              --body "✅ Automated review passed (security-cleared, maintainability-cleared, no protected-path changes). Enabling auto-merge." \
-              -R "$REPO"
+            echo "✅ Eligible for auto-merge. Enabling auto-merge."
             gh pr merge "$PR_NUMBER" --auto --squash -R "$REPO"
 
           else
