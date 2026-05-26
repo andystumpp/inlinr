@@ -71,7 +71,7 @@ export const CURRENT_MONITORING_SCENARIOS: readonly MonitoringScenarioDefinition
     title: 'Submit a request and receive inline review state',
     criticality: 'core',
     startCondition: 'A user submits a request from the inline popup.',
-    successCondition: 'Pending feedback appears and a reviewable inline suggestion is rendered at the targeted location.',
+    successCondition: 'Pending feedback appears and a reviewable inline suggestion is rendered at the targeted document location.',
     safeBlockCondition: 'Execution or targeting fails visibly and the document remains unchanged.',
     checkpoints: [
       {
@@ -227,7 +227,7 @@ export const CURRENT_MONITORING_SCENARIOS: readonly MonitoringScenarioDefinition
     scenarioVersion: '1',
     title: 'Keep the document unchanged when execution or targeting fails',
     criticality: 'important',
-    startCondition: 'Request execution fails, returns unusable output, or can no longer resolve the target safely.',
+    startCondition: 'Request execution fails, returns unusable output, or can no longer resolve the intended target safely.',
     successCondition: 'A clear recovery path is visible and the document remains unchanged.',
     safeBlockCondition: 'Review and apply are blocked when the target is unsafe.',
     checkpoints: [

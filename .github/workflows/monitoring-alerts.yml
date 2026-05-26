@@ -5,7 +5,7 @@ on:
     paths:
       - '.github/workflows/monitoring-alerts.yml'
       - 'infra/monitoring/**'
-      - 'monitoring/alert-policies.yaml'
+      - 'monitoring/scenario-contract.yaml'
       - 'monitoring/monitoring-scenarios.md'
       - 'monitoring/telemetry-guidelines.md'
       - 'src/telemetry/**'
@@ -18,7 +18,7 @@ on:
     paths:
       - '.github/workflows/monitoring-alerts.yml'
       - 'infra/monitoring/**'
-      - 'monitoring/alert-policies.yaml'
+      - 'monitoring/scenario-contract.yaml'
       - 'monitoring/monitoring-scenarios.md'
       - 'monitoring/telemetry-guidelines.md'
       - 'src/telemetry/**'
@@ -50,7 +50,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Validate monitoring alert intent
+      - name: Validate monitoring contract and alert alignment
         run: npm run monitoring:validate
 
   monitoring-generate:

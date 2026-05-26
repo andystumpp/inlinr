@@ -116,7 +116,7 @@ Do not alert directly on every exception or every failed checkpoint. Alert first
 
 Alert resources themselves should be managed through repo-owned declarative infrastructure and deployed by workflows rather than maintained manually in the Azure portal. See `architecture/adr-005-repo-owned-monitoring-alert-management.md` for the control model.
 
-The concrete machine-readable alert intent layer lives in `monitoring/alert-policies.yaml`. That file captures the intended alert posture per monitored business scenario, while this document remains the technical guidance layer.
+The concrete machine-readable alert intent layer lives in `monitoring/scenario-contract.yaml`. That contract captures the intended alert posture per monitored business scenario, while this document remains the technical guidance layer.
 
 ### Alert levels by signal type
 
@@ -182,7 +182,7 @@ When an agent adds or changes a user scenario that should be monitored, it shoul
 3. Define the scenario ID, checkpoints, success condition, and safe block condition.
 4. Add telemetry only at scenario boundaries and checkpoint transitions.
 5. Reuse the shared failure taxonomy where possible.
-6. Add or update the corresponding repo-owned alert intent in `monitoring/alert-policies.yaml`, the generated Azure alert resource, and the dashboard query rather than relying on a portal-only change.
+6. Add or update the corresponding repo-owned monitoring contract in `monitoring/scenario-contract.yaml`, the generated Azure alert resource, and the dashboard query rather than relying on a portal-only change.
 7. Confirm that telemetry excludes document content and other sensitive material.
 
 ## Runtime extension pattern

@@ -58,6 +58,20 @@ In these cases, update `architecture/high-level-architecture.md` first and add a
 - **UI tests:** inline action surfaces, rendered-view behavior, diff presentation, and error handling for core editing flows.
 - **Manual verification:** targeted editor walkthroughs for critical UX paths when automation is not enough.
 
+## Current automated test suites
+
+The repository currently has these automated suites wired into `npm test`:
+
+- **Unit tests:** under `tests/unit/`
+- **Integration tests:** under `tests/integration/`
+
+Dedicated UI or acceptance suites are not yet established as separate runnable commands.
+
 ## Verification commands
 
-No canonical build, test, or lint commands are defined yet. Add them to this document once the repo establishes actual tooling.
+- `npm run compile` - TypeScript compilation
+- `npm run test` - runs current integration and unit suites
+- `npm run test:integration` - VS Code integration suite
+- `npm run test:unit` - unit suite
+- `npm run package:vsix` - package extension artifact
+- `npm run verify:release` - compile, test, and package release artifact
