@@ -56,10 +56,13 @@ function renderPromptTemplate(template: string, variables: Record<string, string
   });
 }
 
-function buildExecutionPrompt(extensionPath: string | undefined, payload: SelectionScopedRequestPayload): string {
-  const promptFilePath = path.join(extensionPath ?? process.cwd(), 'prompts', SELECTION_SCOPED_PROMPT_FILE_NAME);
-  const promptTemplate = fs.readFileSync(promptFilePath, 'utf8');
+function loadSelectionScopedPromptTemplate(extensionPath: string): string {
+  const promptFilePath = path.join(extensionPath, 'prompts', SELECTION_SCOPED_PROMPT_FILE_NAME);
 
+  return fs.readFileSync(promptFilePath, 'utf8');
+}
+
+function buildExecutionPrompt(promptTemplate: string, payload: SelectionScopedRequestPayload): string {
   return renderPromptTemplate(promptTemplate, {
     requestText: payload.requestText,
     selectedMarkdown: payload.selectedMarkdown,
@@ -114,10 +117,18 @@ export class UnsupportedExecutionService implements ExecutionService {
 }
 
 export class VscodeLanguageModelExecutionService implements ExecutionService {
+  private readonly selectionScopedPromptTemplate: string;
+
   public constructor(
     private readonly extensionContext: vscode.ExtensionContext,
     private readonly resolveChatModels: ChatModelResolver = () => vscode.lm.selectChatModels({ vendor: 'copilot' })
-  ) {}
+  ) {
+    if (!extensionContext.extensionPath) {
+      throw new ExecutionServiceError('execution-error', 'Unable to load prompts because extensionPath is unavailable.');
+    }
+
+    this.selectionScopedPromptTemplate = loadSelectionScopedPromptTemplate(extensionContext.extensionPath);
+  }
 
   public async checkAvailability(): Promise<ExecutionAvailability> {
     try {
@@ -143,7 +154,7 @@ export class VscodeLanguageModelExecutionService implements ExecutionService {
     token: vscode.CancellationToken = new vscode.CancellationTokenSource().token
   ): Promise<ExecutionResult> {
     const model = await this.resolveModel();
-    const promptText = buildExecutionPrompt(this.extensionContext.extensionPath, payload);
+    const promptText = buildExecutionPrompt(this.selectionScopedPromptTemplate, payload);
 
     try {
       const response = await model.sendRequest(
