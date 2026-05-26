@@ -417,6 +417,35 @@ body.viewer-shell {
   font-weight: 600;
 }
 
+.selection-request-quick-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 0 0 8px;
+}
+
+.selection-request-quick-format-button {
+  width: 32px;
+  height: 32px;
+  border: 1px solid color-mix(in srgb, var(--viewer-accent) 24%, var(--viewer-border));
+  border-radius: 10px;
+  color: var(--vscode-editor-foreground);
+  background: color-mix(in srgb, var(--vscode-editor-background) 84%, transparent);
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease, transform 120ms ease;
+}
+
+.selection-request-quick-format-button:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--viewer-accent) 42%, var(--viewer-border));
+  background: color-mix(in srgb, var(--viewer-accent) 12%, var(--vscode-editor-background));
+  transform: translateY(-1px);
+}
+
+.selection-request-quick-format-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .selection-request-suggestion {
   margin: 0;
   padding: 12px;

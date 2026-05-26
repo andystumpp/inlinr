@@ -1,4 +1,6 @@
 (function () {
+  const BOLD_QUICK_FORMAT_REQUEST = 'Format the selected text in Markdown bold using **double asterisks** without changing wording.';
+  const ITALIC_QUICK_FORMAT_REQUEST = 'Format the selected text in Markdown italic using *single asterisks* without changing wording.';
   const vscodeApi = typeof acquireVsCodeApi === 'function' ? acquireVsCodeApi() : null;
   let viewerState = null;
   let activeRequest = null;
@@ -344,17 +346,71 @@
     }
 
     const submitButton = requestRoot.querySelector('[data-selection-request-submit]');
+    const quickFormatButtons = requestRoot.querySelectorAll('[data-selection-request-quick-format]');
+    const isBusy =
+      activeRequest.validationState === 'submitted' ||
+      activeRequest.validationState === 'submitting' ||
+      activeRequest.validationState === 'executing' ||
+      activeRequest.validationState === 'review';
 
     if (!(submitButton instanceof HTMLButtonElement)) {
       return;
     }
 
-    submitButton.disabled =
+    submitButton.disabled = isBusy || activeRequest.draftText.trim().length === 0;
+    quickFormatButtons.forEach(function (button) {
+      if (button instanceof HTMLButtonElement) {
+        button.disabled = isBusy;
+      }
+    });
+  }
+
+  function submitActiveRequestFromOverlay() {
+    if (!activeRequest) {
+      return;
+    }
+
+    if (
       activeRequest.validationState === 'submitted' ||
       activeRequest.validationState === 'submitting' ||
       activeRequest.validationState === 'executing' ||
       activeRequest.validationState === 'review' ||
-      activeRequest.draftText.trim().length === 0;
+      activeRequest.draftText.trim().length === 0
+    ) {
+      return;
+    }
+
+    activeRequest.validationState = 'submitting';
+    syncSubmitButtonState();
+    postMessage({
+      type: 'request.submit',
+      sessionId: activeRequest.sessionId,
+      draftText: activeRequest.draftText
+    });
+  }
+
+  function applyQuickFormatRequest(formatKind, textarea) {
+    if (!activeRequest) {
+      return;
+    }
+
+    const draftText = formatKind === 'bold' ? BOLD_QUICK_FORMAT_REQUEST : ITALIC_QUICK_FORMAT_REQUEST;
+
+    activeRequest.draftText = draftText;
+    activeRequest.validationState = 'drafting';
+    activeRequest.validationMessage = undefined;
+
+    if (textarea instanceof HTMLTextAreaElement) {
+      textarea.value = draftText;
+    }
+
+    postMessage({
+      type: 'request.draftChanged',
+      sessionId: activeRequest.sessionId,
+      draftText
+    });
+
+    submitActiveRequestFromOverlay();
   }
 
   function focusRequestTextarea(textarea) {
@@ -542,6 +598,10 @@
 
     requestRoot.innerHTML = `
       <section class="selection-request-popover" aria-label="Selection request popup">
+        <div class="selection-request-quick-actions" role="group" aria-label="Quick formatting actions">
+          <button type="button" class="selection-request-quick-format-button" data-selection-request-quick-format data-selection-request-format-kind="bold" aria-label="Make selected text bold" title="Make selected text bold"><strong>B</strong></button>
+          <button type="button" class="selection-request-quick-format-button" data-selection-request-quick-format data-selection-request-format-kind="italic" aria-label="Make selected text italic" title="Make selected text italic"><em>I</em></button>
+        </div>
         <textarea
           id="selection-request-textarea"
           class="selection-request-textarea"
@@ -559,6 +619,7 @@
 
     const textarea = requestRoot.querySelector('[data-selection-request-draft]');
     const submitButton = requestRoot.querySelector('[data-selection-request-submit]');
+    const quickFormatButtons = requestRoot.querySelectorAll('[data-selection-request-quick-format]');
 
     if (textarea instanceof HTMLTextAreaElement) {
       focusRequestTextarea(textarea);
@@ -596,39 +657,34 @@
         }
 
         event.preventDefault();
-
-        if (activeRequest.validationState === 'submitted' ||
-            activeRequest.validationState === 'submitting' ||
-            activeRequest.validationState === 'executing' ||
-            activeRequest.validationState === 'review') {
-          return;
-        }
-
-        activeRequest.validationState = 'submitting';
-        syncSubmitButtonState();
-        postMessage({
-          type: 'request.submit',
-          sessionId: activeRequest.sessionId,
-          draftText: activeRequest.draftText
-        });
+        submitActiveRequestFromOverlay();
       });
     }
 
     if (submitButton instanceof HTMLButtonElement) {
       submitButton.addEventListener('click', function () {
+        submitActiveRequestFromOverlay();
+      });
+    }
+
+    quickFormatButtons.forEach(function (button) {
+      if (!(button instanceof HTMLButtonElement)) {
+        return;
+      }
+
+      button.addEventListener('click', function () {
         if (!activeRequest) {
           return;
         }
 
-        activeRequest.validationState = 'submitting';
-        syncSubmitButtonState();
-        postMessage({
-          type: 'request.submit',
-          sessionId: activeRequest.sessionId,
-          draftText: activeRequest.draftText
-        });
+        const formatKind = button.dataset.selectionRequestFormatKind;
+        if (formatKind !== 'bold' && formatKind !== 'italic') {
+          return;
+        }
+
+        applyQuickFormatRequest(formatKind, textarea);
       });
-    }
+    });
 
     syncSubmitButtonState();
   }
