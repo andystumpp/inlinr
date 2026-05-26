@@ -101,4 +101,6 @@ If no pattern applies and no protected path is modified: classify as `merge-read
 
 ## Output style
 
+Always start the review body with `**[Security Review]**` followed by the outcome — e.g. `**[Security Review] BLOCKED:**`, `**[Security Review] Cleared:**`, `**[Security Review] Needs human review:**`. This prefix is required so reviewers can identify which agent posted the comment.
+
 Be concise. One short paragraph or a tight bulleted list. Lead with the classification and the key finding (or absence of one). Do not write a long essay. Prioritize signal over volume.

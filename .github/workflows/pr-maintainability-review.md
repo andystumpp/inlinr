@@ -129,4 +129,6 @@ If no pattern applies and no protected path is modified: classify as `maintainab
 
 ## Output style
 
+Always start the review body with `**[Maintainability Review]**` followed by the outcome — e.g. `**[Maintainability Review] BLOCKED:**`, `**[Maintainability Review] Cleared:**`, `**[Maintainability Review] Needs human review:**`. This prefix is required so reviewers can identify which agent posted the comment.
+
 Be concise. One short paragraph or a tight bulleted list. Lead with the classification and the key finding, or the absence of one. Prioritize signal over volume. Do not block for style alone.
