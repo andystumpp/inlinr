@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
 import * as vscode from 'vscode';
 import { createViewerStateForDocument } from '../../src/editors/markdownCustomEditorProvider';
 import { getMarkdownViewerHtml } from '../../src/webview/getMarkdownViewerHtml';
@@ -29,5 +31,13 @@ suite('Rendered viewer state contract', () => {
     assert.match(html, /node_modules[\\/]mermaid[\\/]dist[\\/]mermaid\.min\.js/);
     assert.match(html, /data-selection-inline-review-root/);
     assert.match(html, /data-selection-request-root/);
+  });
+
+  test('selection request popup script includes quick bold and italic actions', () => {
+    const scriptPath = path.join(getExtensionUri().fsPath, 'media', 'markdownViewer', 'selectionRequest.js');
+    const script = fs.readFileSync(scriptPath, 'utf8');
+
+    assert.match(script, /data-selection-request-format-kind="bold"/);
+    assert.match(script, /data-selection-request-format-kind="italic"/);
   });
 });
