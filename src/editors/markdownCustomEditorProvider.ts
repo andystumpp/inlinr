@@ -769,8 +769,7 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
         durationMs: Math.max(0, Date.now() - executionStartedAt),
         resultCode: executionResult.modelId ?? 'success',
         properties: {
-          provider_kind: 'copilot',
-          prompt_version: executionResult.promptVersion ?? 'unknown'
+          provider_kind: 'copilot'
         }
       });
       const suggestion = normalizeSuggestedEdit(payload, executionResult);

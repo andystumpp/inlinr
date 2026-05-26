@@ -113,7 +113,6 @@ suite('Execution service', () => {
 
     assert.match(result.draftDocumentMarkdown, /Rewritten paragraph\./);
     assert.equal(result.modelId, 'copilot-test-model');
-    assert.equal(result.promptVersion, 'selection-scoped-edit-v1');
     assert.match(getCapturedPrompt(), /Marked full document Markdown:/);
     assert.match(getCapturedPrompt(), /<<<INLINR_SELECTION_START:/);
     assert.match(getCapturedPrompt(), /Original paragraph for execution\./);

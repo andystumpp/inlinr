@@ -1,6 +1,6 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import * as vscode from 'vscode';
-import { PromptLoader } from './promptLoader';
 import type { SelectionScopedRequestPayload } from './requestPayloadBuilder';
 
 export type ExecutionFailureReasonCode =
@@ -21,7 +21,6 @@ export interface ExecutionResult {
   draftDocumentMarkdown: string;
   completedAt: string;
   modelId?: string;
-  promptVersion?: string;
 }
 
 export interface ExecutionService {
@@ -40,6 +39,34 @@ export class ExecutionServiceError extends Error {
 }
 
 type ChatModelResolver = () => Thenable<readonly vscode.LanguageModelChat[] | vscode.LanguageModelChat[]>;
+
+const SELECTION_SCOPED_PROMPT_FILE_NAME = 'selection-scoped-edit.md';
+
+function renderPromptTemplate(template: string, variables: Record<string, string>): string {
+  const placeholderMatches = [...template.matchAll(/{{\s*([a-zA-Z0-9_]+)\s*}}/g)];
+  const placeholderNames = [...new Set(placeholderMatches.map((match) => match[1]))];
+  const missingVariables = placeholderNames.filter((variableName) => variables[variableName] === undefined);
+
+  if (missingVariables.length > 0) {
+    throw new Error(`Prompt template is missing variables: ${missingVariables.join(', ')}`);
+  }
+
+  return template.replace(/{{\s*([a-zA-Z0-9_]+)\s*}}/g, (_match, variableName: string) => {
+    return variables[variableName];
+  });
+}
+
+function buildExecutionPrompt(extensionPath: string | undefined, payload: SelectionScopedRequestPayload): string {
+  const promptFilePath = path.join(extensionPath ?? process.cwd(), 'prompts', SELECTION_SCOPED_PROMPT_FILE_NAME);
+  const promptTemplate = fs.readFileSync(promptFilePath, 'utf8');
+
+  return renderPromptTemplate(promptTemplate, {
+    requestText: payload.requestText,
+    selectedMarkdown: payload.selectedMarkdown,
+    selectionMarkerId: payload.selectionMarkerId,
+    markedDocumentMarkdown: payload.markedDocumentMarkdown
+  });
+}
 
 function toExecutionServiceError(error: unknown): ExecutionServiceError {
   if (error instanceof ExecutionServiceError) {
@@ -89,10 +116,7 @@ export class UnsupportedExecutionService implements ExecutionService {
 export class VscodeLanguageModelExecutionService implements ExecutionService {
   public constructor(
     private readonly extensionContext: vscode.ExtensionContext,
-    private readonly resolveChatModels: ChatModelResolver = () => vscode.lm.selectChatModels({ vendor: 'copilot' }),
-    private readonly promptLoader: PromptLoader = new PromptLoader(
-      path.join(extensionContext.extensionPath ?? process.cwd(), 'prompts')
-    )
+    private readonly resolveChatModels: ChatModelResolver = () => vscode.lm.selectChatModels({ vendor: 'copilot' })
   ) {}
 
   public async checkAvailability(): Promise<ExecutionAvailability> {
@@ -119,16 +143,11 @@ export class VscodeLanguageModelExecutionService implements ExecutionService {
     token: vscode.CancellationToken = new vscode.CancellationTokenSource().token
   ): Promise<ExecutionResult> {
     const model = await this.resolveModel();
-    const renderedPrompt = this.promptLoader.render('selection-scoped-edit', {
-      requestText: payload.requestText,
-      selectedMarkdown: payload.selectedMarkdown,
-      selectionMarkerId: payload.selectionMarkerId,
-      markedDocumentMarkdown: payload.markedDocumentMarkdown
-    });
+    const promptText = buildExecutionPrompt(this.extensionContext.extensionPath, payload);
 
     try {
       const response = await model.sendRequest(
-        [vscode.LanguageModelChatMessage.User(renderedPrompt.promptText)],
+        [vscode.LanguageModelChatMessage.User(promptText)],
         {
           justification: 'Generate a selection-scoped Markdown rewrite for text the user explicitly selected in Inlinr.'
         },
@@ -151,8 +170,7 @@ export class VscodeLanguageModelExecutionService implements ExecutionService {
         requestId: payload.requestId,
         draftDocumentMarkdown: normalizedDraft,
         completedAt: new Date().toISOString(),
-        modelId: model.id,
-        promptVersion: renderedPrompt.promptVersion
+        modelId: model.id
       };
     } catch (error) {
       throw toExecutionServiceError(error);
