@@ -30,6 +30,12 @@ tools:
 safe-outputs:
   mentions: false
   allowed-github-references: []
+  submit-pull-request-review:
+    max: 1
+    allowed-events: [APPROVE, COMMENT, REQUEST_CHANGES]
+    footer: if-body
+  add-labels:
+    allowed: [practicality-cleared, practicality-needs-review, practicality-blocked]
   create-issue:
     title-prefix: "[practicality-review] "
     labels: [agentic-workflows]
@@ -123,26 +129,35 @@ If a concern is weak, speculative, or mostly a preference, do not report it.
 
 ## Output behavior
 
-If triggered by a pull request and you find one or more material concerns:
+### Pull request runs
 
-- add exactly one pull request comment
-- include a concise overview followed by up to 3 findings
-- for each finding, include:
-  - `### Finding`
-  - `**Concern:**`
-  - `**Why it may fail in practice:**`
-  - `**Evidence:**`
-  - `**Suggested next step:**`
+Always classify the PR into exactly one outcome:
 
-If triggered by a scheduled or manual run and you find one or more material concerns:
+- **practicality-cleared**: No material practicality concerns. The change works as expected in the real operating context.
+- **practicality-needs-review**: A concern exists that requires human judgment. Not clearly safe, not clearly blocking.
+- **practicality-blocked**: A concrete finding that should be resolved before merge.
 
-- create exactly one issue
-- use this structure:
-  - `### Summary`
-  - `### Findings`
-  - `### Recommended next steps`
-  - `### References`
-- include only the strongest findings from the run
+Apply a label using `add-labels`: `practicality-cleared`, `practicality-needs-review`, or `practicality-blocked`.
+
+Submit a review using `submit-pull-request-review`:
+- `practicality-cleared` → event `APPROVE`, one sentence confirming no practical concerns found
+- `practicality-needs-review` → event `COMMENT`, explain what needs human attention
+- `practicality-blocked` → event `REQUEST_CHANGES`, include a concise overview and up to 3 findings
+
+Always start the review body with `**[Practicality Review]**` followed by the outcome — e.g. `**[Practicality Review] Cleared:**`, `**[Practicality Review] Needs human review:**`, `**[Practicality Review] BLOCKED:**`. This prefix is required so reviewers can identify which agent posted the comment.
+
+For `practicality-needs-review` or `practicality-blocked`, structure each finding as:
+- `### Finding`
+- `**Concern:**`
+- `**Why it may fail in practice:**`
+- `**Evidence:**`
+- `**Suggested next step:**`
+
+### Scheduled or manual runs
+
+If you find one or more material concerns:
+- create exactly one issue with structure: `### Summary`, `### Findings`, `### Recommended next steps`, `### References`
+- include only the strongest findings
 
 If you do not find a material concern, do nothing.
 
