@@ -25,7 +25,7 @@ jobs:
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           PR_NUMBER=$(gh pr list -R "$REPO" --state open --json number,headRefOid \
-            --jq --arg sha "$HEAD_SHA" '.[] | select(.headRefOid == $sha) | .number')
+            | jq -r --arg sha "$HEAD_SHA" '.[] | select(.headRefOid == $sha) | .number')
           if [ -z "$PR_NUMBER" ]; then
             echo "No open PR found for SHA $HEAD_SHA. Skipping."
             echo "pr_number=" >> "$GITHUB_OUTPUT"
