@@ -3,15 +3,7 @@ name: Practicality Review
 description: Audit Inlinr for high-signal reality gaps, hidden assumptions, unusual designs, and silent-failure patterns that may work in narrow paths but fail in real use.
 on:
   pull_request:
-    paths:
-      - "src/**"
-      - "tests/**"
-      - "package.json"
-      - "package-lock.json"
-      - ".github/workflows/**"
-      - "infra/**"
-      - "monitoring/**"
-      - "architecture/**"
+    types: [opened, synchronize, reopened]
   schedule: daily on weekdays
   workflow_dispatch:
 permissions:
