@@ -182,6 +182,12 @@ suite('Telemetry monitoring integration', () => {
     assert.deepEqual(findCheckpointIds(previewEvents), ['route_to_viewer', 'render_markdown', 'viewer_usable']);
     assert.equal(findScenarioResult(previewEvents)?.status, 'success');
 
+    const renderMarkdownCheckpoint = previewEvents.find((event) => event.eventType === 'scenario_checkpoint' && event.checkpointId === 'render_markdown');
+    assert.ok(renderMarkdownCheckpoint);
+    assert.equal(renderMarkdownCheckpoint.eventType, 'scenario_checkpoint');
+    assert.ok(typeof renderMarkdownCheckpoint.durationMs === 'number');
+    assert.ok(renderMarkdownCheckpoint.durationMs >= 0);
+
     provider.dispose();
   });
 
@@ -243,6 +249,18 @@ suite('Telemetry monitoring integration', () => {
     assert.equal(dependencyEvents.length, 1);
     assert.equal(dependencyEvents[0].status, 'success');
     assertNoSensitiveTelemetryValues([...popupEvents, ...submitEvents], [selectedText, 'Tighten the wording.']);
+
+    const popupShownCheckpoint = popupEvents.find((event) => event.eventType === 'scenario_checkpoint' && event.checkpointId === 'popup_shown');
+    assert.ok(popupShownCheckpoint);
+    assert.equal(popupShownCheckpoint.eventType, 'scenario_checkpoint');
+    assert.ok(typeof popupShownCheckpoint.durationMs === 'number');
+    assert.ok(popupShownCheckpoint.durationMs >= 0);
+
+    const pendingVisibleCheckpoint = submitEvents.find((event) => event.eventType === 'scenario_checkpoint' && event.checkpointId === 'pending_visible');
+    assert.ok(pendingVisibleCheckpoint);
+    assert.equal(pendingVisibleCheckpoint.eventType, 'scenario_checkpoint');
+    assert.ok(typeof pendingVisibleCheckpoint.durationMs === 'number');
+    assert.ok(pendingVisibleCheckpoint.durationMs >= 0);
 
     provider.dispose();
   });
@@ -452,6 +470,12 @@ suite('Telemetry monitoring integration', () => {
     assert.equal(failureExceptions[0].eventType, 'exception');
     assert.equal(sessionController.getActiveRequestSession(document)?.validationState, 'failed');
     assertNoSensitiveTelemetryValues([...failureRecoveryEvents, ...failedSubmitEvents], ['Break this request.', 'Trailing paragraph.']);
+
+    const renderRefreshCheckpoint = applyEvents.find((event) => event.eventType === 'scenario_checkpoint' && event.checkpointId === 'render_refresh');
+    assert.ok(renderRefreshCheckpoint);
+    assert.equal(renderRefreshCheckpoint.eventType, 'scenario_checkpoint');
+    assert.ok(typeof renderRefreshCheckpoint.durationMs === 'number');
+    assert.ok(renderRefreshCheckpoint.durationMs >= 0);
 
     provider.dispose();
   });

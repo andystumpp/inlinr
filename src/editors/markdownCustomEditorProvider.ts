@@ -324,6 +324,7 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
   ): Promise<void> {
     let pendingMessage = Promise.resolve();
     let hasRenderedInitialState = false;
+    const initialRenderStartedAt = Date.now();
 
     webviewPanel.webview.options = {
       enableScripts: true,
@@ -373,7 +374,7 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
 
       if (!hasRenderedInitialState) {
         hasRenderedInitialState = true;
-        this.recordInitialViewerTelemetry(targetDocument, state);
+        this.recordInitialViewerTelemetry(targetDocument, state, Math.max(0, Date.now() - initialRenderStartedAt));
       } else if (state.kind === 'error') {
         this.recordRenderFailureTelemetry(targetDocument, state.reasonCode);
       }
@@ -481,6 +482,7 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     postMessageToViewer: (message: ExtensionToViewerMessage) => Promise<void>
   ): Promise<void> {
     const popupAttempt = this.startScenarioAttempt(document, 'show_inline_request_popup');
+    const popupStartedAt = Date.now();
     const selectionDecision = evaluateSelectionSupport(message);
 
     if (!selectionDecision.allowed) {
@@ -575,7 +577,9 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     }
 
     this.emitScenarioCheckpoint(popupAttempt, 'selection_recognized', 'pass');
-    this.emitScenarioCheckpoint(popupAttempt, 'popup_shown', 'pass');
+    this.emitScenarioCheckpoint(popupAttempt, 'popup_shown', 'pass', {
+      durationMs: Math.max(0, Date.now() - popupStartedAt)
+    });
     this.emitScenarioCheckpoint(popupAttempt, 'scope_accurate', 'pass', {
       properties: {
         scope_kind: selectionRange.scopeKind
@@ -629,6 +633,7 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     const submitAttempt = this.startScenarioAttempt(document, 'submit_request_receive_review', {
       sessionId
     });
+    const pendingStartedAt = Date.now();
 
     if (!activeRequest || activeRequest.sessionId !== sessionId) {
       return;
@@ -756,7 +761,9 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
       sessionId,
       message: 'Generating suggestion…'
     });
-    this.emitScenarioCheckpoint(submitAttempt, 'pending_visible', 'pass');
+    this.emitScenarioCheckpoint(submitAttempt, 'pending_visible', 'pass', {
+      durationMs: Math.max(0, Date.now() - pendingStartedAt)
+    });
 
     const executionStartedAt = Date.now();
 
@@ -870,6 +877,7 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     const applyAttempt = this.startScenarioAttempt(document, 'apply_suggested_change', {
       sessionId
     });
+    const applyStartedAt = Date.now();
 
     if (!activeRequest || activeRequest.sessionId !== sessionId || !activeRequest.suggestion) {
       return;
@@ -889,7 +897,9 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     try {
       await applySuggestedEdit(document, activeRequest.suggestion);
       this.emitScenarioCheckpoint(applyAttempt, 'mutate_targeted_range', 'pass');
-      this.emitScenarioCheckpoint(applyAttempt, 'render_refresh', 'pass');
+      this.emitScenarioCheckpoint(applyAttempt, 'render_refresh', 'pass', {
+        durationMs: Math.max(0, Date.now() - applyStartedAt)
+      });
       this.completeScenarioAttempt(applyAttempt, 'success');
       this.readyForNextRequestCycleByDocument.add(document.uri.toString());
       this.sessionController.clearActiveRequestSession(sessionId);
@@ -974,12 +984,14 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     }
   }
 
-  private recordInitialViewerTelemetry(document: vscode.TextDocument, state: ViewerState): void {
+  private recordInitialViewerTelemetry(document: vscode.TextDocument, state: ViewerState, renderDurationMs: number): void {
     if (state.kind === 'rendered') {
       const attempt = this.startScenarioAttempt(document, 'load_markdown_preview');
 
       this.emitScenarioCheckpoint(attempt, 'route_to_viewer', 'pass');
-      this.emitScenarioCheckpoint(attempt, 'render_markdown', 'pass');
+      this.emitScenarioCheckpoint(attempt, 'render_markdown', 'pass', {
+        durationMs: renderDurationMs
+      });
       this.emitScenarioCheckpoint(attempt, 'viewer_usable', 'pass');
       this.completeScenarioAttempt(attempt, 'success');
       return;
