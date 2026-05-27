@@ -51,7 +51,7 @@ You maintain Inlinr's **runtime telemetry implementation** so the extension host
 
 This workflow is the runtime implementation layer in the monitoring loop. It is **not** the source of truth for monitoring intent. `monitoring/scenario-contract.yaml` remains the canonical machine-readable source, and `monitoring/monitoring-scenarios.md` remains the human-readable operational view.
 
-Your job is to detect when runtime coverage is missing, stale, or incomplete and propose a focused pull request that updates the code paths where telemetry is actually emitted, along with the supporting registry entries and tests.
+Your job is to detect when runtime coverage is missing, stale, incomplete, or semantically misaligned and propose a focused pull request that updates the code paths where telemetry is actually emitted, along with the supporting registry entries and tests.
 
 ## Primary point of view
 
@@ -63,7 +63,7 @@ Prioritize repository evidence in this order:
 4. open issues and open pull requests that indicate known telemetry gaps or imminent behavior changes
 5. `monitoring/monitoring-scenarios.md` as readable operational context
 
-If documentation and runtime behavior differ, prefer the reviewed monitoring contract plus the current code that users will actually run.
+If the contract and runtime behavior differ, prefer the reviewed monitoring contract, then verify whether the runtime semantics actually honor it.
 
 ## What to maintain
 
@@ -74,6 +74,7 @@ This includes:
 - scenario definitions in `src/telemetry/scenarioRegistry.ts`
 - telemetry helper usage through `TelemetryAdapter`
 - specific extension-host call sites where attempts, checkpoints, dependencies, exceptions, and results are emitted
+- latency-sensitive checkpoint placement and emitted checkpoint boundaries for latency-sensitive flows
 - tests that prove the intended events are emitted for the monitored flow
 
 This workflow must update the **real emission code**, not only registry metadata.
@@ -131,6 +132,15 @@ When making changes:
 - Do not create a PR if the runtime implementation is already aligned.
 - Before creating a PR, check for open pull requests that already cover the same telemetry implementation gap. Do not duplicate active work.
 - If a contract change would require broader product behavior changes rather than instrumentation, do nothing.
+
+Before reporting a no-op, explicitly verify semantic alignment, not just scenario or checkpoint presence. At minimum check:
+
+- the runtime checkpoint marked `latencySensitive` matches the contract checkpoint marked `latency_sensitive`
+- the emitted latency-sensitive checkpoint is the checkpoint the contract binds latency alerting to
+- checkpoint descriptions and supporting signals still reflect the contract's intended behavior
+- the runtime `primaryAlert` projection still matches the contract's paging vs non-paging semantics
+
+If ids exist but the runtime still reflects older latency or checkpoint semantics, that is not aligned and must not be reported as a no-op.
 
 ## Validation workflow
 
