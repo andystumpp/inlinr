@@ -32,7 +32,11 @@
   "main": "./out/src/extension.js",
   "files": [
     "out/src",
-    "node_modules",
+    "node_modules/@azure",
+    "node_modules/@azure-rest",
+    "node_modules/@opentelemetry",
+    "node_modules/tslib",
+    "node_modules/mermaid/dist/mermaid.min.js",
     "prompts",
     "media",
     "README.md",
@@ -61,7 +65,8 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run bundle -- --production",
+    "bundle": "node scripts/bundle.mjs",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile",
@@ -86,6 +91,7 @@
     "@types/vscode": "^1.90.0",
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
+    "esbuild": "^0.28.0",
     "mocha": "^11.2.2",
     "typescript": "^5.8.3",
     "yaml": "^2.8.1"
