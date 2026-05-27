@@ -15,7 +15,8 @@ export function activate(context: vscode.ExtensionContext): void {
   const telemetryAdapter = createTelemetryAdapter({
     environment: process.env,
     cloudRoleName: getTelemetryCloudRoleName(process.env, context.extension.id),
-    samplingEnabled: isTelemetrySamplingConfigured(process.env)
+    samplingEnabled: isTelemetrySamplingConfigured(process.env),
+    mode: vscode.env.isTelemetryEnabled ? undefined : 'noop'
   });
   const provider = new MarkdownCustomEditorProvider(
     context.extensionUri,

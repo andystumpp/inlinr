@@ -121,6 +121,8 @@ export type TelemetryEvent =
   | DependencyEvent
   | ExceptionEvent;
 
+export type TelemetryConnectionStringSource = 'environment' | 'bundled_default' | 'none';
+
 export interface TelemetrySink {
   emit(event: TelemetryEvent): void | Promise<void>;
   flush?(): Promise<void>;
@@ -130,6 +132,7 @@ export interface TelemetrySink {
 export interface TelemetrySinkConfiguration {
   mode: TelemetrySinkMode;
   connectionStringPresent: boolean;
+  connectionStringSource: TelemetryConnectionStringSource;
   cloudRoleName?: string;
   samplingEnabled: boolean;
   enabledAt: string;

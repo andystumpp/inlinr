@@ -8,10 +8,12 @@ import type {
   ScenarioCheckpointEvent,
   ScenarioResultEvent,
   TelemetryEvent,
+  TelemetryConnectionStringSource,
   TelemetrySink,
   TelemetrySinkConfiguration,
   TelemetrySinkMode
 } from './telemetryContract';
+import { DEFAULT_APPLICATIONINSIGHTS_CONNECTION_STRING } from './defaultTelemetryConfig';
 
 export interface ApplicationInsightsEventEnvelope {
   kind: 'event';
@@ -70,6 +72,11 @@ export interface CreateTelemetrySinkOptions {
 export interface TelemetrySinkSelection {
   sink: TelemetrySink;
   configuration: TelemetrySinkConfiguration;
+}
+
+interface ResolvedApplicationInsightsConnectionString {
+  connectionString?: string;
+  source: TelemetryConnectionStringSource;
 }
 
 interface ApplicationInsightsConnectionStringParts {
@@ -488,9 +495,34 @@ export function mapTelemetryEventToApplicationInsightsEnvelope(event: TelemetryE
   };
 }
 
+export function resolveApplicationInsightsConnectionString(
+  environment: NodeJS.ProcessEnv = process.env
+): ResolvedApplicationInsightsConnectionString {
+  const environmentValue = environment.APPLICATIONINSIGHTS_CONNECTION_STRING?.trim();
+
+  if (environmentValue) {
+    return {
+      connectionString: environmentValue,
+      source: 'environment'
+    };
+  }
+
+  const bundledDefaultValue = DEFAULT_APPLICATIONINSIGHTS_CONNECTION_STRING.trim();
+
+  if (bundledDefaultValue) {
+    return {
+      connectionString: bundledDefaultValue,
+      source: 'bundled_default'
+    };
+  }
+
+  return {
+    source: 'none'
+  };
+}
+
 export function getApplicationInsightsConnectionString(environment: NodeJS.ProcessEnv = process.env): string | undefined {
-  const value = environment.APPLICATIONINSIGHTS_CONNECTION_STRING?.trim();
-  return value && value.length > 0 ? value : undefined;
+  return resolveApplicationInsightsConnectionString(environment).connectionString;
 }
 
 export class NoopTelemetrySink implements TelemetrySink {
@@ -553,7 +585,8 @@ export class AzureMonitorTelemetrySink implements TelemetrySink {
 
 export function createTelemetrySinkSelection(options: CreateTelemetrySinkOptions = {}): TelemetrySinkSelection {
   const environment = options.environment ?? process.env;
-  const connectionString = getApplicationInsightsConnectionString(environment);
+  const resolvedConnectionString = resolveApplicationInsightsConnectionString(environment);
+  const connectionString = resolvedConnectionString.connectionString;
   const requestedMode = options.mode;
   const enabledAt = new Date().toISOString();
   const samplingEnabled = options.samplingEnabled ?? isTelemetrySamplingConfigured(environment);
@@ -565,6 +598,21 @@ export function createTelemetrySinkSelection(options: CreateTelemetrySinkOptions
       configuration: {
         mode: 'recording',
         connectionStringPresent: Boolean(connectionString),
+        connectionStringSource: resolvedConnectionString.source,
+        cloudRoleName,
+        samplingEnabled,
+        enabledAt
+      }
+    };
+  }
+
+  if (requestedMode === 'noop') {
+    return {
+      sink: new NoopTelemetrySink(),
+      configuration: {
+        mode: 'noop',
+        connectionStringPresent: Boolean(connectionString),
+        connectionStringSource: resolvedConnectionString.source,
         cloudRoleName,
         samplingEnabled,
         enabledAt
@@ -593,6 +641,7 @@ export function createTelemetrySinkSelection(options: CreateTelemetrySinkOptions
         configuration: {
           mode: 'noop',
           connectionStringPresent: Boolean(connectionString),
+          connectionStringSource: resolvedConnectionString.source,
           cloudRoleName,
           samplingEnabled,
           enabledAt
@@ -605,6 +654,7 @@ export function createTelemetrySinkSelection(options: CreateTelemetrySinkOptions
       configuration: {
         mode: 'azure_monitor',
         connectionStringPresent: Boolean(connectionString),
+        connectionStringSource: resolvedConnectionString.source,
         cloudRoleName,
         samplingEnabled,
         enabledAt
@@ -617,6 +667,7 @@ export function createTelemetrySinkSelection(options: CreateTelemetrySinkOptions
     configuration: {
       mode: 'noop',
       connectionStringPresent: false,
+      connectionStringSource: resolvedConnectionString.source,
       cloudRoleName,
       samplingEnabled,
       enabledAt
