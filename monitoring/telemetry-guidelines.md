@@ -202,7 +202,8 @@ Default extension sequence:
 
 The default Azure sink path should use:
 
-- `APPLICATIONINSIGHTS_CONNECTION_STRING` for resource targeting.
+- the bundled default Application Insights connection string for shipped extension builds.
+- `APPLICATIONINSIGHTS_CONNECTION_STRING` to override that resource target for development, validation, or alternate deployment environments.
 - `INLINR_TELEMETRY_CLOUD_ROLE_NAME` only when the default role derived from the extension identity needs to be overridden.
 - `OTEL_TRACES_SAMPLER` or `OTEL_TRACES_SAMPLER_ARG` to signal non-default sampling posture.
 

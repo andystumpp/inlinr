@@ -7,6 +7,7 @@ import {
   isTelemetrySamplingConfigured,
   mapTelemetryEventToApplicationInsightsEnvelope
 } from '../../src/telemetry/applicationInsightsSink';
+import { DEFAULT_APPLICATIONINSIGHTS_CONNECTION_STRING } from '../../src/telemetry/defaultTelemetryConfig';
 import { createTelemetryAdapter } from '../../src/telemetry/telemetryAdapter';
 import { createScenarioTelemetryContext, type TelemetryEvent } from '../../src/telemetry/telemetryContract';
 
@@ -102,13 +103,36 @@ suite('Telemetry adapter', () => {
     assert.equal(sink.getEvents().filter((event) => event.eventType === 'scenario_checkpoint').length, 1);
   });
 
-  test('defaults to a no-op sink when Azure configuration is absent', () => {
+  test('uses the bundled Application Insights target when no environment override is provided', () => {
+    let createdConnectionString: string | undefined;
+
+    const selection = createTelemetrySinkSelection({
+      environment: {},
+      applicationInsightsClientFactory(configuration) {
+        createdConnectionString = configuration.connectionString;
+        return {
+          trackEvent() {
+            return undefined;
+          }
+        };
+      }
+    });
+
+    assert.equal(selection.configuration.mode, 'azure_monitor');
+    assert.equal(selection.configuration.connectionStringPresent, true);
+    assert.equal(selection.configuration.connectionStringSource, 'bundled_default');
+    assert.equal(createdConnectionString, DEFAULT_APPLICATIONINSIGHTS_CONNECTION_STRING);
+  });
+
+  test('honors explicit noop mode even when a bundled Application Insights target is available', () => {
     const adapter = createTelemetryAdapter({
+      mode: 'noop',
       environment: {}
     });
 
     assert.equal(adapter.configuration.mode, 'noop');
-    assert.equal(adapter.configuration.connectionStringPresent, false);
+    assert.equal(adapter.configuration.connectionStringPresent, true);
+    assert.equal(adapter.configuration.connectionStringSource, 'bundled_default');
   });
 
   test('maps scenario results to Application Insights custom event envelopes', () => {
@@ -129,6 +153,7 @@ suite('Telemetry adapter', () => {
 
     assert.equal(selection.configuration.mode, 'azure_monitor');
     assert.equal(selection.configuration.connectionStringPresent, true);
+    assert.equal(selection.configuration.connectionStringSource, 'environment');
   });
 
   test('creates a reusable scenario telemetry context from scenario metadata', () => {
@@ -178,7 +203,33 @@ suite('Telemetry adapter', () => {
     assert.equal(selection.configuration.mode, 'azure_monitor');
     assert.equal(selection.configuration.cloudRoleName, 'custom-role');
     assert.equal(selection.configuration.samplingEnabled, true);
+    assert.equal(selection.configuration.connectionStringSource, 'environment');
     assert.equal(createdClients.length, 1);
+  });
+
+  test('prefers the environment connection string over the bundled default target', () => {
+    let createdConnectionString: string | undefined;
+
+    const selection = createTelemetrySinkSelection({
+      environment: {
+        APPLICATIONINSIGHTS_CONNECTION_STRING: 'InstrumentationKey=override;IngestionEndpoint=https://override.test/'
+      },
+      applicationInsightsClientFactory(configuration) {
+        createdConnectionString = configuration.connectionString;
+        return {
+          trackEvent() {
+            return undefined;
+          }
+        };
+      }
+    });
+
+    assert.equal(selection.configuration.mode, 'azure_monitor');
+    assert.equal(selection.configuration.connectionStringSource, 'environment');
+    assert.equal(
+      createdConnectionString,
+      'InstrumentationKey=override;IngestionEndpoint=https://override.test/'
+    );
   });
 
   test('fails open when Azure client initialization throws', async () => {
@@ -193,6 +244,7 @@ suite('Telemetry adapter', () => {
 
     assert.equal(selection.configuration.mode, 'noop');
     assert.equal(selection.configuration.connectionStringPresent, true);
+    assert.equal(selection.configuration.connectionStringSource, 'environment');
     await assert.doesNotReject(async () => {
       await selection.sink.emit({
         eventType: 'scenario_attempt',
