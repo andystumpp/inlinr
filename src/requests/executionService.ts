@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import * as vscode from 'vscode';
 import type { SelectionScopedRequestPayload } from './requestPayloadBuilder';
 
@@ -38,26 +40,35 @@ export class ExecutionServiceError extends Error {
 
 type ChatModelResolver = () => Thenable<readonly vscode.LanguageModelChat[] | vscode.LanguageModelChat[]>;
 
-function buildExecutionPrompt(payload: SelectionScopedRequestPayload): string {
-  return [
-    'Rewrite only the Markdown content inside the explicit selection markers according to the user request.',
-    'You may restructure content inside the selection markers if needed.',
-    'Do not change any Markdown content outside the selection markers.',
-    'Return the full Markdown document and preserve the selection markers exactly.',
-    'Do not include commentary or code fences.',
-    '',
-    'User request:',
-    payload.requestText,
-    '',
-    'Selected Markdown:',
-    payload.selectedMarkdown,
-    '',
-    'Selection marker id:',
-    payload.selectionMarkerId,
-    '',
-    'Marked full document Markdown:',
-    payload.markedDocumentMarkdown
-  ].join('\n');
+const SELECTION_SCOPED_PROMPT_FILE_NAME = 'selection-scoped-edit.md';
+
+function renderPromptTemplate(template: string, variables: Record<string, string>): string {
+  const placeholderMatches = [...template.matchAll(/{{\s*([a-zA-Z0-9_]+)\s*}}/g)];
+  const placeholderNames = [...new Set(placeholderMatches.map((match) => match[1]))];
+  const missingVariables = placeholderNames.filter((variableName) => variables[variableName] === undefined);
+
+  if (missingVariables.length > 0) {
+    throw new Error(`Prompt template is missing variables: ${missingVariables.join(', ')}`);
+  }
+
+  return template.replace(/{{\s*([a-zA-Z0-9_]+)\s*}}/g, (_match, variableName: string) => {
+    return variables[variableName];
+  });
+}
+
+function loadSelectionScopedPromptTemplate(extensionPath: string): string {
+  const promptFilePath = path.join(extensionPath, 'prompts', SELECTION_SCOPED_PROMPT_FILE_NAME);
+
+  return fs.readFileSync(promptFilePath, 'utf8');
+}
+
+function buildExecutionPrompt(promptTemplate: string, payload: SelectionScopedRequestPayload): string {
+  return renderPromptTemplate(promptTemplate, {
+    requestText: payload.requestText,
+    selectedMarkdown: payload.selectedMarkdown,
+    selectionMarkerId: payload.selectionMarkerId,
+    markedDocumentMarkdown: payload.markedDocumentMarkdown
+  });
 }
 
 function toExecutionServiceError(error: unknown): ExecutionServiceError {
@@ -106,10 +117,18 @@ export class UnsupportedExecutionService implements ExecutionService {
 }
 
 export class VscodeLanguageModelExecutionService implements ExecutionService {
+  private readonly selectionScopedPromptTemplate: string;
+
   public constructor(
     private readonly extensionContext: vscode.ExtensionContext,
     private readonly resolveChatModels: ChatModelResolver = () => vscode.lm.selectChatModels({ vendor: 'copilot' })
-  ) {}
+  ) {
+    if (!extensionContext.extensionPath) {
+      throw new ExecutionServiceError('execution-error', 'Unable to load prompts because extensionPath is unavailable.');
+    }
+
+    this.selectionScopedPromptTemplate = loadSelectionScopedPromptTemplate(extensionContext.extensionPath);
+  }
 
   public async checkAvailability(): Promise<ExecutionAvailability> {
     try {
@@ -135,10 +154,11 @@ export class VscodeLanguageModelExecutionService implements ExecutionService {
     token: vscode.CancellationToken = new vscode.CancellationTokenSource().token
   ): Promise<ExecutionResult> {
     const model = await this.resolveModel();
+    const promptText = buildExecutionPrompt(this.selectionScopedPromptTemplate, payload);
 
     try {
       const response = await model.sendRequest(
-        [vscode.LanguageModelChatMessage.User(buildExecutionPrompt(payload))],
+        [vscode.LanguageModelChatMessage.User(promptText)],
         {
           justification: 'Generate a selection-scoped Markdown rewrite for text the user explicitly selected in Inlinr.'
         },

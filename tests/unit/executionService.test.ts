@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import path from 'node:path';
 import * as vscode from 'vscode';
 import {
   VscodeLanguageModelExecutionService,
@@ -43,6 +44,7 @@ function createPayload() {
 
 function createContext(canSendRequest: boolean | undefined): vscode.ExtensionContext {
   return {
+    extensionPath: path.resolve(__dirname, '../../..'),
     languageModelAccessInformation: {
       onDidChange: new vscode.EventEmitter<void>().event,
       canSendRequest: () => canSendRequest
