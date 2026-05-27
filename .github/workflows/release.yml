@@ -215,4 +215,15 @@ jobs:
       - name: Publish to Visual Studio Marketplace
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
-        run: npx --yes @vscode/vsce@3.9.1 publish -p "$VSCE_PAT"
+        run: |
+          for attempt in 1 2 3; do
+            echo "Publish attempt $attempt/3..."
+            npx --yes @vscode/vsce@3.9.1 publish -p "$VSCE_PAT" && break
+            if [ $attempt -lt 3 ]; then
+              echo "Attempt $attempt failed, waiting 30s before retry..."
+              sleep 30
+            else
+              echo "All 3 publish attempts failed."
+              exit 1
+            fi
+          done
