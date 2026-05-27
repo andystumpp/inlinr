@@ -28,12 +28,12 @@ Each scenario stays crisp and monitoring-oriented: a real user journey, the key 
 
 ### Submit a request and receive inline review state
 **Criticality:** Core
-**Journey:** A user enters a request, submits it from the inline popup, and sees pending feedback followed by a reviewable suggested change rendered in the document flow at the targeted location.
+**Journey:** A user enters a request, submits it from the inline popup, and sees pending feedback followed by a reviewable suggested change rendered in the document flow at the targeted location within 2 seconds of submit.
 **Key checkpoints:**
 1. The request input accepts text and submits successfully.
 2. The system shows a visible pending state while work is in progress.
-3. A reviewable inline suggestion appears at the targeted document location.
-**Monitoring intent:** Catch failures where request submission stalls, the user never reaches review, or the returned suggestion is detached from the intended document context.
+3. A reviewable inline suggestion appears at the targeted document location within 2 seconds.
+**Monitoring intent:** Catch failures where request submission stalls, suggestion generation exceeds the expected latency budget, the user never reaches review, or the returned suggestion is detached from the intended document context.
 
 ### Apply a suggested change into the document
 **Criticality:** Core
