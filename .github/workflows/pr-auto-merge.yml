@@ -5,7 +5,7 @@ name: Auto-merge Enabler
 # do not cascade to trigger other workflows (GitHub safety rule).
 on:
   workflow_run:
-    workflows: ["PR Security Review", "PR Maintainability Review"]
+    workflows: ["PR Security Review", "PR Maintainability Review", "Practicality Review"]
     types: [completed]
 
 permissions:
@@ -46,9 +46,10 @@ jobs:
 
           HAS_SECURITY_CLEARED=$(echo "$LABELS" | jq -r 'contains(["security-cleared"])')
           HAS_MAINTAINABILITY_CLEARED=$(echo "$LABELS" | jq -r 'contains(["maintainability-cleared"])')
+          HAS_PRACTICALITY_CLEARED=$(echo "$LABELS" | jq -r 'contains(["practicality-cleared"])')
 
           # Any blocked or needs-review signal should prevent auto-merge
-          HAS_BLOCKING=$(echo "$LABELS" | jq -r 'any(.[]; . == "security-blocked" or . == "security-needs-review" or . == "maintainability-blocked" or . == "maintainability-needs-review")')
+          HAS_BLOCKING=$(echo "$LABELS" | jq -r 'any(.[]; . == "security-blocked" or . == "security-needs-review" or . == "maintainability-blocked" or . == "maintainability-needs-review" or . == "practicality-blocked" or . == "practicality-needs-review")')
 
           # Protected paths must route to human review
           PROTECTED_COUNT=$(gh pr view "$PR_NUMBER" \
@@ -63,6 +64,7 @@ jobs:
           echo "pr-number:                $PR_NUMBER"
           echo "security-cleared:         $HAS_SECURITY_CLEARED"
           echo "maintainability-cleared:  $HAS_MAINTAINABILITY_CLEARED"
+          echo "practicality-cleared:     $HAS_PRACTICALITY_CLEARED"
           echo "has-blocking-labels:      $HAS_BLOCKING"
           echo "protected-file-count:     $PROTECTED_COUNT"
 
@@ -73,6 +75,7 @@ jobs:
 
           elif [ "$HAS_SECURITY_CLEARED" = "true" ] \
             && [ "$HAS_MAINTAINABILITY_CLEARED" = "true" ] \
+            && [ "$HAS_PRACTICALITY_CLEARED" = "true" ] \
             && [ "$PROTECTED_COUNT" = "0" ]; then
             echo "✅ Eligible for auto-merge. Enabling auto-merge."
             gh pr merge "$PR_NUMBER" --auto --squash -R "$REPO"
