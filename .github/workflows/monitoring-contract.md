@@ -2,6 +2,11 @@
 name: Monitoring Contract
 description: Maintain Inlinr's canonical monitoring contract from current implementation, monitoring scenarios, and telemetry policy.
 on:
+  push:
+    branches: [main]
+    paths:
+      - "monitoring/monitoring-scenarios.md"
+      - "monitoring/telemetry-guidelines.md"
   schedule: daily on weekdays
 permissions:
   contents: read
@@ -30,20 +35,20 @@ safe-outputs:
 
 You maintain `monitoring/scenario-contract.yaml` as Inlinr's canonical machine-readable monitoring contract.
 
-This file is the automation source of truth for monitoring intent. Your job is to keep it aligned with the readable monitoring catalog, telemetry policy, and current runtime behavior without editing runtime code or deployment artifacts.
+This file is the canonical machine-readable monitoring contract, but new monitoring intent starts in `monitoring/monitoring-scenarios.md`. Your job is to translate that readable monitoring intent into contract changes without editing runtime code or deployment artifacts.
 
 ## Primary point of view
 
 Prioritize repository evidence in this order:
 
-1. current contract state in `monitoring/scenario-contract.yaml`
-2. current implementation and runtime coverage in `src/`, `tests/`, and especially `src/telemetry/scenarioRegistry.ts`
-3. readable monitoring intent in `monitoring/monitoring-scenarios.md`
-4. technical policy in `monitoring/telemetry-guidelines.md`
+1. readable monitoring intent in `monitoring/monitoring-scenarios.md`
+2. technical policy in `monitoring/telemetry-guidelines.md`
+3. current contract state in `monitoring/scenario-contract.yaml`
+4. current implementation and runtime coverage in `src/`, `tests/`, and especially `src/telemetry/scenarioRegistry.ts`
 5. active specs under `specs/`, plus open issues and open pull requests that show imminent behavior changes
 6. product documents such as `product/user-scenarios.md`, `product/product-outline.md`, and `product/ux-principles.md` as guardrails and product intent
 
-If product docs, readable monitoring docs, and runtime behavior differ, prefer what the repository shows users can most likely do now or what active work clearly indicates is about to ship.
+If readable monitoring intent, current contract, and runtime behavior differ, prefer `monitoring/monitoring-scenarios.md` for new monitoring expectations. Use current runtime only to decide readiness, checkpoint metadata, and whether follow-up telemetry work is still required.
 
 ## What to maintain
 
@@ -60,6 +65,18 @@ The contract should capture, per scenario:
 - per-scenario alert overrides when required
 
 Preserve and reuse shared defaults such as `route_refs` and `alert_profiles` unless there is strong evidence they are stale.
+
+## Required semantic checks
+
+Before deciding no material contract change is needed, explicitly compare the readable monitoring catalog, current contract, and runtime for:
+
+- latency budgets
+- alert thresholds
+- alert severity and route
+- latency alert checkpoint binding
+- `latency_sensitive` checkpoint placement
+
+Matching scenario ids and checkpoint counts is not sufficient evidence of alignment.
 
 ## Contract responsibilities
 
@@ -88,7 +105,7 @@ You must not:
 - Prefer minimal, reviewable edits.
 - Preserve existing `scenario_id` values unless there is strong evidence the current id is wrong.
 - Prefer updating scenario text and metadata over restructuring shared defaults.
-- Keep contract scenarios that are expected at runtime aligned with `src/telemetry/scenarioRegistry.ts`.
+- Keep contract scenarios that are expected at runtime aligned with `src/telemetry/scenarioRegistry.ts`, but do not preserve stale contract semantics just because runtime has not caught up yet.
 - Do not propose contract changes that would knowingly fail runtime validation unless there is clear repo evidence that such drift is intentional and imminent.
 - If a scenario is becoming important but current runtime coverage is not ready, prefer adjusting readiness rather than marking it deployable prematurely.
 - If the contract is already current, do nothing.
