@@ -175,15 +175,14 @@ Use the following default mapping for the current monitoring scenarios.
 
 ## Rules for future agents
 
-When an agent adds or changes a user scenario that should be monitored, it should do all of the following:
+When an agent adds or changes a user scenario that should be monitored, it should update the readable scenario catalog first and make the monitoring expectation explicit there:
 
 1. Add or update the scenario in `monitoring/monitoring-scenarios.md`.
 2. Assign `core` or `important` criticality.
 3. Define the scenario ID, checkpoints, success condition, and safe block condition.
-4. Add telemetry only at scenario boundaries and checkpoint transitions.
-5. Reuse the shared failure taxonomy where possible.
-6. Add or update the corresponding repo-owned monitoring contract in `monitoring/scenario-contract.yaml`, the generated Azure alert resource, and the dashboard query rather than relying on a portal-only change.
-7. Confirm that telemetry excludes document content and other sensitive material.
+4. Record user-visible latency or timing expectations in plain language when they affect alerting or usability.
+
+Downstream contract curation, telemetry implementation, and alert generation workflows should carry that readable scenario intent into `monitoring/scenario-contract.yaml`, runtime telemetry, and deployable alert artifacts rather than relying on portal-only changes.
 
 ## Runtime extension pattern
 

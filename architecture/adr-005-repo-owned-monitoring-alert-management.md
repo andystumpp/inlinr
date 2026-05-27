@@ -46,6 +46,8 @@ The control model is:
 
 This means the readable scenario catalog is for human understanding, while the contract is for automation.
 
+New monitoring intent should normally be authored in [monitoring/monitoring-scenarios.md](../monitoring/monitoring-scenarios.md) first. That readable scenario update is the entry point for new business expectations such as latency budgets, failure semantics, or safety requirements. The contract, runtime instrumentation, and deployable alert artifacts remain repo-owned, but they are downstream automation products rather than the primary human authoring surface for new scenario meaning.
+
 ## Why This Replaces The Previous Shape
 
 The repository does need structured alert semantics somewhere. It does not need those semantics to live forever in a separately hand-maintained alert-intent file.
@@ -62,7 +64,7 @@ Under this decision:
 |---|---|---|---|---|---|
 | [product/user-scenarios.md](../product/user-scenarios.md) | Existing input | Humans | Scenario discovery agents, product reviewers | Product-level user journeys and expected product behavior | A user selects Markdown and requests an inline edit |
 | [.github/workflows/monitoring-scenarios.md](../.github/workflows/monitoring-scenarios.md) | Existing agent workflow prompt | Humans | GitHub Actions agent runtime | Instructions for the scenario discovery agent | Read code, issues, PRs, and update the scenario catalog |
-| [monitoring/monitoring-scenarios.md](../monitoring/monitoring-scenarios.md) | Existing readable business and operations view | Scenario discovery agent, humans | Humans, contract curation agent | Human-readable monitoring scenarios and checkpoints | Apply a suggested change into the document |
+| [monitoring/monitoring-scenarios.md](../monitoring/monitoring-scenarios.md) | Existing readable business and operations view and default authoring entry point for new monitoring intent | Scenario discovery agent, humans | Humans, contract curation agent | Human-readable monitoring scenarios and checkpoints | Apply a suggested change into the document |
 | [monitoring/telemetry-guidelines.md](../monitoring/telemetry-guidelines.md) | Existing technical policy | Humans | Contract curation agent, telemetry implementation agent, generators | Rules for telemetry event shape, failure classes, and alerting semantics | scenario_result, checkpoint_spike, blocked_safe |
 | [monitoring/scenario-contract.yaml](../monitoring/scenario-contract.yaml) | Existing canonical automation source | Contract curation agent, humans | Telemetry implementation agent, alert compiler, validators | Structured scenario definition that combines business meaning, runtime expectations, and alert profile selection | scenario_id, criticality, checkpoints, readiness, alert profile |
 | [src/telemetry/scenarioRegistry.ts](../src/telemetry/scenarioRegistry.ts) | Existing runtime registry | Telemetry implementation agent, humans | Runtime code, validators, tests | What the extension actually emits at runtime today | load_markdown_preview, checkpoint ordering, primaryAlert |
@@ -205,6 +207,7 @@ Current status:
 2. AI workflows have one structured artifact to update instead of juggling multiple independent machine-readable files.
 3. Runtime telemetry and deployable alerts can be validated against the same contract.
 4. Production Azure monitoring remains repo-driven and release-gated.
+5. Humans and product-facing agents can add new monitoring expectations by updating the readable scenario catalog first, then relying on downstream monitoring automation to carry that intent into the contract and deployed alerts.
 
 ### Tradeoffs
 
