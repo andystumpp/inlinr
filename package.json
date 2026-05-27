@@ -32,7 +32,11 @@
   "main": "./out/src/extension.js",
   "files": [
     "out/src",
-    "node_modules/@azure/monitor-opentelemetry-exporter",
+    "node_modules/@azure",
+    "node_modules/@azure-rest",
+    "node_modules/@opentelemetry",
+    "node_modules/tslib",
+    "node_modules/mermaid/dist/mermaid.min.js",
     "prompts",
     "media",
     "README.md",
