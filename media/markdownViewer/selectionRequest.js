@@ -606,7 +606,7 @@
           id="selection-request-textarea"
           class="selection-request-textarea"
           aria-label="Ask for changes"
-          placeholder="Ask for changes"
+          placeholder="Try: 'make this clearer' or 'expand with examples'"
           data-selection-request-draft
         >${escapeHtml(activeRequest.draftText)}</textarea>
         <p class="${validationClass}">${escapeHtml(activeRequest.validationMessage || '')}</p>
