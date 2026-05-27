@@ -101,7 +101,7 @@ defaults:
           window: PT30M
           evaluation_frequency: PT5M
           threshold:
-            p95_duration_ms: 15000
+            p95_duration_ms: 2000
             minimum_sample_size: 10
           requires_checkpoint_id: true
         - template_id: checkpoint_spike
