@@ -841,7 +841,7 @@
       return;
     }
 
-    documentRoot.addEventListener('mouseup', function () {
+    const captureSelection = function () {
       if (blocksReplacementSelection()) {
         return;
       }
@@ -851,7 +851,10 @@
       if (message) {
         postMessage(message);
       }
-    });
+    };
+
+    document.addEventListener('mouseup', captureSelection);
+    document.addEventListener('keyup', captureSelection);
   }
 
   function bootstrapSelectionRequestShell() {
