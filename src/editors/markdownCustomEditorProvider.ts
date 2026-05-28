@@ -633,6 +633,7 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     const submitAttempt = this.startScenarioAttempt(document, 'submit_request_receive_review', {
       sessionId
     });
+    const submitStartedAt = Date.now();
     const pendingStartedAt = Date.now();
 
     if (!activeRequest || activeRequest.sessionId !== sessionId) {
@@ -761,9 +762,7 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
       sessionId,
       message: 'Generating suggestion…'
     });
-    this.emitScenarioCheckpoint(submitAttempt, 'pending_visible', 'pass', {
-      durationMs: Math.max(0, Date.now() - pendingStartedAt)
-    });
+    this.emitScenarioCheckpoint(submitAttempt, 'pending_visible', 'pass');
 
     const executionStartedAt = Date.now();
 
@@ -804,7 +803,9 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
         }
       });
 
-      this.emitScenarioCheckpoint(submitAttempt, 'review_rendered_inline', 'pass');
+      this.emitScenarioCheckpoint(submitAttempt, 'review_rendered_inline', 'pass', {
+        durationMs: Math.max(0, Date.now() - submitStartedAt)
+      });
       this.completeScenarioAttempt(submitAttempt, 'success');
 
       return;
