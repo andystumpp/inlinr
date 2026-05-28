@@ -2,7 +2,7 @@
   "name": "inlinr",
   "displayName": "Inlinr Markdown Editor",
   "description": "Make targeted AI edits to selected Markdown directly in VS Code.",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "publisher": "AndyStumpp",
   "preview": true,
   "engines": {
@@ -103,3 +103,4 @@
     "yaml": "^2.8.1"
   }
 }
+
