@@ -46,6 +46,6 @@ suite('Rendered viewer state contract', () => {
     const script = fs.readFileSync(scriptPath, 'utf8');
 
     assert.match(script, /document\.addEventListener\('mouseup', captureSelection\)/);
-    assert.match(script, /document\.addEventListener\('keyup', captureSelection\)/);
+    assert.match(script, /document\.addEventListener\('keyup', captureSelectionFromKeyboard\)/);
   });
 });
