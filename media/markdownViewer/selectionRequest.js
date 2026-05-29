@@ -1,4 +1,6 @@
 (function () {
+  const BOLD_QUICK_FORMAT_REQUEST = 'Format the selected text in Markdown bold using **double asterisks** without changing wording.';
+  const ITALIC_QUICK_FORMAT_REQUEST = 'Format the selected text in Markdown italic using *single asterisks* without changing wording.';
   const vscodeApi = typeof acquireVsCodeApi === 'function' ? acquireVsCodeApi() : null;
   let viewerState = null;
   let activeRequest = null;
@@ -392,6 +394,8 @@
       return;
     }
 
+    activeRequest.draftText =
+      formatKind === 'bold' ? BOLD_QUICK_FORMAT_REQUEST : ITALIC_QUICK_FORMAT_REQUEST;
     activeRequest.validationState = 'submitting';
     activeRequest.validationMessage = undefined;
     syncSubmitButtonState();

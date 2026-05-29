@@ -33,6 +33,7 @@ import { getMarkdownViewerHtml } from '../webview/getMarkdownViewerHtml';
 import {
   assertValidViewerToExtensionMessage,
   type ExtensionToViewerMessage,
+  type QuickFormatKind,
   type RequestQuickFormatMessage,
   type SelectionCaptureMessage,
   type ViewerToExtensionMessage
@@ -84,8 +85,6 @@ function renderSuggestionHtml(replacementMarkdown: string): string {
     .replace(/\sdata-selection-end-marker="[^"]*"/g, '')
     .replace(/\sdata-selection-selectable="[^"]*"/g, '');
 }
-
-type QuickFormatKind = 'bold' | 'italic';
 
 function buildQuickFormatRequestText(formatKind: QuickFormatKind): string {
   return formatKind === 'bold'
@@ -909,7 +908,11 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     const { sessionId, formatKind } = message;
     const activeRequest = this.sessionController.getActiveRequestSession(document);
     const submitAttempt = this.startScenarioAttempt(document, 'submit_request_receive_review', {
-      sessionId
+      sessionId,
+      properties: {
+        is_quick_format: true,
+        quick_format_kind: formatKind
+      }
     });
     const submitStartedAt = Date.now();
     const draftText = buildQuickFormatRequestText(formatKind);

@@ -25,10 +25,12 @@ export interface RequestSubmitMessage {
   draftText: string;
 }
 
+export type QuickFormatKind = 'bold' | 'italic';
+
 export interface RequestQuickFormatMessage {
   type: 'request.quickFormat';
   sessionId: string;
-  formatKind: 'bold' | 'italic';
+  formatKind: QuickFormatKind;
 }
 
 export interface RequestCancelMessage {
