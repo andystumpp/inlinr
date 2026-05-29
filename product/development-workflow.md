@@ -55,22 +55,35 @@ In these cases, update `architecture/high-level-architecture.md` first and add a
 
 - **Unit tests:** anchoring, context building, diff generation, validation, and formatting logic.
 - **Integration tests:** VS Code command flow, provider adapters, document update flow, and persistence boundaries.
-- **UI tests:** inline action surfaces, rendered-view behavior, diff presentation, and error handling for core editing flows.
+- **UI tests:** browser-based webview contract tests for inline action surfaces, rendered selection and popup behavior, diff presentation, and core error handling for editing flows.
 - **Manual verification:** targeted editor walkthroughs for critical UX paths when automation is not enough.
 
 ## Current automated test suites
 
 The repository currently has these automated suites wired into `npm test`:
 
+- **Browser-based webview contract tests:** under `tests/webview/`
 - **Unit tests:** under `tests/unit/`
 - **Integration tests:** under `tests/integration/`
 
-Dedicated UI or acceptance suites are not yet established as separate runnable commands.
+The browser-based webview selection contract suite is part of the regular development process rather
+than occasional manual verification.
+
+## When to run browser-based webview contract tests
+
+- Run them during feature work and bug fixes that touch rendered selection handling, popup behavior,
+  selection anchors, rendered selection markup, or bounding-rect and geometry logic.
+- Run them before merge for pull requests that affect the webview selection-to-popup contract.
+- Run them as part of release verification once a dedicated command is wired into the automated test
+  path.
+- Add or update one of these tests for bugs that originate at the webview DOM selection or popup
+  boundary.
 
 ## Verification commands
 
 - `npm run compile` - TypeScript compilation
-- `npm run test` - runs current integration and unit suites
+- `npm run test` - runs the webview, integration, and unit suites
+- `npm run test:webview` - browser-based webview contract suite
 - `npm run test:integration` - VS Code integration suite
 - `npm run test:unit` - unit suite
 - `npm run package:vsix` - package extension artifact
