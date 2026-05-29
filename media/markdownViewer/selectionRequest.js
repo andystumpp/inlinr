@@ -894,10 +894,7 @@
           return;
         }
 
-        activeRequest.validationState = 'applying';
-        activeRequest.validationMessage = 'Refreshing document…';
-        activeRequest.suggestion = undefined;
-        renderOverlay();
+        clearActiveRequestOverlay();
         return;
       default:
         return;

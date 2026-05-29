@@ -223,4 +223,44 @@ test.describe('webview selection request contract', () => {
 
     expect(await isRequestRootHidden(page)).toBe(true);
   });
+
+  test('clears the overlay after a suggestion is applied', async ({ page }) => {
+    await mountWebview(page, {
+      markdown: 'Alpha beta gamma delta.'
+    });
+    const regionId = await findRegionIdContainingText(page, 'Alpha beta gamma delta.');
+
+    await postExtensionMessage(page, {
+      type: 'selection.accepted',
+      sessionId: 'session-apply',
+      selectedTextPreview: 'beta gamma',
+      selectedRegionIds: [regionId],
+      draftText: 'Rewrite this.',
+      validationState: 'drafting'
+    });
+    await postExtensionMessage(page, {
+      type: 'suggestion.ready',
+      sessionId: 'session-apply',
+      proposal: {
+        proposalId: 'proposal-1',
+        previewMode: 'blended-inline',
+        replacementMarkdown: 'Updated text.',
+        renderedReplacementHtml: '<p>Updated text.</p>'
+      }
+    });
+
+    await page.locator('[data-selection-request-apply]').click();
+
+    await expect(page.locator('[data-selection-inline-review-root]')).toBeVisible();
+
+    await postExtensionMessage(page, {
+      type: 'suggestion.applied',
+      sessionId: 'session-apply',
+      message: 'Suggestion applied.'
+    });
+
+    expect(await isRequestRootHidden(page)).toBe(true);
+    await expect(page.locator('[data-selection-inline-review-root]')).toBeHidden();
+    expect(await getTargetedRegionIds(page)).toEqual([]);
+  });
 });

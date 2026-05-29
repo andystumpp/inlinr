@@ -901,6 +901,14 @@ suite('Selection-scoped edit request integration', () => {
       () => document.isDirty,
       (isDirty) => isDirty === false
     );
+    await waitFor(
+      () => panel.webview.html,
+      (html) =>
+        html.includes('Rewritten paragraph.') &&
+        html.includes('data-active-request-state="none"') &&
+        !html.includes('Refreshing document') &&
+        !html.includes('Applying suggestion')
+    );
 
     assert.equal(
       document.getText(),
@@ -911,6 +919,8 @@ suite('Selection-scoped edit request integration', () => {
       ['# Apply Flow', '', 'Rewritten paragraph.', '', 'Trailing paragraph.'].join('\n')
     );
     assert.equal(sessionController.getActiveRequestSession(document), null);
+    assert.match(panel.webview.html, /data-active-request-state="none"/);
+    assert.doesNotMatch(panel.webview.html, /Refreshing document|Applying suggestion/);
 
     provider.dispose();
   });
