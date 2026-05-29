@@ -25,6 +25,12 @@ export interface RequestSubmitMessage {
   draftText: string;
 }
 
+export interface RequestQuickFormatMessage {
+  type: 'request.quickFormat';
+  sessionId: string;
+  formatKind: 'bold' | 'italic';
+}
+
 export interface RequestCancelMessage {
   type: 'request.cancel';
   sessionId: string;
@@ -46,6 +52,7 @@ export type ViewerToExtensionMessage =
   | SelectionCaptureMessage
   | RequestDraftChangeMessage
   | RequestSubmitMessage
+  | RequestQuickFormatMessage
   | RequestCancelMessage
   | SuggestionApplyMessage
   | SuggestionRejectMessage;
@@ -202,6 +209,11 @@ export function isViewerToExtensionMessage(value: unknown): value is ViewerToExt
       return isNonEmptyString(candidate.sessionId) && typeof candidate.draftText === 'string';
     case 'request.submit':
       return isNonEmptyString(candidate.sessionId) && typeof candidate.draftText === 'string';
+    case 'request.quickFormat':
+      return (
+        isNonEmptyString(candidate.sessionId) &&
+        (candidate.formatKind === 'bold' || candidate.formatKind === 'italic')
+      );
     case 'request.cancel':
       return isNonEmptyString(candidate.sessionId);
     case 'suggestion.apply':

@@ -147,6 +147,59 @@ suite('Selection-scoped edit request integration', () => {
     provider.dispose();
   });
 
+  test('returns a local bold suggestion from quick format without execution availability', async () => {
+    const requestService = new InMemoryRequestService<SelectionScopedRequestPayload>();
+    const provider = new MarkdownCustomEditorProvider(
+      getExtensionUri(),
+      new DocumentSessionController(),
+      requestService
+    );
+    const document = await vscode.workspace.openTextDocument(getWorkspaceFile('selection-request-basic.md'));
+    const { panel, postedMessages, sendMessageToExtension } = createMockWebviewPanel();
+    const selectedText = 'selectable for the first request flow';
+    const selectionCapture = buildSelectionCaptureFromText(document.getText(), selectedText);
+
+    await provider.resolveCustomTextEditor(document, panel, new vscode.CancellationTokenSource().token);
+
+    sendMessageToExtension({
+      type: 'selection.capture',
+      documentVersion: document.version,
+      selectedText,
+      ...selectionCapture,
+      selectionRect: {
+        top: 164,
+        left: 276,
+        bottom: 184,
+        right: 332
+      }
+    });
+
+    await waitFor(
+      () => findPostedMessage<{ type: 'selection.accepted'; sessionId: string }>(postedMessages, 'selection.accepted'),
+      (message) => Boolean(message)
+    );
+
+    sendMessageToExtension({
+      type: 'request.quickFormat',
+      sessionId: 'request-session-0',
+      formatKind: 'bold'
+    });
+
+    const readyMessage = await waitFor(
+      () => findPostedMessage<{ type: 'suggestion.ready'; proposal: { replacementMarkdown: string } }>(postedMessages, 'suggestion.ready'),
+      (message) => Boolean(message)
+    );
+
+    assert.equal(readyMessage.proposal.replacementMarkdown, `**${selectedText}**`);
+    assert.equal(findPostedMessage(postedMessages, 'request.unavailable'), undefined);
+    assert.equal(
+      requestService.getLastSubmittedPayload()?.requestText,
+      'Format the selected text in Markdown bold using **double asterisks** without changing wording.'
+    );
+
+    provider.dispose();
+  });
+
   test('submits a local request payload only after explicit submit', async () => {
     const requestService = new InMemoryRequestService<SelectionScopedRequestPayload>();
     const sessionController = new DocumentSessionController();

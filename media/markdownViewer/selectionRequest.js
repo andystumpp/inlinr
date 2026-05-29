@@ -1,6 +1,4 @@
 (function () {
-  const BOLD_QUICK_FORMAT_REQUEST = 'Format the selected text in Markdown bold using **double asterisks** without changing wording.';
-  const ITALIC_QUICK_FORMAT_REQUEST = 'Format the selected text in Markdown italic using *single asterisks* without changing wording.';
   const vscodeApi = typeof acquireVsCodeApi === 'function' ? acquireVsCodeApi() : null;
   let viewerState = null;
   let activeRequest = null;
@@ -389,28 +387,19 @@
     });
   }
 
-  function applyQuickFormatRequest(formatKind, textarea) {
+  function applyQuickFormatRequest(formatKind) {
     if (!activeRequest) {
       return;
     }
 
-    const draftText = formatKind === 'bold' ? BOLD_QUICK_FORMAT_REQUEST : ITALIC_QUICK_FORMAT_REQUEST;
-
-    activeRequest.draftText = draftText;
-    activeRequest.validationState = 'drafting';
+    activeRequest.validationState = 'submitting';
     activeRequest.validationMessage = undefined;
-
-    if (textarea instanceof HTMLTextAreaElement) {
-      textarea.value = draftText;
-    }
-
+    syncSubmitButtonState();
     postMessage({
-      type: 'request.draftChanged',
+      type: 'request.quickFormat',
       sessionId: activeRequest.sessionId,
-      draftText
+      formatKind
     });
-
-    submitActiveRequestFromOverlay();
   }
 
   function focusRequestTextarea(textarea) {
@@ -682,7 +671,7 @@
           return;
         }
 
-        applyQuickFormatRequest(formatKind, textarea);
+        applyQuickFormatRequest(formatKind);
       });
     });
 

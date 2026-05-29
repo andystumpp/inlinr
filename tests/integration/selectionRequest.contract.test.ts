@@ -32,6 +32,11 @@ suite('Selection request contract', () => {
         draftText: 'Ask for changes'
       },
       {
+        type: 'request.quickFormat',
+        sessionId: 'request-session-0',
+        formatKind: 'bold'
+      },
+      {
         type: 'request.cancel',
         sessionId: 'request-session-0'
       },

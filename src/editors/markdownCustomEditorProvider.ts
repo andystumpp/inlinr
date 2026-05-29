@@ -7,6 +7,10 @@ import {
 } from '../rendering/markdownRenderer';
 import type { RenderedSelectionMetadata } from '../rendering/renderedSelectionMetadata';
 import {
+  extractMarkedDocumentRange,
+  getSelectionMarkerTokens
+} from '../requests/documentDraftMarkers';
+import {
   ExecutionServiceError,
   UnsupportedExecutionService,
   type ExecutionService
@@ -29,6 +33,7 @@ import { getMarkdownViewerHtml } from '../webview/getMarkdownViewerHtml';
 import {
   assertValidViewerToExtensionMessage,
   type ExtensionToViewerMessage,
+  type RequestQuickFormatMessage,
   type SelectionCaptureMessage,
   type ViewerToExtensionMessage
 } from '../webview/viewerProtocol';
@@ -78,6 +83,31 @@ function renderSuggestionHtml(replacementMarkdown: string): string {
     .replace(/\sdata-selection-start-marker="[^"]*"/g, '')
     .replace(/\sdata-selection-end-marker="[^"]*"/g, '')
     .replace(/\sdata-selection-selectable="[^"]*"/g, '');
+}
+
+type QuickFormatKind = 'bold' | 'italic';
+
+function buildQuickFormatRequestText(formatKind: QuickFormatKind): string {
+  return formatKind === 'bold'
+    ? 'Format the selected text in Markdown bold using **double asterisks** without changing wording.'
+    : 'Format the selected text in Markdown italic using *single asterisks* without changing wording.';
+}
+
+function buildQuickFormatReplacementMarkdown(selectedMarkdown: string, formatKind: QuickFormatKind): string {
+  const delimiter = formatKind === 'bold' ? '**' : '*';
+
+  return `${delimiter}${selectedMarkdown}${delimiter}`;
+}
+
+function buildQuickFormatDraftDocumentMarkdown(
+  markedDocumentMarkdown: string,
+  selectionMarkerId: string,
+  replacementMarkdown: string
+): string {
+  const { beforeMarkdown, afterMarkdown } = extractMarkedDocumentRange(markedDocumentMarkdown, selectionMarkerId);
+  const { startMarker, endMarker } = getSelectionMarkerTokens(selectionMarkerId);
+
+  return `${beforeMarkdown}${startMarker}${replacementMarkdown}${endMarker}${afterMarkdown}`;
 }
 
 function findSelectionRange(markdownSource: string, selectedText: string): { sourceStart: number; sourceEnd: number } | null {
@@ -463,6 +493,9 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
         return;
       case 'request.submit':
         await this.submitActiveRequest(document, message.sessionId, message.draftText, postMessageToViewer);
+        return;
+      case 'request.quickFormat':
+        await this.submitActiveQuickFormatRequest(document, message, postMessageToViewer);
         return;
       case 'request.cancel':
         this.sessionController.clearActiveRequestSession(message.sessionId);
@@ -866,6 +899,121 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
 
       return;
     }
+  }
+
+  private async submitActiveQuickFormatRequest(
+    document: vscode.TextDocument,
+    message: RequestQuickFormatMessage,
+    postMessageToViewer: (message: ExtensionToViewerMessage) => Promise<void>
+  ): Promise<void> {
+    const { sessionId, formatKind } = message;
+    const activeRequest = this.sessionController.getActiveRequestSession(document);
+    const submitAttempt = this.startScenarioAttempt(document, 'submit_request_receive_review', {
+      sessionId
+    });
+    const submitStartedAt = Date.now();
+    const draftText = buildQuickFormatRequestText(formatKind);
+
+    if (!activeRequest || activeRequest.sessionId !== sessionId) {
+      return;
+    }
+
+    this.sessionController.setActiveRequestSession({
+      ...activeRequest,
+      draftText,
+      validationState: 'submitting',
+      validationMessage: undefined
+    });
+    this.emitScenarioCheckpoint(submitAttempt, 'request_submitted', 'pass');
+
+    const revalidation = revalidateSelectionAnchor(document.getText(), activeRequest.selectionAnchor);
+
+    if (!revalidation.match || revalidation.status === 'ambiguous' || revalidation.status === 'missing') {
+      this.completeScenarioAttempt(submitAttempt, 'blocked_safe', {
+        failureClass: 'anchor_revalidation_failure',
+        reasonCode: revalidation.status
+      });
+      this.sessionController.setActiveRequestSession({
+        ...activeRequest,
+        draftText,
+        validationState: 'invalid',
+        validationMessage: 'The target changed. Reselect before submitting.'
+      });
+
+      await postMessageToViewer({
+        type: 'request.invalidated',
+        sessionId,
+        message: 'The target changed. Reselect before submitting.'
+      });
+
+      return;
+    }
+
+    const selectedMarkdown = document.getText().slice(revalidation.match.sourceStart, revalidation.match.sourceEnd);
+    const effectiveSelectionScope = shiftEffectiveSelectionScope(
+      activeRequest.effectiveSelectionScope,
+      revalidation.match.sourceStart - activeRequest.selectionAnchor.sourceStart,
+      revalidation.match.sourceStart,
+      revalidation.match.sourceEnd
+    );
+    const refreshedAnchor = createSelectionAnchor({
+      documentUri: document.uri.toString(),
+      capturedDocumentVersion: document.version,
+      markdownSource: document.getText(),
+      sourceStart: revalidation.match.sourceStart,
+      sourceEnd: revalidation.match.sourceEnd
+    });
+    const payload = buildSelectionScopedRequestPayload({
+      documentUri: document.uri.toString(),
+      documentVersion: document.version,
+      requestText: draftText,
+      selectedMarkdown,
+      documentMarkdown: document.getText(),
+      selectionAnchor: refreshedAnchor,
+      effectiveSelectionScope
+    });
+    const replacementMarkdown = buildQuickFormatReplacementMarkdown(selectedMarkdown, formatKind);
+
+    await this.requestService.submit(payload);
+
+    const suggestion = normalizeSuggestedEdit(payload, {
+      requestId: payload.requestId,
+      draftDocumentMarkdown: buildQuickFormatDraftDocumentMarkdown(
+        payload.markedDocumentMarkdown,
+        payload.selectionMarkerId,
+        replacementMarkdown
+      ),
+      completedAt: new Date().toISOString(),
+      modelId: 'inlinr-quick-format'
+    });
+
+    this.sessionController.setActiveRequestSession({
+      ...activeRequest,
+      draftText,
+      selectedTextPreview: selectedMarkdown,
+      selectionAnchor: refreshedAnchor,
+      effectiveSelectionScope,
+      submittedPayload: payload,
+      validationState: 'review',
+      validationMessage: 'Suggestion ready.',
+      suggestion
+    });
+
+    await postMessageToViewer({
+      type: 'suggestion.ready',
+      sessionId,
+      proposal: {
+        proposalId: suggestion.proposalId,
+        previewMode: suggestion.previewMode,
+        replacementMarkdown: suggestion.replacementMarkdown,
+        renderedReplacementHtml: renderSuggestionHtml(suggestion.replacementMarkdown)
+      }
+    });
+
+    this.emitScenarioCheckpoint(submitAttempt, 'review_rendered_inline', 'pass', {
+      durationMs: Math.max(0, Date.now() - submitStartedAt)
+    });
+    this.completeScenarioAttempt(submitAttempt, 'success');
   }
 
   private async applyActiveSuggestion(
