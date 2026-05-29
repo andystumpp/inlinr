@@ -202,13 +202,10 @@ export class VscodeLanguageModelExecutionService implements ExecutionService {
 
     if (explicitlyAllowedModels.length > 0) {
       return explicitlyAllowedModels
-        .map((model, index) => ({ model, index }))
+        .map((model, index) => ({ model, index, isFast: isFastModelCandidate(model) }))
         .sort((left, right) => {
-          const leftIsFast = isFastModelCandidate(left.model);
-          const rightIsFast = isFastModelCandidate(right.model);
-
-          if (leftIsFast !== rightIsFast) {
-            return leftIsFast ? -1 : 1;
+          if (left.isFast !== right.isFast) {
+            return left.isFast ? -1 : 1;
           }
 
           return left.index - right.index;
@@ -220,7 +217,9 @@ export class VscodeLanguageModelExecutionService implements ExecutionService {
 }
 
 function isFastModelCandidate(model: vscode.LanguageModelChat): boolean {
-  const modelIdentity = [model.id, model.family, model.name].filter((value) => typeof value === 'string').join(' ');
+  const modelIdentity = [model.id, model.name]
+    .filter((value): value is string => typeof value === 'string' && value.length > 0)
+    .join(' ');
 
   return FAST_MODEL_HINT_PATTERN.test(modelIdentity);
 }

@@ -126,7 +126,6 @@ suite('Execution service', () => {
         ({
           id: 'copilot-opus',
           vendor: 'copilot',
-          family: 'claude',
           version: '1',
           name: 'Claude Opus',
           maxInputTokens: 8000,
@@ -139,7 +138,6 @@ suite('Execution service', () => {
         ({
           id: 'copilot-haiku',
           vendor: 'copilot',
-          family: 'claude',
           version: '1',
           name: 'Claude Haiku',
           maxInputTokens: 8000,
