@@ -120,12 +120,50 @@ suite('Execution service', () => {
     assert.match(getCapturedPrompt(), /Original paragraph for execution\./);
   });
 
-  test('prefers lower-latency model variants when multiple models are available', async () => {
+  test('prefers Claude Sonnet when it is available', async () => {
+    const service = new VscodeLanguageModelExecutionService(createContext(true), async () => {
+      return [
+        ({
+          id: 'copilot-haiku',
+          vendor: 'copilot',
+          family: 'claude-3.5-haiku',
+          version: '1',
+          name: 'Claude Haiku',
+          maxInputTokens: 8000,
+          sendRequest: async () => ({
+            text: (async function* () {})(),
+            stream: (async function* () {})()
+          }),
+          countTokens: async () => 1
+        } as unknown as vscode.LanguageModelChat),
+        ({
+          id: 'copilot-sonnet',
+          vendor: 'copilot',
+          family: 'claude-3.7-sonnet',
+          version: '1',
+          name: 'Claude Sonnet',
+          maxInputTokens: 8000,
+          sendRequest: async () => ({
+            text: (async function* () {})(),
+            stream: (async function* () {})()
+          }),
+          countTokens: async () => 1
+        } as unknown as vscode.LanguageModelChat)
+      ];
+    });
+
+    const availability = await service.checkAvailability();
+
+    assert.equal(availability.modelId, 'copilot-sonnet');
+  });
+
+  test('preserves original model order when Sonnet is unavailable', async () => {
     const service = new VscodeLanguageModelExecutionService(createContext(true), async () => {
       return [
         ({
           id: 'copilot-opus',
           vendor: 'copilot',
+          family: 'claude-4-opus',
           version: '1',
           name: 'Claude Opus',
           maxInputTokens: 8000,
@@ -138,6 +176,7 @@ suite('Execution service', () => {
         ({
           id: 'copilot-haiku',
           vendor: 'copilot',
+          family: 'claude-3.5-haiku',
           version: '1',
           name: 'Claude Haiku',
           maxInputTokens: 8000,
@@ -152,6 +191,6 @@ suite('Execution service', () => {
 
     const availability = await service.checkAvailability();
 
-    assert.equal(availability.modelId, 'copilot-haiku');
+    assert.equal(availability.modelId, 'copilot-opus');
   });
 });
