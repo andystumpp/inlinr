@@ -267,6 +267,163 @@ suite('Selection-scoped edit request integration', () => {
     provider.dispose();
   });
 
+  test('keeps an already bold selection unchanged in local quick format', async () => {
+    const requestService = new InMemoryRequestService<SelectionScopedRequestPayload>();
+    const provider = new MarkdownCustomEditorProvider(
+      getExtensionUri(),
+      new DocumentSessionController(),
+      requestService
+    );
+    const document = await vscode.workspace.openTextDocument({
+      language: 'markdown',
+      content: ['# Quick Format', '', '**Already formatted**'].join('\n')
+    });
+    const { panel, postedMessages, sendMessageToExtension } = createMockWebviewPanel();
+    const selectedText = '**Already formatted**';
+    const selectionCapture = buildSelectionCaptureFromText(document.getText(), selectedText);
+
+    await provider.resolveCustomTextEditor(document, panel, new vscode.CancellationTokenSource().token);
+
+    sendMessageToExtension({
+      type: 'selection.capture',
+      documentVersion: document.version,
+      selectedText,
+      ...selectionCapture,
+      selectionRect: {
+        top: 164,
+        left: 276,
+        bottom: 184,
+        right: 332
+      }
+    });
+
+    await waitFor(
+      () => findPostedMessage<{ type: 'selection.accepted'; sessionId: string }>(postedMessages, 'selection.accepted'),
+      (message) => Boolean(message)
+    );
+
+    sendMessageToExtension({
+      type: 'request.quickFormat',
+      sessionId: 'request-session-0',
+      formatKind: 'bold'
+    });
+
+    const readyMessage = await waitFor(
+      () => findPostedMessage<{ type: 'suggestion.ready'; proposal: { replacementMarkdown: string } }>(postedMessages, 'suggestion.ready'),
+      (message) => Boolean(message)
+    );
+
+    assert.equal(readyMessage.proposal.replacementMarkdown, '**Already formatted**');
+    assert.equal(findPostedMessage(postedMessages, 'request.unavailable'), undefined);
+
+    provider.dispose();
+  });
+
+  test('converts an already italic selection to bold without nesting delimiters', async () => {
+    const requestService = new InMemoryRequestService<SelectionScopedRequestPayload>();
+    const provider = new MarkdownCustomEditorProvider(
+      getExtensionUri(),
+      new DocumentSessionController(),
+      requestService
+    );
+    const document = await vscode.workspace.openTextDocument({
+      language: 'markdown',
+      content: ['# Quick Format', '', '*Already formatted*'].join('\n')
+    });
+    const { panel, postedMessages, sendMessageToExtension } = createMockWebviewPanel();
+    const selectedText = '*Already formatted*';
+    const selectionCapture = buildSelectionCaptureFromText(document.getText(), selectedText);
+
+    await provider.resolveCustomTextEditor(document, panel, new vscode.CancellationTokenSource().token);
+
+    sendMessageToExtension({
+      type: 'selection.capture',
+      documentVersion: document.version,
+      selectedText,
+      ...selectionCapture,
+      selectionRect: {
+        top: 164,
+        left: 276,
+        bottom: 184,
+        right: 332
+      }
+    });
+
+    await waitFor(
+      () => findPostedMessage<{ type: 'selection.accepted'; sessionId: string }>(postedMessages, 'selection.accepted'),
+      (message) => Boolean(message)
+    );
+
+    sendMessageToExtension({
+      type: 'request.quickFormat',
+      sessionId: 'request-session-0',
+      formatKind: 'bold'
+    });
+
+    const readyMessage = await waitFor(
+      () => findPostedMessage<{ type: 'suggestion.ready'; proposal: { replacementMarkdown: string } }>(postedMessages, 'suggestion.ready'),
+      (message) => Boolean(message)
+    );
+
+    assert.equal(readyMessage.proposal.replacementMarkdown, '**Already formatted**');
+    assert.equal(findPostedMessage(postedMessages, 'request.unavailable'), undefined);
+
+    provider.dispose();
+  });
+
+  test('falls back to model execution for ambiguous quick-format markdown selections', async () => {
+    const requestService = new InMemoryRequestService<SelectionScopedRequestPayload>();
+    const provider = new MarkdownCustomEditorProvider(
+      getExtensionUri(),
+      new DocumentSessionController(),
+      requestService,
+      new FakeExecutionService(createSuccessfulExecutionOutcome('Resolved by model.'))
+    );
+    const document = await vscode.workspace.openTextDocument({
+      language: 'markdown',
+      content: ['# Quick Format', '', 'text * note'].join('\n')
+    });
+    const { panel, postedMessages, sendMessageToExtension } = createMockWebviewPanel();
+    const selectedText = 'text * note';
+    const selectionCapture = buildSelectionCaptureFromText(document.getText(), selectedText);
+
+    await provider.resolveCustomTextEditor(document, panel, new vscode.CancellationTokenSource().token);
+
+    sendMessageToExtension({
+      type: 'selection.capture',
+      documentVersion: document.version,
+      selectedText,
+      ...selectionCapture,
+      selectionRect: {
+        top: 164,
+        left: 276,
+        bottom: 184,
+        right: 332
+      }
+    });
+
+    await waitFor(
+      () => findPostedMessage<{ type: 'selection.accepted'; sessionId: string }>(postedMessages, 'selection.accepted'),
+      (message) => Boolean(message)
+    );
+
+    sendMessageToExtension({
+      type: 'request.quickFormat',
+      sessionId: 'request-session-0',
+      formatKind: 'bold'
+    });
+
+    const readyMessage = await waitFor(
+      () => findPostedMessage<{ type: 'suggestion.ready'; proposal: { replacementMarkdown: string } }>(postedMessages, 'suggestion.ready'),
+      (message) => Boolean(message)
+    );
+
+    assert.equal(readyMessage.proposal.replacementMarkdown, 'Resolved by model.');
+    assert.equal(findPostedMessage(postedMessages, 'request.unavailable'), undefined);
+
+    provider.dispose();
+  });
+
   test('submits a local request payload only after explicit submit', async () => {
     const requestService = new InMemoryRequestService<SelectionScopedRequestPayload>();
     const sessionController = new DocumentSessionController();

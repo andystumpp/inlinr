@@ -92,10 +92,49 @@ function buildQuickFormatRequestText(formatKind: QuickFormatKind): string {
     : 'Format the selected text in Markdown italic using *single asterisks* without changing wording.';
 }
 
-function buildQuickFormatReplacementMarkdown(selectedMarkdown: string, formatKind: QuickFormatKind): string {
+function unwrapQuickFormatSelection(selectedMarkdown: string): { formatKind: QuickFormatKind; content: string } | null {
+  if (selectedMarkdown.length >= 4) {
+    if (
+      (selectedMarkdown.startsWith('**') && selectedMarkdown.endsWith('**')) ||
+      (selectedMarkdown.startsWith('__') && selectedMarkdown.endsWith('__'))
+    ) {
+      return {
+        formatKind: 'bold',
+        content: selectedMarkdown.slice(2, -2)
+      };
+    }
+  }
+
+  if (selectedMarkdown.length >= 2) {
+    if (
+      (selectedMarkdown.startsWith('*') && selectedMarkdown.endsWith('*')) ||
+      (selectedMarkdown.startsWith('_') && selectedMarkdown.endsWith('_'))
+    ) {
+      return {
+        formatKind: 'italic',
+        content: selectedMarkdown.slice(1, -1)
+      };
+    }
+  }
+
+  return null;
+}
+
+function hasPotentialQuickFormatMarkdownAmbiguity(selectedMarkdown: string): boolean {
+  return /(^|[^\\])\*/.test(selectedMarkdown);
+}
+
+function buildQuickFormatReplacementMarkdown(selectedMarkdown: string, formatKind: QuickFormatKind): string | null {
+  const unwrappedSelection = unwrapQuickFormatSelection(selectedMarkdown);
+  const normalizedContent = unwrappedSelection?.content ?? selectedMarkdown;
+
+  if (hasPotentialQuickFormatMarkdownAmbiguity(normalizedContent)) {
+    return null;
+  }
+
   const delimiter = formatKind === 'bold' ? '**' : '*';
 
-  return `${delimiter}${selectedMarkdown}${delimiter}`;
+  return `${delimiter}${normalizedContent}${delimiter}`;
 }
 
 function buildQuickFormatDraftDocumentMarkdown(
@@ -666,7 +705,6 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
       sessionId
     });
     const submitStartedAt = Date.now();
-    const pendingStartedAt = Date.now();
 
     if (!activeRequest || activeRequest.sessionId !== sessionId) {
       return;
@@ -748,6 +786,34 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
 
     await this.requestService.submit(payload);
 
+    await this.executeSubmittedSelectionRequest(
+      document,
+      sessionId,
+      activeRequest,
+      draftText,
+      selectedMarkdown,
+      refreshedAnchor,
+      effectiveSelectionScope,
+      payload,
+      submitAttempt,
+      submitStartedAt,
+      postMessageToViewer
+    );
+  }
+
+  private async executeSubmittedSelectionRequest(
+    document: vscode.TextDocument,
+    sessionId: string,
+    activeRequest: TrackedActiveRequestSession,
+    draftText: string,
+    selectedMarkdown: string,
+    refreshedAnchor: ReturnType<typeof createSelectionAnchor>,
+    effectiveSelectionScope: EffectiveSelectionScope,
+    payload: SelectionScopedRequestPayload,
+    submitAttempt: ScenarioAttemptHandle | undefined,
+    submitStartedAt: number,
+    postMessageToViewer: (message: ExtensionToViewerMessage) => Promise<void>
+  ): Promise<void> {
     const availability = await this.executionService.checkAvailability();
 
     if (!availability.available) {
@@ -924,17 +990,10 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     this.sessionController.setActiveRequestSession({
       ...activeRequest,
       draftText,
-      validationState: 'executing',
-      validationMessage: 'Generating suggestion…'
+      validationState: 'submitting',
+      validationMessage: undefined
     });
     this.emitScenarioCheckpoint(submitAttempt, 'request_submitted', 'pass');
-
-    await postMessageToViewer({
-      type: 'request.executing',
-      sessionId,
-      message: 'Generating suggestion…'
-    });
-    this.emitScenarioCheckpoint(submitAttempt, 'pending_visible', 'pass');
     const revalidation = revalidateSelectionAnchor(document.getText(), activeRequest.selectionAnchor);
 
     if (!revalidation.match || revalidation.status === 'ambiguous' || revalidation.status === 'missing') {
@@ -984,6 +1043,24 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     const replacementMarkdown = buildQuickFormatReplacementMarkdown(selectedMarkdown, formatKind);
 
     await this.requestService.submit(payload);
+
+    if (replacementMarkdown === null) {
+      await this.executeSubmittedSelectionRequest(
+        document,
+        sessionId,
+        activeRequest,
+        draftText,
+        selectedMarkdown,
+        refreshedAnchor,
+        effectiveSelectionScope,
+        payload,
+        submitAttempt,
+        submitStartedAt,
+        postMessageToViewer
+      );
+
+      return;
+    }
 
     this.sessionController.setActiveRequestSession({
       ...activeRequest,
