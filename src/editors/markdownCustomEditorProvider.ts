@@ -125,16 +125,17 @@ function hasPotentialQuickFormatMarkdownAmbiguity(selectedMarkdown: string): boo
 }
 
 function buildQuickFormatReplacementMarkdown(selectedMarkdown: string, formatKind: QuickFormatKind): string | null {
-  const unwrappedSelection = unwrapQuickFormatSelection(selectedMarkdown);
-  const normalizedContent = unwrappedSelection?.content ?? selectedMarkdown;
+  if (unwrapQuickFormatSelection(selectedMarkdown)) {
+    return null;
+  }
 
-  if (hasPotentialQuickFormatMarkdownAmbiguity(normalizedContent)) {
+  if (hasPotentialQuickFormatMarkdownAmbiguity(selectedMarkdown)) {
     return null;
   }
 
   const delimiter = formatKind === 'bold' ? '**' : '*';
 
-  return `${delimiter}${normalizedContent}${delimiter}`;
+  return `${delimiter}${selectedMarkdown}${delimiter}`;
 }
 
 function buildQuickFormatDraftDocumentMarkdown(

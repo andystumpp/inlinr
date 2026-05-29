@@ -267,12 +267,13 @@ suite('Selection-scoped edit request integration', () => {
     provider.dispose();
   });
 
-  test('keeps an already bold selection unchanged in local quick format', async () => {
+  test('falls back to model execution when the quick-format selection is already bold', async () => {
     const requestService = new InMemoryRequestService<SelectionScopedRequestPayload>();
     const provider = new MarkdownCustomEditorProvider(
       getExtensionUri(),
       new DocumentSessionController(),
-      requestService
+      requestService,
+      new FakeExecutionService(createSuccessfulExecutionOutcome('Resolved by model.'))
     );
     const document = await vscode.workspace.openTextDocument({
       language: 'markdown',
@@ -313,18 +314,19 @@ suite('Selection-scoped edit request integration', () => {
       (message) => Boolean(message)
     );
 
-    assert.equal(readyMessage.proposal.replacementMarkdown, '**Already formatted**');
+    assert.equal(readyMessage.proposal.replacementMarkdown, 'Resolved by model.');
     assert.equal(findPostedMessage(postedMessages, 'request.unavailable'), undefined);
 
     provider.dispose();
   });
 
-  test('converts an already italic selection to bold without nesting delimiters', async () => {
+  test('falls back to model execution when the quick-format selection is already italic', async () => {
     const requestService = new InMemoryRequestService<SelectionScopedRequestPayload>();
     const provider = new MarkdownCustomEditorProvider(
       getExtensionUri(),
       new DocumentSessionController(),
-      requestService
+      requestService,
+      new FakeExecutionService(createSuccessfulExecutionOutcome('Resolved by model.'))
     );
     const document = await vscode.workspace.openTextDocument({
       language: 'markdown',
@@ -365,7 +367,7 @@ suite('Selection-scoped edit request integration', () => {
       (message) => Boolean(message)
     );
 
-    assert.equal(readyMessage.proposal.replacementMarkdown, '**Already formatted**');
+    assert.equal(readyMessage.proposal.replacementMarkdown, 'Resolved by model.');
     assert.equal(findPostedMessage(postedMessages, 'request.unavailable'), undefined);
 
     provider.dispose();
