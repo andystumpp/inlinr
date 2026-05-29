@@ -340,7 +340,7 @@ scenarios:
       safe_block_condition: Execution or targeting fails visibly and the document remains unchanged.
     runtime:
       readiness: deployable
-      scenario_version: '1'
+      scenario_version: '2'
       owner_surface: custom_editor
       owner_component: request_execution
       checkpoints:

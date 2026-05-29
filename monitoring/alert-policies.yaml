@@ -93,7 +93,7 @@ scenarios:
     readiness: deployable
     runtime_binding:
       scenario_id: submit_request_receive_review
-      scenario_version: '1'
+      scenario_version: '2'
       checkpoint_ids:
         - request_submitted
         - pending_visible
