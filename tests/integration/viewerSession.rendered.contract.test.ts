@@ -40,4 +40,12 @@ suite('Rendered viewer state contract', () => {
     assert.match(script, /data-selection-request-format-kind="bold"/);
     assert.match(script, /data-selection-request-format-kind="italic"/);
   });
+
+  test('selection request popup script captures selection from mouse and keyboard interactions', () => {
+    const scriptPath = path.join(getExtensionUri().fsPath, 'media', 'markdownViewer', 'selectionRequest.js');
+    const script = fs.readFileSync(scriptPath, 'utf8');
+
+    assert.match(script, /document\.addEventListener\('mouseup', captureSelection\)/);
+    assert.match(script, /document\.addEventListener\('keyup', captureSelectionFromKeyboard\)/);
+  });
 });
