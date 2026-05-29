@@ -212,6 +212,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate public README
+        run: npm run readme:validate-public
+
       - name: Publish to Visual Studio Marketplace
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
