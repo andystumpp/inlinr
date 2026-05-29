@@ -256,11 +256,11 @@ suite('Telemetry monitoring integration', () => {
     assert.ok(typeof popupShownCheckpoint.durationMs === 'number');
     assert.ok(popupShownCheckpoint.durationMs >= 0);
 
-    const pendingVisibleCheckpoint = submitEvents.find((event) => event.eventType === 'scenario_checkpoint' && event.checkpointId === 'pending_visible');
-    assert.ok(pendingVisibleCheckpoint);
-    assert.equal(pendingVisibleCheckpoint.eventType, 'scenario_checkpoint');
-    assert.ok(typeof pendingVisibleCheckpoint.durationMs === 'number');
-    assert.ok(pendingVisibleCheckpoint.durationMs >= 0);
+    const reviewRenderedCheckpoint = submitEvents.find((event) => event.eventType === 'scenario_checkpoint' && event.checkpointId === 'review_rendered_inline');
+    assert.ok(reviewRenderedCheckpoint);
+    assert.equal(reviewRenderedCheckpoint.eventType, 'scenario_checkpoint');
+    assert.ok(typeof reviewRenderedCheckpoint.durationMs === 'number');
+    assert.ok(reviewRenderedCheckpoint.durationMs >= 0);
 
     provider.dispose();
   });

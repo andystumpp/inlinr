@@ -6,6 +6,7 @@ on:
     types: [opened, synchronize, reopened]
   schedule: daily on weekdays
   workflow_dispatch:
+  roles: all
 permissions:
   contents: read
   issues: read

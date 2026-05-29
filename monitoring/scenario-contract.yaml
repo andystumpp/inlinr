@@ -352,11 +352,11 @@ scenarios:
           order: 2
           description: The system shows a visible pending state while work is in progress.
           component: request_execution
-          latency_sensitive: true
         - checkpoint_id: review_rendered_inline
           order: 3
           description: A reviewable inline suggestion appears at the targeted document location.
           component: request_execution
+          latency_sensitive: true
     telemetry:
       result_event: scenario_result
       safe_block_status: blocked_safe
@@ -370,7 +370,7 @@ scenarios:
       overrides:
         supporting_alerts:
           - template_id: latency
-            checkpoint_id: pending_visible
+            checkpoint_id: review_rendered_inline
           - template_id: checkpoint_spike
             checkpoint_id: review_rendered_inline
 
