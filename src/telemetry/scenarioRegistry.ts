@@ -84,14 +84,14 @@ export const CURRENT_MONITORING_SCENARIOS: readonly MonitoringScenarioDefinition
         checkpointId: 'pending_visible',
         order: 2,
         description: 'The system shows a visible pending state while work is in progress.',
-        component: 'request_execution',
-        latencySensitive: true
+        component: 'request_execution'
       },
       {
         checkpointId: 'review_rendered_inline',
         order: 3,
         description: 'A reviewable inline suggestion appears at the targeted document location.',
-        component: 'request_execution'
+        component: 'request_execution',
+        latencySensitive: true
       }
     ],
     primaryAlert: 'real_user_failure_rate',
