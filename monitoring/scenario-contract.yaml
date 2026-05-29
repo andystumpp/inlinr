@@ -336,7 +336,7 @@ scenarios:
     criticality: core
     journey:
       start_condition: A user submits a request from the inline popup.
-      success_condition: Pending feedback appears and a reviewable inline suggestion is rendered at the targeted document location.
+      success_condition: Pending feedback appears and a reviewable inline suggestion is rendered at the targeted document location within 2 seconds of submit.
       safe_block_condition: Execution or targeting fails visibly and the document remains unchanged.
     runtime:
       readiness: deployable
