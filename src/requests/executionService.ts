@@ -41,6 +41,7 @@ export class ExecutionServiceError extends Error {
 type ChatModelResolver = () => Thenable<readonly vscode.LanguageModelChat[] | vscode.LanguageModelChat[]>;
 
 const SELECTION_SCOPED_PROMPT_FILE_NAME = 'selection-scoped-edit.md';
+const FAST_MODEL_HINT_PATTERN = /\b(haiku|mini|flash|fast)\b/i;
 
 function renderPromptTemplate(template: string, variables: Record<string, string>): string {
   const placeholderMatches = [...template.matchAll(/{{\s*([a-zA-Z0-9_]+)\s*}}/g)];
@@ -195,14 +196,31 @@ export class VscodeLanguageModelExecutionService implements ExecutionService {
       throw new ExecutionServiceError('missing-capability', 'No supported Copilot-backed model is available.');
     }
 
-    const explicitlyAllowedModel = models.find((model) => {
+    const explicitlyAllowedModels = models.filter((model) => {
       return this.extensionContext.languageModelAccessInformation.canSendRequest(model) !== false;
     });
 
-    if (explicitlyAllowedModel) {
-      return explicitlyAllowedModel;
+    if (explicitlyAllowedModels.length > 0) {
+      return explicitlyAllowedModels
+        .map((model, index) => ({ model, index }))
+        .sort((left, right) => {
+          const leftIsFast = isFastModelCandidate(left.model);
+          const rightIsFast = isFastModelCandidate(right.model);
+
+          if (leftIsFast !== rightIsFast) {
+            return leftIsFast ? -1 : 1;
+          }
+
+          return left.index - right.index;
+        })[0].model;
     }
 
     throw new ExecutionServiceError('access-denied', 'The current environment does not allow model execution.');
   }
+}
+
+function isFastModelCandidate(model: vscode.LanguageModelChat): boolean {
+  const modelIdentity = [model.id, model.family, model.name].filter((value) => typeof value === 'string').join(' ');
+
+  return FAST_MODEL_HINT_PATTERN.test(modelIdentity);
 }
