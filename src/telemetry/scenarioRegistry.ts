@@ -67,7 +67,7 @@ export const CURRENT_MONITORING_SCENARIOS: readonly MonitoringScenarioDefinition
   },
   {
     scenarioId: 'submit_request_receive_review',
-    scenarioVersion: '2',
+    scenarioVersion: '1',
     title: 'Submit a request and receive inline review state',
     criticality: 'core',
     startCondition: 'A user submits a request from the inline popup.',

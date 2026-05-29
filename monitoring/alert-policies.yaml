@@ -93,7 +93,7 @@ scenarios:
     readiness: deployable
     runtime_binding:
       scenario_id: submit_request_receive_review
-      scenario_version: '2'
+      scenario_version: '1'
       checkpoint_ids:
         - request_submitted
         - pending_visible
@@ -112,14 +112,14 @@ scenarios:
     supporting_alerts:
       - kind: scheduled_query
         signal_type: latency
-        checkpoint_id: pending_visible
+        checkpoint_id: review_rendered_inline
         severity: non_paging
         route_ref: team_non_paging
         rule_kind: log_search_alert
         window: PT30M
         evaluation_frequency: PT5M
         threshold:
-          p95_duration_ms: 15000
+          p95_duration_ms: 2000
           minimum_sample_size: 10
       - kind: scheduled_query
         signal_type: checkpoint_spike
