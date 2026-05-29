@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.0.7
+
+- Reduce suggestion latency by preferring faster models and tightening generation scope.
+- Stabilize the inline request popup trigger for text selections.
+- Clarify the 2-second latency expectation for the submit-review journey.
+
 ## 0.0.6
 
 - Fix latency monitoring checkpoint for suggestion rendering scenario.
