@@ -8,6 +8,7 @@ import { DocumentSessionController } from '../../src/sessions/documentSessionCon
 import {
   FakeExecutionService,
   closeAllEditors,
+  createTemporaryMarkdownDocument,
   createMockWebviewPanel,
   createOutOfRangeExecutionOutcome,
   createSuccessfulExecutionOutcome,
@@ -96,8 +97,14 @@ function buildSelectionCaptureFromText(markdownSource: string, selectedText: str
 }
 
 suite('Selection-scoped edit request integration', () => {
+  const cleanupActions: Array<() => Promise<void>> = [];
+
   teardown(async () => {
     await closeAllEditors();
+
+    while (cleanupActions.length > 0) {
+      await cleanupActions.pop()?.();
+    }
   });
 
   test('opens one anchored request popup from a valid rendered selection without submitting immediately', async () => {
@@ -438,10 +445,12 @@ suite('Selection-scoped edit request integration', () => {
       requestService,
       new FakeExecutionService(createSuccessfulExecutionOutcome(''))
     );
-    const document = await vscode.workspace.openTextDocument({
-      language: 'markdown',
-      content: ['# List Removal', '', '- Alpha item', '- Beta item', '', 'Trailing paragraph.'].join('\n')
-    });
+    const temporaryDocument = await createTemporaryMarkdownDocument(
+      'list-removal',
+      ['# List Removal', '', '- Alpha item', '- Beta item', '', 'Trailing paragraph.'].join('\n')
+    );
+    cleanupActions.push(temporaryDocument.cleanup);
+    const document = temporaryDocument.document;
     const { panel, postedMessages, sendMessageToExtension } = createMockWebviewPanel();
     const selectionCapture = buildSelectionCaptureFromText(document.getText(), 'Beta item');
 
@@ -833,7 +842,9 @@ suite('Selection-scoped edit request integration', () => {
       '',
       'Trailing paragraph.'
     ].join('\n');
-    const document = await vscode.workspace.openTextDocument({ language: 'markdown', content: originalContent });
+    const temporaryDocument = await createTemporaryMarkdownDocument('apply-flow', originalContent);
+    cleanupActions.push(temporaryDocument.cleanup);
+    const document = temporaryDocument.document;
     const { panel, postedMessages, sendMessageToExtension } = createMockWebviewPanel();
 
     await provider.resolveCustomTextEditor(document, panel, new vscode.CancellationTokenSource().token);
@@ -878,9 +889,17 @@ suite('Selection-scoped edit request integration', () => {
       () => document.getText(),
       (text) => text.includes('Rewritten paragraph.')
     );
+    await waitFor(
+      () => document.isDirty,
+      (isDirty) => isDirty === false
+    );
 
     assert.equal(
       document.getText(),
+      ['# Apply Flow', '', 'Rewritten paragraph.', '', 'Trailing paragraph.'].join('\n')
+    );
+    assert.equal(
+      Buffer.from(await vscode.workspace.fs.readFile(document.uri)).toString('utf8'),
       ['# Apply Flow', '', 'Rewritten paragraph.', '', 'Trailing paragraph.'].join('\n')
     );
     assert.equal(sessionController.getActiveRequestSession(document), null);
@@ -901,7 +920,9 @@ suite('Selection-scoped edit request integration', () => {
       ])
     );
     const originalContent = ['# Apply Then Continue', '', 'Original paragraph.', '', 'Trailing paragraph.'].join('\n');
-    const document = await vscode.workspace.openTextDocument({ language: 'markdown', content: originalContent });
+    const temporaryDocument = await createTemporaryMarkdownDocument('apply-then-continue', originalContent);
+    cleanupActions.push(temporaryDocument.cleanup);
+    const document = temporaryDocument.document;
     const { panel, postedMessages, sendMessageToExtension } = createMockWebviewPanel();
 
     await provider.resolveCustomTextEditor(document, panel, new vscode.CancellationTokenSource().token);
@@ -1112,7 +1133,9 @@ suite('Selection-scoped edit request integration', () => {
       new FakeExecutionService(createSuccessfulExecutionOutcome(''))
     );
     const originalContent = ['# Delete Flow', '', 'Original paragraph.', '', 'Trailing paragraph.'].join('\n');
-    const document = await vscode.workspace.openTextDocument({ language: 'markdown', content: originalContent });
+    const temporaryDocument = await createTemporaryMarkdownDocument('delete-flow', originalContent);
+    cleanupActions.push(temporaryDocument.cleanup);
+    const document = temporaryDocument.document;
     const { panel, postedMessages, sendMessageToExtension } = createMockWebviewPanel();
 
     await provider.resolveCustomTextEditor(document, panel, new vscode.CancellationTokenSource().token);
