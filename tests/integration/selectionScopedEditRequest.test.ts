@@ -512,6 +512,14 @@ suite('Selection-scoped edit request integration', () => {
       () => document.getText(),
       (text) => text === ['# List Removal', '', '- Alpha item', '', 'Trailing paragraph.'].join('\n')
     );
+    await waitFor(
+      () => document.isDirty,
+      (isDirty) => isDirty === false
+    );
+    await waitFor(
+      () => sessionController.getActiveRequestSession(document),
+      (activeRequest) => activeRequest === null
+    );
 
     assert.equal(document.getText(), ['# List Removal', '', '- Alpha item', '', 'Trailing paragraph.'].join('\n'));
     assert.equal(sessionController.getActiveRequestSession(document), null);
@@ -1181,6 +1189,14 @@ suite('Selection-scoped edit request integration', () => {
     await waitFor(
       () => document.getText(),
       (text) => text === ['# Delete Flow', '', '', '', 'Trailing paragraph.'].join('\n')
+    );
+    await waitFor(
+      () => document.isDirty,
+      (isDirty) => isDirty === false
+    );
+    await waitFor(
+      () => sessionController.getActiveRequestSession(document),
+      (activeRequest) => activeRequest === null
     );
 
     assert.equal(document.getText(), ['# Delete Flow', '', '', '', 'Trailing paragraph.'].join('\n'));
