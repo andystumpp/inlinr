@@ -62,27 +62,28 @@ In these cases, update `architecture/high-level-architecture.md` first and add a
 
 The repository currently has these automated suites wired into `npm test`:
 
-- **Browser-based webview contract tests:** under `tests/webview/`
 - **Unit tests:** under `tests/unit/`
 - **Integration tests:** under `tests/integration/`
 
-The browser-based webview selection contract suite is part of the regular development process rather
-than occasional manual verification.
+The browser-based webview selection contract suite exists as a dedicated command under
+`tests/webview/`, but it is intentionally kept separate from `npm test`, CI, and release verification
+until the suite stabilizes.
 
 ## When to run browser-based webview contract tests
 
 - Run them during feature work and bug fixes that touch rendered selection handling, popup behavior,
   selection anchors, rendered selection markup, or bounding-rect and geometry logic.
-- Run them before merge for pull requests that affect the webview selection-to-popup contract.
-- Run them as part of release verification once a dedicated command is wired into the automated test
-  path.
+- Run them explicitly before merge for pull requests that affect the webview selection-to-popup
+  contract.
 - Add or update one of these tests for bugs that originate at the webview DOM selection or popup
   boundary.
+- Promote them into `npm test`, CI, and release verification only after the suite is stable enough to
+  serve as a blocking gate.
 
 ## Verification commands
 
 - `npm run compile` - TypeScript compilation
-- `npm run test` - runs the webview, integration, and unit suites
+- `npm run test` - runs the integration and unit suites
 - `npm run test:webview` - browser-based webview contract suite
 - `npm run test:integration` - VS Code integration suite
 - `npm run test:unit` - unit suite

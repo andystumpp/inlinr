@@ -68,11 +68,12 @@ popup reliability.
   - popup eligibility and gating
   - emitted `selection.capture` message shape
   - safe no-op behavior when geometry or selection state is invalid
-- Treat this suite as part of the regular development process once it exists:
+- Treat this suite as a staged rollout rather than an immediate default pipeline gate:
   - run it during feature work and bug fixes that touch rendered selection, popup behavior, rendered
     selection markup, or bounding-rect and geometry logic
-  - run it in pull request validation for changes that affect the webview selection-to-popup contract
-  - run it in release verification once a dedicated command is wired into the automated test path
+  - run it explicitly for pull requests that affect the webview selection-to-popup contract
+  - keep it out of default CI and release verification until the suite has demonstrated stable signal
+  - promote it into `npm test`, CI, and release verification only after that stabilization step
 - Do not make a DOM emulator such as jsdom the primary solution for this layer, because the bug class
   depends on real browser behavior around `Selection`, `Range`, and geometry.
 - Do not use the full VS Code test instance as the primary tool for this layer, because it is slower,
@@ -90,8 +91,8 @@ popup reliability.
 - Popup regressions can be caught earlier and more deterministically than with extension-level tests
   alone.
 - The repository gains a new test harness and dependency surface that will need maintenance.
-- The development workflow becomes stricter for webview interaction changes because this suite becomes a
-  normal pre-merge and release gate for the affected surface.
+- The development workflow becomes stricter for webview interaction changes, but the suite can mature
+  before it becomes a blocking default gate.
 - Realistic rendered fixtures and controlled geometry stubs become part of the test system of record for
   popup behavior.
 - If a browser harness result and a real VS Code webview ever diverge, the right response is to add a
