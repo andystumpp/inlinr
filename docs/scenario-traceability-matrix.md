@@ -1,6 +1,6 @@
 # Scenario Traceability Matrix
 
-Speckit is the spec/planning source here, not executable BDD. Executable coverage comes from the Mocha suites.
+Speckit is the spec/planning source here, not executable BDD. Executable coverage comes from the Mocha suites (integration and unit) and the Playwright webview contract suite.
 
 | Product scenario | Spec | Executable tests | Monitoring scenarios | Alert posture |
 |---|---|---|---|---|
