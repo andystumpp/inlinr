@@ -41,7 +41,7 @@ export class ExecutionServiceError extends Error {
 type ChatModelResolver = () => Thenable<readonly vscode.LanguageModelChat[] | vscode.LanguageModelChat[]>;
 
 const SELECTION_SCOPED_PROMPT_FILE_NAME = 'selection-scoped-edit.md';
-const FAST_MODEL_HINT_PATTERN = /\b(haiku|mini|flash|fast)\b/i;
+const SONNET_MODEL_HINT_PATTERN = /\bsonnet\b/i;
 
 function renderPromptTemplate(template: string, variables: Record<string, string>): string {
   const placeholderMatches = [...template.matchAll(/{{\s*([a-zA-Z0-9_]+)\s*}}/g)];
@@ -202,10 +202,10 @@ export class VscodeLanguageModelExecutionService implements ExecutionService {
 
     if (explicitlyAllowedModels.length > 0) {
       return explicitlyAllowedModels
-        .map((model, index) => ({ model, index, isFast: isFastModelCandidate(model) }))
+        .map((model, index) => ({ model, index, preferenceRank: getModelPreferenceRank(model) }))
         .sort((left, right) => {
-          if (left.isFast !== right.isFast) {
-            return left.isFast ? -1 : 1;
+          if (left.preferenceRank !== right.preferenceRank) {
+            return left.preferenceRank - right.preferenceRank;
           }
 
           return left.index - right.index;
@@ -216,10 +216,16 @@ export class VscodeLanguageModelExecutionService implements ExecutionService {
   }
 }
 
-function isFastModelCandidate(model: vscode.LanguageModelChat): boolean {
-  const modelIdentity = [model.id, model.name]
+function getModelPreferenceRank(model: vscode.LanguageModelChat): number {
+  if (SONNET_MODEL_HINT_PATTERN.test(getModelIdentity(model))) {
+    return 0;
+  }
+
+  return 1;
+}
+
+function getModelIdentity(model: vscode.LanguageModelChat): string {
+  return [model.id, model.name, model.family]
     .filter((value): value is string => typeof value === 'string' && value.length > 0)
     .join(' ');
-
-  return FAST_MODEL_HINT_PATTERN.test(modelIdentity);
 }
