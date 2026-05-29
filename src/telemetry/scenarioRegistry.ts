@@ -71,7 +71,7 @@ export const CURRENT_MONITORING_SCENARIOS: readonly MonitoringScenarioDefinition
     title: 'Submit a request and receive inline review state',
     criticality: 'core',
     startCondition: 'A user submits a request from the inline popup.',
-    successCondition: 'Pending feedback appears and a reviewable inline suggestion is rendered at the targeted document location.',
+    successCondition: 'Pending feedback appears and a reviewable inline suggestion is rendered at the targeted document location within 2 seconds of submit.',
     safeBlockCondition: 'Execution or targeting fails visibly and the document remains unchanged.',
     checkpoints: [
       {

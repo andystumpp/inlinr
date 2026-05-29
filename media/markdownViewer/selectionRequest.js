@@ -870,7 +870,7 @@
       return;
     }
 
-    documentRoot.addEventListener('mouseup', function () {
+    const captureSelection = function () {
       if (blocksReplacementSelection()) {
         return;
       }
@@ -880,7 +880,22 @@
       if (message) {
         postMessage(message);
       }
-    });
+    };
+
+    const captureSelectionFromKeyboard = function (event) {
+      const selectionNavigationKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'];
+      const isSelectionNavigation = event.shiftKey && selectionNavigationKeys.includes(event.key);
+      const isSelectAll = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'a';
+
+      if (!isSelectionNavigation && !isSelectAll) {
+        return;
+      }
+
+      captureSelection();
+    };
+
+    document.addEventListener('mouseup', captureSelection);
+    document.addEventListener('keyup', captureSelectionFromKeyboard);
   }
 
   function bootstrapSelectionRequestShell() {
