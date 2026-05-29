@@ -979,6 +979,25 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
 
     await this.requestService.submit(payload);
 
+    this.sessionController.setActiveRequestSession({
+      ...activeRequest,
+      draftText,
+      selectedTextPreview: selectedMarkdown,
+      selectionAnchor: refreshedAnchor,
+      effectiveSelectionScope,
+      submittedPayload: payload,
+      validationState: 'executing',
+      validationMessage: 'Generating suggestion…',
+      suggestion: undefined
+    });
+
+    await postMessageToViewer({
+      type: 'request.executing',
+      sessionId,
+      message: 'Generating suggestion…'
+    });
+    this.emitScenarioCheckpoint(submitAttempt, 'pending_visible', 'pass');
+
     const suggestion = normalizeSuggestedEdit(payload, {
       requestId: payload.requestId,
       draftDocumentMarkdown: buildQuickFormatDraftDocumentMarkdown(

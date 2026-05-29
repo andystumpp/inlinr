@@ -185,6 +185,13 @@ suite('Selection-scoped edit request integration', () => {
       formatKind: 'bold'
     });
 
+    const executingMessage = await waitFor(
+      () => findPostedMessage<{ type: 'request.executing'; message: string }>(postedMessages, 'request.executing'),
+      (message) => Boolean(message)
+    );
+
+    assert.equal(executingMessage.message, 'Generating suggestion…');
+
     const readyMessage = await waitFor(
       () => findPostedMessage<{ type: 'suggestion.ready'; proposal: { replacementMarkdown: string } }>(postedMessages, 'suggestion.ready'),
       (message) => Boolean(message)
@@ -237,6 +244,13 @@ suite('Selection-scoped edit request integration', () => {
       sessionId: 'request-session-0',
       formatKind: 'italic'
     });
+
+    const executingMessage = await waitFor(
+      () => findPostedMessage<{ type: 'request.executing'; message: string }>(postedMessages, 'request.executing'),
+      (message) => Boolean(message)
+    );
+
+    assert.equal(executingMessage.message, 'Generating suggestion…');
 
     const readyMessage = await waitFor(
       () => findPostedMessage<{ type: 'suggestion.ready'; proposal: { replacementMarkdown: string } }>(postedMessages, 'suggestion.ready'),

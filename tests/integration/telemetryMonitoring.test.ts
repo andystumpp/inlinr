@@ -265,6 +265,66 @@ suite('Telemetry monitoring integration', () => {
     provider.dispose();
   });
 
+  test('records pending-visible telemetry for quick-format submit before review', async () => {
+    const { adapter, sink } = createRecordingTelemetryHarness();
+    const requestService = new InMemoryRequestService<SelectionScopedRequestPayload>();
+    const provider = new MarkdownCustomEditorProvider(
+      getExtensionUri(),
+      new DocumentSessionController(),
+      requestService,
+      undefined,
+      adapter
+    );
+    const document = await vscode.workspace.openTextDocument(getWorkspaceFile('selection-request-basic.md'));
+    const { panel, postedMessages, sendMessageToExtension } = createMockWebviewPanel();
+    const selectedText = 'selectable for the first request flow';
+    const selectionCapture = buildSelectionCaptureFromText(document.getText(), selectedText);
+
+    await provider.resolveCustomTextEditor(document, panel, new vscode.CancellationTokenSource().token);
+
+    sendMessageToExtension({
+      type: 'selection.capture',
+      documentVersion: document.version,
+      selectedText,
+      ...selectionCapture,
+      selectionRect: {
+        top: 164,
+        left: 276,
+        bottom: 184,
+        right: 332
+      }
+    });
+
+    await waitFor(
+      () => findPostedMessage<{ type: 'selection.accepted'; sessionId: string }>(postedMessages, 'selection.accepted'),
+      (message) => Boolean(message)
+    );
+
+    sendMessageToExtension({
+      type: 'request.quickFormat',
+      sessionId: 'request-session-0',
+      formatKind: 'bold'
+    });
+
+    await waitFor(
+      () => findPostedMessage<{ type: 'suggestion.ready' }>(postedMessages, 'suggestion.ready'),
+      (message) => Boolean(message)
+    );
+
+    const submitEvents = findScenarioEvents(sink.getEvents(), 'submit_request_receive_review');
+    const submitResult = findScenarioResult(submitEvents);
+    const dependencyEvents = findDependencyEvents(submitEvents);
+
+    assert.deepEqual(findCheckpointIds(submitEvents), ['request_submitted', 'pending_visible', 'review_rendered_inline']);
+    assert.ok(submitResult);
+    assert.equal(submitResult.status, 'success');
+    assert.equal(dependencyEvents.length, 0);
+    assertNoSensitiveTelemetryValues(submitEvents, [selectedText]);
+    assert.equal(requestService.getLastSubmittedPayload()?.requestText, 'Format the selected text in Markdown bold using **double asterisks** without changing wording.');
+
+    provider.dispose();
+  });
+
   test('records reject and next-request-cycle telemetry after a follow-up selection', async () => {
     const { adapter, sink } = createRecordingTelemetryHarness();
     const provider = new MarkdownCustomEditorProvider(
