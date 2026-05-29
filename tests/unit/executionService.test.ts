@@ -119,4 +119,39 @@ suite('Execution service', () => {
     assert.match(getCapturedPrompt(), /<<<INLINR_SELECTION_START:/);
     assert.match(getCapturedPrompt(), /Original paragraph for execution\./);
   });
+
+  test('prefers lower-latency model variants when multiple models are available', async () => {
+    const service = new VscodeLanguageModelExecutionService(createContext(true), async () => {
+      return [
+        ({
+          id: 'copilot-opus',
+          vendor: 'copilot',
+          version: '1',
+          name: 'Claude Opus',
+          maxInputTokens: 8000,
+          sendRequest: async () => ({
+            text: (async function* () {})(),
+            stream: (async function* () {})()
+          }),
+          countTokens: async () => 1
+        } as unknown as vscode.LanguageModelChat),
+        ({
+          id: 'copilot-haiku',
+          vendor: 'copilot',
+          version: '1',
+          name: 'Claude Haiku',
+          maxInputTokens: 8000,
+          sendRequest: async () => ({
+            text: (async function* () {})(),
+            stream: (async function* () {})()
+          }),
+          countTokens: async () => 1
+        } as unknown as vscode.LanguageModelChat)
+      ];
+    });
+
+    const availability = await service.checkAvailability();
+
+    assert.equal(availability.modelId, 'copilot-haiku');
+  });
 });
