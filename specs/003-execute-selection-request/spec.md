@@ -62,7 +62,7 @@ A user inspects the inline diff for the targeted Markdown range and explicitly c
 **Acceptance Scenarios**:
 
 1. **Given** a suggested edit is available for a targeted range, **When** the user reviews it, **Then** the product shows the proposed revision as an inline diff in the document for that selected scope, rendered in-flow at the targeted location itself, with the original targeted passage still visible and struck through, no duplicate preview kept in the popup, no detached review card, and no separate side-by-side current-versus-proposed comparison card.
-2. **Given** a suggested edit is available, **When** the user chooses Apply, **Then** the system updates only the intended Markdown range in the canonical document and refreshes the rendered view.
+2. **Given** a suggested edit is available, **When** the user chooses Apply, **Then** the system updates only the intended Markdown range in the canonical document, persists that applied document to disk, and refreshes the rendered view.
 3. **Given** a suggested edit is available, **When** the user chooses Reject, **Then** the document remains unchanged and the suggestion is dismissed without hidden side effects.
 4. **Given** a suggested edit is available, **When** the user applies it, **Then** the resulting document may restructure or remove content inside the targeted range but preserves Markdown content outside that range because only the selected range is mutated.
 5. **Given** the targeted range falls within a bullet list, numbered list, or similar list structure, **When** the user requests removal of one item, **Then** the applied result removes the full containing list item line or block, including its marker when necessary, and leaves the surrounding list structurally valid.
@@ -139,6 +139,7 @@ A user gets a clear recovery path when request execution fails, when the returne
 - **FR-010**: The system MUST require an explicit Apply action before mutating the Markdown document.
 - **FR-011**: The system MUST allow the user to reject a suggested edit without changing the document.
 - **FR-012**: The system MUST update only the intended Markdown range when the user applies a suggested edit.
+- **FR-012a**: The system MUST persist a successfully applied suggestion to disk before the apply cycle is considered complete, and MUST fail clearly if the document cannot be saved automatically.
 - **FR-013**: The system MUST allow structural changes or deletion inside the targeted range when they are part of the requested transformation, but MUST preserve Markdown content outside the targeted range in the final applied document.
 - **FR-013a**: When the user requests removal of content inside a list item and the selected text does not include the list marker, the system MUST still remove the full containing list item line or block if that is the intended scoped change.
 - **FR-013b**: When applying list-item removal, the system MUST preserve valid surrounding list structure, numbering, and spacing.

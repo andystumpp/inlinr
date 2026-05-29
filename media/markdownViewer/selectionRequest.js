@@ -565,10 +565,13 @@
         });
       }
     } else {
+      const pendingKicker = activeRequest.validationState === 'applying' ? 'Updating document' : 'Processing request';
+      const pendingMessage = activeRequest.validationMessage ||
+        (activeRequest.validationState === 'applying' ? 'Applying suggestion…' : 'Generating suggestion…');
       inlineReviewRoot.innerHTML = `
         <section class="selection-inline-review selection-inline-review-pending" aria-live="polite">
-          <p class="selection-inline-review-kicker">Processing request</p>
-          <p class="selection-inline-review-status">${escapeHtml(activeRequest.validationMessage || 'Generating suggestion…')}</p>
+          <p class="selection-inline-review-kicker">${escapeHtml(pendingKicker)}</p>
+          <p class="selection-inline-review-status">${escapeHtml(pendingMessage)}</p>
         </section>`;
     }
 
@@ -886,7 +889,15 @@
         renderOverlay();
         return;
       case 'suggestion.applied':
-        clearActiveRequestOverlay();
+        if (!activeRequest || activeRequest.sessionId !== message.sessionId) {
+          pendingSelectionRect = null;
+          return;
+        }
+
+        activeRequest.validationState = 'applying';
+        activeRequest.validationMessage = 'Refreshing document…';
+        activeRequest.suggestion = undefined;
+        renderOverlay();
         return;
       default:
         return;

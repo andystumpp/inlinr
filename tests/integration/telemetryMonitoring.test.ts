@@ -10,6 +10,7 @@ import {
   FakeExecutionService,
   closeAllEditors,
   createFailedExecutionOutcome,
+  createTemporaryMarkdownDocument,
   createMockWebviewPanel,
   createRecordingTelemetryHarness,
   createSuccessfulExecutionOutcome,
@@ -133,8 +134,14 @@ function assertNoSensitiveTelemetryValues(events: readonly TelemetryEvent[], sen
 }
 
 suite('Telemetry monitoring integration', () => {
+  const cleanupActions: Array<() => Promise<void>> = [];
+
   teardown(async () => {
     await closeAllEditors();
+
+    while (cleanupActions.length > 0) {
+      await cleanupActions.pop()?.();
+    }
   });
 
   test('provides a reusable recording telemetry harness for extension-host flows', () => {
@@ -371,10 +378,12 @@ suite('Telemetry monitoring integration', () => {
       ]),
       adapter
     );
-    const document = await vscode.workspace.openTextDocument({
-      language: 'markdown',
-      content: ['# Apply Flow', '', 'Original paragraph.', '', 'Trailing paragraph.'].join('\n')
-    });
+    const temporaryDocument = await createTemporaryMarkdownDocument(
+      'telemetry-apply-flow',
+      ['# Apply Flow', '', 'Original paragraph.', '', 'Trailing paragraph.'].join('\n')
+    );
+    cleanupActions.push(temporaryDocument.cleanup);
+    const document = temporaryDocument.document;
     const { panel, postedMessages, sendMessageToExtension } = createMockWebviewPanel();
 
     await provider.resolveCustomTextEditor(document, panel, new vscode.CancellationTokenSource().token);

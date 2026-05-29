@@ -106,6 +106,36 @@ export async function openWorkspaceFileWithEditor(relativePath: string, viewType
   return target;
 }
 
+let temporaryMarkdownFileCounter = 0;
+
+export async function createTemporaryMarkdownDocument(fileNamePrefix: string, content: string): Promise<{
+  document: vscode.TextDocument;
+  uri: vscode.Uri;
+  cleanup: () => Promise<void>;
+}> {
+  const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri;
+  assert.ok(workspaceFolder, 'Expected the integration test workspace to be open.');
+
+  const tempDirectory = vscode.Uri.joinPath(workspaceFolder, '.tmp-integration');
+  const fileName = `${fileNamePrefix}-${temporaryMarkdownFileCounter++}.md`;
+  const uri = vscode.Uri.joinPath(tempDirectory, fileName);
+
+  await vscode.workspace.fs.createDirectory(tempDirectory);
+  await vscode.workspace.fs.writeFile(uri, Buffer.from(content, 'utf8'));
+
+  return {
+    document: await vscode.workspace.openTextDocument(uri),
+    uri,
+    cleanup: async () => {
+      try {
+        await vscode.workspace.fs.delete(uri, { useTrash: false });
+      } catch {
+        // Ignore cleanup failures for already-removed temp files.
+      }
+    }
+  };
+}
+
 export async function waitFor<T>(
   getValue: () => T | undefined,
   predicate: (value: T) => boolean,

@@ -915,6 +915,7 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
       const reasonCode = error instanceof EditApplicationError ? error.reasonCode : 'apply-failed';
       const isTargetResolutionSafeBlock = reasonCode === 'missing-target' || reasonCode === 'ambiguous-target';
       const failureClass = isTargetResolutionSafeBlock ? 'anchor_revalidation_failure' : 'apply_failure';
+      const failureEventType = isTargetResolutionSafeBlock ? 'request.invalidated' : 'request.failed';
 
       this.completeScenarioAttempt(applyAttempt, isTargetResolutionSafeBlock ? 'blocked_safe' : 'failure', {
         failureClass,
@@ -933,7 +934,7 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
       });
 
       await postMessageToViewer({
-        type: 'request.invalidated',
+        type: failureEventType,
         sessionId,
         message: applyMessage
       });
