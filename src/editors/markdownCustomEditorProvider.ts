@@ -924,11 +924,17 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     this.sessionController.setActiveRequestSession({
       ...activeRequest,
       draftText,
-      validationState: 'submitting',
-      validationMessage: undefined
+      validationState: 'executing',
+      validationMessage: 'Generating suggestion…'
     });
     this.emitScenarioCheckpoint(submitAttempt, 'request_submitted', 'pass');
 
+    await postMessageToViewer({
+      type: 'request.executing',
+      sessionId,
+      message: 'Generating suggestion…'
+    });
+    this.emitScenarioCheckpoint(submitAttempt, 'pending_visible', 'pass');
     const revalidation = revalidateSelectionAnchor(document.getText(), activeRequest.selectionAnchor);
 
     if (!revalidation.match || revalidation.status === 'ambiguous' || revalidation.status === 'missing') {
