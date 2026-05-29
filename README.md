@@ -25,15 +25,16 @@ If a supported model is unavailable or access is denied, Inlinr keeps the reques
 
 1. Run `npm install`.
 2. Run `npm run compile` for a one-off build or `npm run watch` while developing.
-3. Open Run and Debug, choose `Run Inlinr Extension`, and press `F5` to launch an Extension Development Host.
-4. Run `npm test` to execute the VS Code-hosted unit and integration suites.
-5. Run `npm run package:vsix` to build a Marketplace-ready extension package.
+3. Run `npm test` to execute the default VS Code-hosted integration and unit suites.
+4. To run the dedicated browser-based webview suite, first install the Playwright browser once with `npm run test:webview:install`, then run `npm run test:webview`.
+5. Open Run and Debug, choose `Run Inlinr Extension`, and press `F5` to launch an Extension Development Host.
+6. Run `npm run package:vsix` to build a Marketplace-ready extension package.
 
 ## Project structure
 
 - `src/` contains the extension activation code, custom editor provider, render pipeline, selection-scoped request flow, and document session controller.
 - `media/markdownViewer/` contains the custom editor scripts and stylesheet.
-- `tests/` contains VS Code-hosted unit and integration coverage plus workspace fixtures.
+- `tests/` contains VS Code-hosted unit and integration coverage, Playwright webview contract tests, and workspace fixtures.
 
 ## Repository guide
 
