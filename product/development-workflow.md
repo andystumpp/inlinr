@@ -71,6 +71,8 @@ until the suite stabilizes.
 
 ## When to run browser-based webview contract tests
 
+- Install the Playwright browser once per machine with `npm run test:webview:install` before running
+  `npm run test:webview`.
 - Run them during feature work and bug fixes that touch rendered selection handling, popup behavior,
   selection anchors, rendered selection markup, or bounding-rect and geometry logic.
 - Run them explicitly before merge for pull requests that affect the webview selection-to-popup
@@ -84,6 +86,7 @@ until the suite stabilizes.
 
 - `npm run compile` - TypeScript compilation
 - `npm run test` - runs the integration and unit suites
+- `npm run test:webview:install` - installs the Chromium browser used by the webview contract suite
 - `npm run test:webview` - browser-based webview contract suite
 - `npm run test:integration` - VS Code integration suite
 - `npm run test:unit` - unit suite
