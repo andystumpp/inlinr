@@ -1,8 +1,9 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import process from "node:process";
 
-const repositoryRoot = process.cwd();
+const repositoryRoot = path.resolve(fileURLToPath(import.meta.url), "../../..");
 const readmePath = path.join(repositoryRoot, "README.md");
 const readme = readFileSync(readmePath, "utf8");
 
