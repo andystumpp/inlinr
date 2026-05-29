@@ -44,6 +44,9 @@ jobs:
       - name: Package extension
         run: npm run package:vsix
 
+      - name: Smoke test VSIX
+        run: npm run verify:vsix
+
       - name: Upload VSIX artifact
         uses: actions/upload-artifact@v4
         with:
