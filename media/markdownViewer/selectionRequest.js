@@ -716,6 +716,36 @@
     };
   }
 
+  function handleKeyDown(event) {
+    if (!(event instanceof KeyboardEvent) || event.key !== 'Escape') {
+      return;
+    }
+
+    if (!activeRequest) {
+      return;
+    }
+
+    if (isReviewState()) {
+      event.preventDefault();
+      postMessage({
+        type: 'suggestion.reject',
+        sessionId: activeRequest.sessionId,
+        proposalId: activeRequest.suggestion.proposalId
+      });
+      return;
+    }
+
+    if (!blocksReplacementSelection()) {
+      event.preventDefault();
+      const sessionId = activeRequest.sessionId;
+      clearActiveRequestOverlay();
+      postMessage({
+        type: 'request.cancel',
+        sessionId
+      });
+    }
+  }
+
   function handlePointerDown(event) {
     if (!activeRequest || shouldRenderInlinePanel()) {
       return;
@@ -885,6 +915,7 @@
     renderOverlay();
     window.addEventListener('message', handleExtensionMessage);
     document.addEventListener('pointerdown', handlePointerDown, true);
+    document.addEventListener('keydown', handleKeyDown, true);
     window.addEventListener('resize', syncOverlayPosition);
     window.addEventListener('scroll', syncOverlayPosition, true);
   }
