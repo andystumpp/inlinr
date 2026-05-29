@@ -572,6 +572,11 @@
         <section class="selection-inline-review selection-inline-review-pending" aria-live="polite">
           <p class="selection-inline-review-kicker">${escapeHtml(pendingKicker)}</p>
           <p class="selection-inline-review-status">${escapeHtml(pendingMessage)}</p>
+          <div class="selection-inline-review-skeleton" aria-hidden="true">
+            <div class="selection-inline-review-skeleton-line" style="width: 92%;"></div>
+            <div class="selection-inline-review-skeleton-line" style="width: 78%;"></div>
+            <div class="selection-inline-review-skeleton-line" style="width: 60%;"></div>
+          </div>
         </section>`;
     }
 

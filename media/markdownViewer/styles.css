@@ -241,6 +241,42 @@ body.viewer-shell {
   margin-top: 0.55rem;
 }
 
+.selection-inline-review-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 0.75rem;
+}
+
+.selection-inline-review-skeleton-line {
+  height: 14px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--viewer-accent) 8%, var(--viewer-border)) 25%,
+    color-mix(in srgb, var(--viewer-accent) 14%, var(--viewer-border)) 50%,
+    color-mix(in srgb, var(--viewer-accent) 8%, var(--viewer-border)) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s linear infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .selection-inline-review-skeleton-line {
+    animation: none;
+    background: color-mix(in srgb, var(--viewer-accent) 12%, var(--viewer-border));
+  }
+}
+
 .selection-inline-review-kicker {
   margin: 0 0 0.35rem;
   color: var(--viewer-accent);
