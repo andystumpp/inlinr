@@ -310,7 +310,7 @@ body.viewer-shell {
 
 .selection-request-popover {
   width: 100%;
-  padding: 10px;
+  padding: 16px;
   border: 1px solid color-mix(in srgb, var(--viewer-accent) 18%, var(--viewer-border));
   border-radius: 24px;
   background:
@@ -319,6 +319,46 @@ body.viewer-shell {
   backdrop-filter: blur(16px);
   pointer-events: auto;
   overflow: hidden;
+}
+
+.selection-request-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.selection-request-title {
+  margin: 0;
+  color: var(--viewer-accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.selection-request-hints {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.selection-request-hint {
+  color: var(--viewer-muted);
+  font-size: 0.7rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.selection-request-hint kbd {
+  padding: 2px 6px;
+  border: 1px solid color-mix(in srgb, var(--viewer-border) 80%, transparent);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--vscode-editor-background) 70%, transparent);
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 600;
 }
 
 .selection-request-kicker {
@@ -417,33 +457,40 @@ body.viewer-shell {
   font-weight: 600;
 }
 
-.selection-request-quick-actions {
+.selection-request-quick-prompts {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 8px;
-  margin: 0 0 8px;
+  margin: 10px 0 0;
+  flex-wrap: wrap;
 }
 
-.selection-request-quick-format-button {
-  width: 32px;
-  height: 32px;
-  border: 1px solid color-mix(in srgb, var(--viewer-accent) 24%, var(--viewer-border));
-  border-radius: 10px;
+.selection-request-quick-prompt {
+  padding: 6px 12px;
+  border: 1px solid color-mix(in srgb, var(--viewer-accent) 20%, var(--viewer-border));
+  border-radius: 12px;
   color: var(--vscode-editor-foreground);
   background: color-mix(in srgb, var(--vscode-editor-background) 84%, transparent);
+  font-size: 0.82rem;
+  font-weight: 500;
   cursor: pointer;
   transition: border-color 120ms ease, background 120ms ease, transform 120ms ease;
 }
 
-.selection-request-quick-format-button:hover:not(:disabled) {
-  border-color: color-mix(in srgb, var(--viewer-accent) 42%, var(--viewer-border));
+.selection-request-quick-prompt:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--viewer-accent) 38%, var(--viewer-border));
   background: color-mix(in srgb, var(--viewer-accent) 12%, var(--vscode-editor-background));
   transform: translateY(-1px);
 }
 
-.selection-request-quick-format-button:disabled {
+.selection-request-quick-prompt:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.selection-request-quick-prompt strong,
+.selection-request-quick-prompt em {
+  margin-right: 4px;
 }
 
 .selection-request-suggestion {
@@ -467,7 +514,8 @@ body.viewer-shell {
 .selection-request-actions {
   display: flex;
   justify-content: flex-end;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 14px;
   padding: 0;
 }
 
@@ -497,7 +545,15 @@ body.viewer-shell {
 
 .selection-request-button-secondary {
   color: var(--vscode-editor-foreground);
-  background: transparent;
+  background: color-mix(in srgb, var(--vscode-editor-background) 84%, transparent);
+  border: 1px solid color-mix(in srgb, var(--viewer-accent) 22%, var(--viewer-border));
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.selection-request-button-secondary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--viewer-accent) 10%, var(--vscode-editor-background));
+  border-color: color-mix(in srgb, var(--viewer-accent) 32%, var(--viewer-border));
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
 @media (max-width: 640px) {
