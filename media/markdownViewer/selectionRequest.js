@@ -148,22 +148,11 @@
   }
 
   function getSelectionRectFromRange(range) {
-    const selectionRect = range.getBoundingClientRect();
-
-    if (!selectionRect || (selectionRect.width === 0 && selectionRect.height === 0)) {
-      return null;
-    }
-
-    return {
-      top: selectionRect.top,
-      left: selectionRect.left,
-      bottom: selectionRect.bottom,
-      right: selectionRect.right
-    };
+    return toSelectionRect(range.getBoundingClientRect());
   }
 
   function resolveOverlayPosition(selectionRect) {
-    if (!selectionRect) {
+    if (!selectionRect || !hasFiniteSelectionRect(selectionRect)) {
       return null;
     }
 
@@ -220,7 +209,11 @@
 
     return regionElements.reduce(
       function (combinedRect, element) {
-        const rect = element.getBoundingClientRect();
+        const rect = toSelectionRect(element.getBoundingClientRect());
+
+        if (!rect) {
+          return combinedRect;
+        }
 
         if (!combinedRect) {
           return {
@@ -240,6 +233,42 @@
       },
       null
     );
+  }
+
+  function hasFiniteSelectionRect(selectionRect) {
+    return !!selectionRect &&
+      Number.isFinite(selectionRect.top) &&
+      Number.isFinite(selectionRect.left) &&
+      Number.isFinite(selectionRect.bottom) &&
+      Number.isFinite(selectionRect.right);
+  }
+
+  function toSelectionRect(rect) {
+    if (!rect) {
+      return null;
+    }
+
+    const width = Number.isFinite(rect.width) ? rect.width : rect.right - rect.left;
+    const height = Number.isFinite(rect.height) ? rect.height : rect.bottom - rect.top;
+
+    if (
+      !Number.isFinite(rect.top) ||
+      !Number.isFinite(rect.left) ||
+      !Number.isFinite(rect.bottom) ||
+      !Number.isFinite(rect.right) ||
+      !Number.isFinite(width) ||
+      !Number.isFinite(height) ||
+      (width === 0 && height === 0)
+    ) {
+      return null;
+    }
+
+    return {
+      top: rect.top,
+      left: rect.left,
+      bottom: rect.bottom,
+      right: rect.right
+    };
   }
 
   function findSelectionMessage(currentViewerState) {
@@ -719,6 +748,36 @@
     };
   }
 
+  function handleKeyDown(event) {
+    if (!(event instanceof KeyboardEvent) || event.key !== 'Escape') {
+      return;
+    }
+
+    if (!activeRequest) {
+      return;
+    }
+
+    if (isReviewState()) {
+      event.preventDefault();
+      postMessage({
+        type: 'suggestion.reject',
+        sessionId: activeRequest.sessionId,
+        proposalId: activeRequest.suggestion.proposalId
+      });
+      return;
+    }
+
+    if (!blocksReplacementSelection()) {
+      event.preventDefault();
+      const sessionId = activeRequest.sessionId;
+      clearActiveRequestOverlay();
+      postMessage({
+        type: 'request.cancel',
+        sessionId
+      });
+    }
+  }
+
   function handlePointerDown(event) {
     if (!activeRequest || shouldRenderInlinePanel()) {
       return;
@@ -896,6 +955,7 @@
     renderOverlay();
     window.addEventListener('message', handleExtensionMessage);
     document.addEventListener('pointerdown', handlePointerDown, true);
+    document.addEventListener('keydown', handleKeyDown, true);
     window.addEventListener('resize', syncOverlayPosition);
     window.addEventListener('scroll', syncOverlayPosition, true);
   }

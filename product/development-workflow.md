@@ -55,7 +55,7 @@ In these cases, update `architecture/high-level-architecture.md` first and add a
 
 - **Unit tests:** anchoring, context building, diff generation, validation, and formatting logic.
 - **Integration tests:** VS Code command flow, provider adapters, document update flow, and persistence boundaries.
-- **UI tests:** inline action surfaces, rendered-view behavior, diff presentation, and error handling for core editing flows.
+- **UI tests:** browser-based webview contract tests for inline action surfaces, rendered selection and popup behavior, diff presentation, and core error handling for editing flows.
 - **Manual verification:** targeted editor walkthroughs for critical UX paths when automation is not enough.
 
 ## Current automated test suites
@@ -65,12 +65,29 @@ The repository currently has these automated suites wired into `npm test`:
 - **Unit tests:** under `tests/unit/`
 - **Integration tests:** under `tests/integration/`
 
-Dedicated UI or acceptance suites are not yet established as separate runnable commands.
+The browser-based webview selection contract suite exists as a dedicated command under
+`tests/webview/`, but it is intentionally kept separate from `npm test`, CI, and release verification
+until the suite stabilizes.
+
+## When to run browser-based webview contract tests
+
+- Install the Playwright browser once per machine with `npm run test:webview:install` before running
+  `npm run test:webview`.
+- Run them during feature work and bug fixes that touch rendered selection handling, popup behavior,
+  selection anchors, rendered selection markup, or bounding-rect and geometry logic.
+- Run them explicitly before merge for pull requests that affect the webview selection-to-popup
+  contract.
+- Add or update one of these tests for bugs that originate at the webview DOM selection or popup
+  boundary.
+- Promote them into `npm test`, CI, and release verification only after the suite is stable enough to
+  serve as a blocking gate.
 
 ## Verification commands
 
 - `npm run compile` - TypeScript compilation
-- `npm run test` - runs current integration and unit suites
+- `npm run test` - runs the integration and unit suites
+- `npm run test:webview:install` - installs the Chromium browser used by the webview contract suite
+- `npm run test:webview` - browser-based webview contract suite
 - `npm run test:integration` - VS Code integration suite
 - `npm run test:unit` - unit suite
 - `npm run package:vsix` - package extension artifact
