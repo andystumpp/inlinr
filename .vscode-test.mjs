@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 
@@ -12,5 +12,7 @@ export default {
   extensionDevelopmentPath,
   integrationTestsPath,
   unitTestsPath,
-  launchArgs: [workspacePath, '--disable-extensions']
+  // Keep the workspace in a flag instead of a positional path so Windows test
+  // launches do not treat the fixture folder as the entry module.
+  launchArgs: [`--folder-uri=${pathToFileURL(workspacePath).href}`, '--disable-extensions']
 };

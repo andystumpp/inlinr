@@ -3,6 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { TestRunFailedError, runTests } from '@vscode/test-electron';
+import { buildVsCodeLaunchArgs } from './vscodeLaunchArgs';
 
 async function ensureTestRootPath(targetPath: string): Promise<string> {
   if (process.platform !== 'win32' || !targetPath.includes(' ')) {
@@ -26,7 +27,7 @@ async function runSuite(options: {
   await runTests({
     extensionDevelopmentPath: options.extensionDevelopmentPath,
     extensionTestsPath: options.extensionTestsPath,
-    launchArgs: [options.workspacePath, '--disable-extensions'],
+    launchArgs: buildVsCodeLaunchArgs(options.workspacePath),
     ...(options.version ? { version: options.version } : {})
   });
 }
