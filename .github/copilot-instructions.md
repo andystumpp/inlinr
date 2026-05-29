@@ -32,6 +32,11 @@
 - Do not invent build, test, or lint commands until the corresponding tooling exists in the repo.
 - If a task changes product or architecture direction, update the relevant source doc instead of leaving the decision only in code or chat history.
 - For scenario monitoring work, keep `monitoring/monitoring-scenarios.md` and `monitoring/telemetry-guidelines.md` aligned with the runtime behavior, especially privacy-safe property allowlists, scenario status classification, and Azure fail-open rules.
+- When preparing or reviewing a behavior-touching PR, require a verification section that records the exact commands run or the exact blocker for each required command.
+- Treat `npm run compile` and `npm run test` as the default PR verification commands, and require `npm run test:webview` when the change touches webview behavior, rendered selection, popup behavior, selection anchors, or related geometry logic.
+- Require manual walkthrough notes for user-visible UX or editor-surface changes.
+- For bug-fix PRs, require naming the exact regression test added or updated; if automation is not practical yet, require the PR to explain why and name the manual verification that covers the fix.
+- If expected local verification is blocked, surface it as a workflow defect to fix or track explicitly rather than leaving it as passive PR context.
 
 ## Code review guidelines
 

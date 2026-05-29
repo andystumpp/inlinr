@@ -49,7 +49,7 @@ In these cases, update `architecture/high-level-architecture.md` first and add a
 - Prefer fast, deterministic tests over brittle or slow tests.
 - Cover rendered-view alignment, selection anchoring, diff application, Markdown integrity, and privacy boundaries first.
 - Once user scenarios are formally captured, preserve them or intentionally update the source docs and related tests.
-- Bug fixes should add or update a test that would have caught the issue.
+- Bug fixes should add or update a test that would have caught the issue, and the PR should name the exact regression test that now covers the fix.
 
 ## Expected test layers
 
@@ -92,3 +92,12 @@ until the suite stabilizes.
 - `npm run test:unit` - unit suite
 - `npm run package:vsix` - package extension artifact
 - `npm run verify:release` - compile, test, and package release artifact
+
+## Pull request verification requirements
+
+- Behavior-touching PRs should include a verification section that records the exact commands run or the exact blocker for each required command.
+- The default verification set is `npm run compile` and `npm run test`.
+- PRs that affect rendered selection, popup behavior, selection anchors, rendered selection markup, or related geometry logic should also record `npm run test:webview`.
+- PRs with user-visible UX or editor-surface changes should include short manual walkthrough notes describing what was exercised and what happened.
+- Bug-fix PRs should name the exact regression test added or updated for the fix. If automation is not yet practical, the PR should say why and name the manual verification that covers the bug.
+- If expected local verification is blocked, treat that as a workflow defect to surface explicitly and track, not as passive PR context.
