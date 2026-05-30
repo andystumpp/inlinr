@@ -53,10 +53,36 @@
     "commands": [
       {
         "command": "inlinr.reopenWithDefaultEditor",
-        "title": "Reopen With Default Text Editor",
+        "title": "Open Raw Markdown",
+        "category": "Inlinr"
+      },
+      {
+        "command": "inlinr.openWithInlinrViewer",
+        "title": "Open in Inlinr Viewer",
         "category": "Inlinr"
       }
     ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "inlinr.reopenWithDefaultEditor",
+          "when": "activeCustomEditorId == inlinr.markdownViewer",
+          "group": "navigation"
+        },
+        {
+          "command": "inlinr.openWithInlinrViewer",
+          "when": "(resourceExtname == .md || resourceExtname == .markdown) && activeCustomEditorId != inlinr.markdownViewer",
+          "group": "navigation"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "inlinr.openWithInlinrViewer",
+          "when": "resourceExtname == .md || resourceExtname == .markdown",
+          "group": "navigation"
+        }
+      ]
+    },
     "customEditors": [
       {
         "viewType": "inlinr.markdownViewer",
@@ -64,6 +90,9 @@
         "selector": [
           {
             "filenamePattern": "*.md"
+          },
+          {
+            "filenamePattern": "*.markdown"
           }
         ],
         "priority": "default"
