@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { reopenWithDefaultEditor } from './commands/reopenWithDefaultEditor';
 import { MarkdownCustomEditorProvider } from './editors/markdownCustomEditorProvider';
+import { FirstActionGuidanceState } from './onboarding/firstActionGuidanceState';
 import { VscodeLanguageModelExecutionService } from './requests/executionService';
 import { InMemoryRequestService } from './requests/requestService';
 import { DocumentSessionController } from './sessions/documentSessionController';
@@ -12,19 +13,21 @@ export function activate(context: vscode.ExtensionContext): void {
   const sessionController = new DocumentSessionController();
   const requestService = new InMemoryRequestService<SelectionScopedRequestPayload>();
   const executionService = new VscodeLanguageModelExecutionService(context);
+  const firstActionGuidanceState = new FirstActionGuidanceState(context.globalState);
   const telemetryAdapter = createTelemetryAdapter({
     environment: process.env,
     cloudRoleName: getTelemetryCloudRoleName(process.env, context.extension.id),
     samplingEnabled: isTelemetrySamplingConfigured(process.env),
     mode: vscode.env.isTelemetryEnabled ? undefined : 'noop'
   });
-  const provider = new MarkdownCustomEditorProvider(
-    context.extensionUri,
-    sessionController,
-    requestService,
-    executionService,
-    telemetryAdapter
-  );
+    const provider = new MarkdownCustomEditorProvider(
+      context.extensionUri,
+      sessionController,
+      requestService,
+      executionService,
+      telemetryAdapter,
+      firstActionGuidanceState
+    );
 
   context.subscriptions.push(
     new vscode.Disposable(() => {

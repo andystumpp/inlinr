@@ -28,6 +28,13 @@ export interface ActiveRequestViewState {
   suggestion?: SuggestedEditViewState;
 }
 
+export interface FirstActionGuidanceViewState {
+  title: string;
+  body: string;
+  dismissLabel: string;
+  completionState: 'pending';
+}
+
 export interface ViewerRenderedState {
   kind: 'rendered';
   uri: string;
@@ -38,6 +45,7 @@ export interface ViewerRenderedState {
   canFallbackToDefaultEditor: false;
   html: string;
   selectionMode: 'enabled';
+  firstActionGuidance: FirstActionGuidanceViewState | null;
   activeRequest: ActiveRequestViewState | null;
   selectionMetadata: RenderedSelectionMetadata;
 }
@@ -78,6 +86,21 @@ function isSuggestedEditViewState(value: unknown): value is SuggestedEditViewSta
   );
 }
 
+function isFirstActionGuidanceViewState(value: unknown): value is FirstActionGuidanceViewState {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const candidate = value as Partial<FirstActionGuidanceViewState>;
+
+  return (
+    isNonEmptyString(candidate.title) &&
+    isNonEmptyString(candidate.body) &&
+    isNonEmptyString(candidate.dismissLabel) &&
+    candidate.completionState === 'pending'
+  );
+}
+
 export function isActiveRequestViewState(value: unknown): value is ActiveRequestViewState {
   if (!value || typeof value !== 'object') {
     return false;
@@ -102,6 +125,7 @@ export function createRenderedState(input: {
   documentVersion: number;
   html: string;
   selectionMetadata?: RenderedSelectionMetadata;
+  firstActionGuidance?: FirstActionGuidanceViewState | null;
   activeRequest?: ActiveRequestViewState | null;
 }): ViewerRenderedState {
   return {
@@ -111,11 +135,12 @@ export function createRenderedState(input: {
     documentVersion: input.documentVersion,
     previewOnly: true,
     sourceMode: false,
-    canFallbackToDefaultEditor: false,
-    html: input.html,
-    selectionMode: 'enabled',
-    activeRequest: input.activeRequest ?? null,
-    selectionMetadata: input.selectionMetadata ?? EMPTY_RENDERED_SELECTION_METADATA
+      canFallbackToDefaultEditor: false,
+      html: input.html,
+      selectionMode: 'enabled',
+      firstActionGuidance: input.firstActionGuidance ?? null,
+      activeRequest: input.activeRequest ?? null,
+      selectionMetadata: input.selectionMetadata ?? EMPTY_RENDERED_SELECTION_METADATA
   };
 }
 
@@ -158,6 +183,7 @@ export function isViewerState(value: unknown): value is ViewerState {
       candidate.sourceMode === false &&
       isNonEmptyString(candidate.html) &&
       candidate.selectionMode === 'enabled' &&
+      (candidate.firstActionGuidance === null || isFirstActionGuidanceViewState(candidate.firstActionGuidance)) &&
       (candidate.activeRequest === null || isActiveRequestViewState(candidate.activeRequest)) &&
       assertRenderedSelectionMetadata(candidate.selectionMetadata)
     );

@@ -70,6 +70,7 @@ flowchart LR
 | Markdown Render Pipeline | Converts Markdown text into locally rendered preview content for the custom editor webview, including local Mermaid diagram handling. |
 | Selection and Anchor Logic | Tracks what text the request targets and keeps that intent stable as edits happen. |
 | Anchored Request Popup | Webview-owned transient overlay that appears near the live selection and keeps request entry inside the Inlinr surface while the extension host validates source-backed targeting. |
+| First-Action Guidance State | Keeps a one-time, local-only onboarding hint eligibility record in VS Code global state so new users get in-document guidance without syncing document content anywhere else. |
 | Scoped Request Builder | Packages the selected text and nearby context for an AI edit request. |
 | AI Provider Client | Calls the configured model backend through supported VS Code extension APIs rather than another extension's chat UI. |
 | Suggestion Normalizer | Converts provider output into a predictable suggested edit shape. |
@@ -82,6 +83,7 @@ flowchart LR
 - Keep the document surface under Inlinr control so viewing and later editing share one editor model.
 - Keep the editing loop precise and selection-scoped.
 - Keep transient overlay state in the webview and keep source-backed validation in the extension host.
+- Keep first-run onboarding state local to the VS Code profile and persist only completion metadata, never document content.
 - Keep provider details behind a stable contract.
 - Keep telemetry scenario-based, sanitized, and emitted from the extension-host boundary.
 - Keep monitoring alert configuration repo-owned and workflow-deployed rather than manually managed in Azure.

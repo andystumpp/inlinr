@@ -1,6 +1,10 @@
 import path from 'node:path';
 import * as vscode from 'vscode';
 import {
+  FirstActionGuidanceState,
+  type FirstActionGuidanceCompletionSource
+} from '../onboarding/firstActionGuidanceState';
+import {
   renderMarkdown,
   renderMarkdownDocumentWithMetadata,
   toViewerError
@@ -252,7 +256,10 @@ function blocksReplacementSelection(activeRequest: TrackedActiveRequestSession):
 
 export function createViewerStateForDocument(
   document: vscode.TextDocument,
-  activeRequest: TrackedActiveRequestSession | null = null
+  activeRequest: TrackedActiveRequestSession | null = null,
+  options?: {
+    firstActionGuidance?: ReturnType<FirstActionGuidanceState['getPendingViewState']>;
+  }
 ): ViewerState {
   const title = getDocumentTitle(document);
 
@@ -275,6 +282,7 @@ export function createViewerStateForDocument(
       documentVersion: document.version,
       html: renderedDocument.html,
       selectionMetadata: renderedDocument.selectionMetadata,
+      firstActionGuidance: options?.firstActionGuidance ?? null,
       activeRequest: toActiveRequestViewState(activeRequest)
     });
   } catch (error) {
@@ -304,7 +312,8 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     private readonly sessionController: DocumentSessionController,
     private readonly requestService: RequestService<SelectionScopedRequestPayload> = new UnsupportedRequestService<SelectionScopedRequestPayload>(),
     private readonly executionService: ExecutionService = new UnsupportedExecutionService(),
-    private readonly telemetryAdapter?: TelemetryAdapter
+    private readonly telemetryAdapter?: TelemetryAdapter,
+    private readonly firstActionGuidanceState?: FirstActionGuidanceState
   ) {
     this.disposables.push(
       vscode.workspace.onDidChangeTextDocument((event) => {
@@ -363,7 +372,10 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
 
       const state = createViewerStateForDocument(
         targetDocument,
-        this.sessionController.getActiveRequestSession(targetDocument)
+        this.sessionController.getActiveRequestSession(targetDocument),
+        {
+          firstActionGuidance: this.firstActionGuidanceState?.getPendingViewState() ?? null
+        }
       );
 
       if (state.kind === 'rendered') {
@@ -466,6 +478,9 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
         return;
       case 'request.cancel':
         this.sessionController.clearActiveRequestSession(message.sessionId);
+        return;
+      case 'firstActionGuidance.dismiss':
+        await this.completeFirstActionGuidance('dismissed');
         return;
       case 'suggestion.apply':
         await this.applyActiveSuggestion(document, message.sessionId, message.proposalId, postMessageToViewer);
@@ -575,6 +590,8 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     if (!activeRequest) {
       return;
     }
+
+    await this.completeFirstActionGuidance('selection');
 
     this.emitScenarioCheckpoint(popupAttempt, 'selection_recognized', 'pass');
     this.emitScenarioCheckpoint(popupAttempt, 'popup_shown', 'pass', {
@@ -807,6 +824,7 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
         durationMs: Math.max(0, Date.now() - submitStartedAt)
       });
       this.completeScenarioAttempt(submitAttempt, 'success');
+      await this.completeFirstActionGuidance('successful-request');
 
       return;
     } catch (error) {
@@ -866,6 +884,14 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
 
       return;
     }
+  }
+
+  private async completeFirstActionGuidance(completionSource: FirstActionGuidanceCompletionSource): Promise<void> {
+    if (!this.firstActionGuidanceState) {
+      return;
+    }
+
+    await this.firstActionGuidanceState.markCompleted(completionSource);
   }
 
   private async applyActiveSuggestion(

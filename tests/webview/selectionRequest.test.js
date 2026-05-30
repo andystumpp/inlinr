@@ -3,9 +3,13 @@ const {
   cancelActiveRequest,
   clearPostedMessages,
   createAcceptedSelectionMessage,
+  createFirstActionGuidanceState,
+  dismissFirstActionGuidance,
+  getFirstActionGuidance,
   findRegionIdContainingText,
   getPostedMessages,
   getTargetedRegionIds,
+  isFirstActionGuidanceHidden,
   isRequestRootHidden,
   mountWebview,
   postExtensionMessage,
@@ -15,6 +19,53 @@ const {
 } = require('./helpers/selectionRequestHarness');
 
 test.describe('webview selection request contract', () => {
+  test('renders first-action guidance when the viewer state includes it', async ({ page }) => {
+    await mountWebview(page, {
+      markdown: 'Alpha beta gamma delta.',
+      firstActionGuidance: createFirstActionGuidanceState()
+    });
+
+    expect(await isFirstActionGuidanceHidden(page)).toBe(false);
+    await expect(getFirstActionGuidance(page)).toContainText('Select text to start editing');
+    await expect(getFirstActionGuidance(page)).toContainText(
+      'Highlight Markdown you want to change, then describe the edit.'
+    );
+  });
+
+  test('dismisses first-action guidance and notifies the extension', async ({ page }) => {
+    await mountWebview(page, {
+      markdown: 'Alpha beta gamma delta.',
+      firstActionGuidance: createFirstActionGuidanceState()
+    });
+
+    await dismissFirstActionGuidance(page);
+
+    expect(await isFirstActionGuidanceHidden(page)).toBe(true);
+    await expect.poll(() => getPostedMessages(page)).toContainEqual({
+      type: 'firstActionGuidance.dismiss'
+    });
+  });
+
+  test('hides first-action guidance after the first accepted selection', async ({ page }) => {
+    await mountWebview(page, {
+      markdown: 'Alpha beta gamma delta.',
+      firstActionGuidance: createFirstActionGuidanceState()
+    });
+    const regionId = await findRegionIdContainingText(page, 'Alpha beta gamma delta.');
+
+    await selectFragment(page, {
+      startRegionId: regionId,
+      startText: 'beta',
+      endRegionId: regionId,
+      endText: 'gamma'
+    });
+
+    const [captureMessage] = await getPostedMessages(page);
+    await postExtensionMessage(page, createAcceptedSelectionMessage(captureMessage));
+
+    expect(await isFirstActionGuidanceHidden(page)).toBe(true);
+  });
+
   test('captures a normal text selection and opens the popup after acceptance', async ({ page }) => {
     const fixture = await mountWebview(page, {
       markdown: 'Alpha beta gamma delta.'
@@ -262,5 +313,13 @@ test.describe('webview selection request contract', () => {
     expect(await isRequestRootHidden(page)).toBe(true);
     await expect(page.locator('[data-selection-inline-review-root]')).toBeHidden();
     expect(await getTargetedRegionIds(page)).toEqual([]);
+  });
+
+  test('keeps first-action guidance hidden when the viewer state omits it', async ({ page }) => {
+    await mountWebview(page, {
+      markdown: 'Alpha beta gamma delta.'
+    });
+
+    expect(await isFirstActionGuidanceHidden(page)).toBe(true);
   });
 });

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import * as vscode from 'vscode';
+import { MarkdownCustomEditorProvider } from '../../src/editors/markdownCustomEditorProvider';
 import {
   ExecutionServiceError,
   type ExecutionAvailability,
@@ -9,8 +10,11 @@ import {
 } from '../../src/requests/executionService';
 import { extractMarkedDocumentRange, getSelectionMarkerTokens } from '../../src/requests/documentDraftMarkers';
 import type { SelectionScopedRequestPayload } from '../../src/requests/requestPayloadBuilder';
+import type { RequestService } from '../../src/requests/requestService';
+import { DocumentSessionController } from '../../src/sessions/documentSessionController';
 import { RecordingTelemetrySink } from '../../src/telemetry/applicationInsightsSink';
 import { createTelemetryAdapter } from '../../src/telemetry/telemetryAdapter';
+import type { TelemetryAdapter } from '../../src/telemetry/telemetryAdapter';
 
 export interface FakeExecutionOutcome {
   kind: 'success' | 'failure' | 'unavailable';
@@ -208,6 +212,70 @@ export function getActiveCustomTabInput(): vscode.TabInputCustom | undefined {
 
 export function getExtensionUri(): vscode.Uri {
   return vscode.Uri.file(path.resolve(__dirname, '..', '..', '..'));
+}
+
+export interface MockMemento extends vscode.Memento {
+  snapshot(): Record<string, unknown>;
+}
+
+export function createMockMemento(initialState: Record<string, unknown> = {}): MockMemento {
+  const state = new Map<string, unknown>(Object.entries(initialState));
+
+  return {
+    keys: () => [...state.keys()],
+    get: <T>(key: string, defaultValue?: T) => {
+      return (state.has(key) ? state.get(key) : defaultValue) as T;
+    },
+    update: async (key: string, value: unknown) => {
+      if (value === undefined) {
+        state.delete(key);
+        return;
+      }
+
+      state.set(key, value);
+    },
+    snapshot: () => Object.fromEntries(state.entries())
+  };
+}
+
+export function createMockExtensionContext(options?: {
+  globalStateValues?: Record<string, unknown>;
+  workspaceStateValues?: Record<string, unknown>;
+}): vscode.ExtensionContext & { globalState: MockMemento; workspaceState: MockMemento } {
+  const extensionPath = path.resolve(__dirname, '..', '..', '..');
+  const globalState = createMockMemento(options?.globalStateValues);
+  const workspaceState = createMockMemento(options?.workspaceStateValues);
+
+  return {
+    extensionPath,
+    extensionUri: vscode.Uri.file(extensionPath),
+    globalState,
+    workspaceState,
+    subscriptions: []
+  } as unknown as vscode.ExtensionContext & { globalState: MockMemento; workspaceState: MockMemento };
+}
+
+export function createCustomEditorProviderHarness(options?: {
+  sessionController?: DocumentSessionController;
+  requestService?: RequestService<SelectionScopedRequestPayload>;
+  executionService?: ExecutionService;
+  telemetryAdapter?: TelemetryAdapter;
+}): {
+  provider: MarkdownCustomEditorProvider;
+  sessionController: DocumentSessionController;
+} {
+  const sessionController = options?.sessionController ?? new DocumentSessionController();
+
+  return {
+    provider: new MarkdownCustomEditorProvider(
+      getExtensionUri(),
+      sessionController,
+      options?.requestService,
+      options?.executionService,
+      options?.telemetryAdapter
+    ),
+    sessionController
+  };
 }
 
 export function createRecordingTelemetryHarness() {

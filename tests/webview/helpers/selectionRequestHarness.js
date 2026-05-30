@@ -31,6 +31,11 @@ function buildHarnessHtml(markdown, options = {}) {
     selectionMetadata,
     activeRequest: options.activeRequest ?? null
   });
+  if (options.firstActionGuidance) {
+    state.firstActionGuidance = {
+      ...options.firstActionGuidance
+    };
+  }
   const serializedState = escapeJsonForHtml(JSON.stringify(state));
 
   return {
@@ -69,6 +74,7 @@ function buildHarnessHtml(markdown, options = {}) {
     <main class="viewer-main">
       <article class="viewer-document markdown-body" data-selection-mode="${state.selectionMode}">${state.html}</article>
       <section class="selection-inline-review-root" data-selection-inline-review-root hidden></section>
+      <aside class="first-action-guidance-root" data-first-action-guidance-root hidden></aside>
       <aside class="selection-request-root" data-selection-request-root hidden></aside>
     </main>
     <script>
@@ -273,6 +279,27 @@ async function isRequestRootHidden(page) {
   return page.locator('[data-selection-request-root]').evaluate((element) => element.hidden);
 }
 
+function createFirstActionGuidanceState(overrides = {}) {
+  return {
+    title: overrides.title ?? 'Select text to start editing',
+    body: overrides.body ?? 'Highlight Markdown you want to change, then describe the edit.',
+    dismissLabel: overrides.dismissLabel ?? 'Got it',
+    completionState: overrides.completionState ?? 'pending'
+  };
+}
+
+function getFirstActionGuidance(page) {
+  return page.locator('[data-first-action-guidance-root]');
+}
+
+async function isFirstActionGuidanceHidden(page) {
+  return getFirstActionGuidance(page).evaluate((element) => element.hidden);
+}
+
+async function dismissFirstActionGuidance(page) {
+  await page.locator('[data-first-action-guidance-dismiss]').click();
+}
+
 async function getTargetedRegionIds(page) {
   return page.locator('.selection-request-target').evaluateAll((elements) => {
     return elements
@@ -297,10 +324,14 @@ module.exports = {
   cancelActiveRequest,
   clearPostedMessages,
   createAcceptedSelectionMessage,
+  createFirstActionGuidanceState,
+  dismissFirstActionGuidance,
   findRegionIdContainingText,
+  getFirstActionGuidance,
   getPostedMessages,
   getRegionIds,
   getTargetedRegionIds,
+  isFirstActionGuidanceHidden,
   isRequestRootHidden,
   mountWebview,
   postExtensionMessage,
