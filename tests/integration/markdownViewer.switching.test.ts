@@ -7,7 +7,7 @@ import {
   createMockWebviewPanel,
   getExtensionUri,
   getWorkspaceFile,
-  openWorkspaceFile,
+  openWorkspaceFileWithEditor,
   waitFor
 } from './helpers';
 
@@ -36,7 +36,13 @@ suite('Markdown viewer switching', () => {
   });
 
   test('openWithInlinrViewer reopens an active Markdown text editor in the Inlinr viewer', async () => {
-    const markdownUri = await openWorkspaceFile('sample.md');
+    const markdownUri = await openWorkspaceFileWithEditor('sample.md', 'default');
+
+    await waitFor(
+      () => vscode.window.tabGroups.activeTabGroup.activeTab?.input,
+      (input): input is vscode.TabInputText =>
+        input instanceof vscode.TabInputText && input.uri.toString() === markdownUri.toString()
+    );
 
     await vscode.commands.executeCommand('inlinr.openWithInlinrViewer');
 
