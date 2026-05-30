@@ -210,7 +210,7 @@ function resolveSelectionRangeFromMetadata(
       const proseStartOffset = startRegion.sourceStart + (syntaxMatch ? syntaxMatch[0].length : 0);
       const proseEndOffset = startRegion.sourceStart + regionText.trimEnd().length;
 
-      const coversFullProse = sourceStart <= proseStartOffset + 1 && sourceEnd >= proseEndOffset;
+      const coversFullProse = sourceStart <= proseStartOffset && sourceEnd >= proseEndOffset;
 
       if (!coversFullProse) {
         return {

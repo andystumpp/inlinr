@@ -849,7 +849,10 @@
         if (pendingSelectionRange && typeof CSS !== 'undefined' && CSS.highlights) {
           try {
             CSS.highlights.set('inlinr-active-selection', new Highlight(pendingSelectionRange));
-          } catch {}
+          } catch {
+            // CSS Custom Highlight API may not be available in all environments;
+            // the precise highlight is a visual enhancement only, so failures are safe to ignore.
+          }
         }
 
         pendingSelectionRange = null;
