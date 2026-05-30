@@ -5,6 +5,7 @@
   let viewerState = null;
   let activeRequest = null;
   let pendingSelectionRect = null;
+  let pendingSelectionRange = null;
   let requestRoot = null;
   let inlineReviewRoot = null;
   let mermaidInitialized = false;
@@ -302,6 +303,7 @@
     }
 
     pendingSelectionRect = selectionRect;
+    pendingSelectionRange = range;
 
     return {
       type: 'selection.capture',
@@ -329,6 +331,11 @@
   function clearActiveRequestOverlay() {
     activeRequest = null;
     pendingSelectionRect = null;
+    pendingSelectionRange = null;
+
+    if (typeof CSS !== 'undefined' && CSS.highlights) {
+      CSS.highlights.delete('inlinr-active-selection');
+    }
 
     clearInlineReview();
     syncSelectedRegionState();
@@ -838,10 +845,22 @@
           suggestion: undefined,
           selectionRect: pendingSelectionRect || getSelectionRectFromRegionIds(message.selectedRegionIds)
         };
+
+        if (pendingSelectionRange && typeof CSS !== 'undefined' && CSS.highlights) {
+          try {
+            CSS.highlights.set('inlinr-active-selection', new Highlight(pendingSelectionRange));
+          } catch {
+            // CSS Custom Highlight API may not be available in all environments;
+            // the precise highlight is a visual enhancement only, so failures are safe to ignore.
+          }
+        }
+
+        pendingSelectionRange = null;
         renderOverlay();
         return;
       case 'selection.rejected':
         pendingSelectionRect = null;
+        pendingSelectionRange = null;
         return;
       case 'request.invalidated':
         if (!activeRequest || activeRequest.sessionId !== message.sessionId) {

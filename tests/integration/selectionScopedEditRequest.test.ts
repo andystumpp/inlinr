@@ -1295,4 +1295,66 @@ suite('Selection-scoped edit request integration', () => {
 
     provider.dispose();
   });
+
+  test('uses exact selection range when only a single word within a list item is selected', async () => {
+    const requestService = new InMemoryRequestService<SelectionScopedRequestPayload>();
+    const sessionController = new DocumentSessionController();
+    const provider = new MarkdownCustomEditorProvider(
+      getExtensionUri(),
+      sessionController,
+      requestService,
+      new FakeExecutionService(createSuccessfulExecutionOutcome('Gamma'))
+    );
+    const temporaryDocument = await createTemporaryMarkdownDocument(
+      'partial-word-selection',
+      ['# Partial Word', '', '- Alpha item', '- Beta item', '', 'Trailing paragraph.'].join('\n')
+    );
+    cleanupActions.push(temporaryDocument.cleanup);
+    const document = temporaryDocument.document;
+    const { panel, postedMessages, sendMessageToExtension } = createMockWebviewPanel();
+    const selectionCapture = buildSelectionCaptureFromText(document.getText(), 'Beta');
+
+    await provider.resolveCustomTextEditor(document, panel, new vscode.CancellationTokenSource().token);
+
+    sendMessageToExtension({
+      type: 'selection.capture',
+      documentVersion: document.version,
+      selectedText: 'Beta',
+      ...selectionCapture,
+      selectionRect: {
+        top: 180,
+        left: 220,
+        bottom: 208,
+        right: 300
+      }
+    });
+
+    await waitFor(
+      () => findPostedMessage<{ type: 'selection.accepted' }>(postedMessages, 'selection.accepted'),
+      (message) => Boolean(message)
+    );
+
+    sendMessageToExtension({
+      type: 'request.draftChanged',
+      sessionId: 'request-session-0',
+      draftText: 'Replace this word.'
+    });
+    sendMessageToExtension({
+      type: 'request.submit',
+      sessionId: 'request-session-0',
+      draftText: 'Replace this word.'
+    });
+
+    await waitFor(
+      () => requestService.getLastSubmittedPayload(),
+      (payload): payload is SelectionScopedRequestPayload => payload !== null
+    );
+
+    const payload = requestService.getLastSubmittedPayload();
+
+    assert.ok(payload);
+    assert.equal(payload.selectedMarkdown.replace(/\r\n/g, '\n'), 'Beta');
+
+    provider.dispose();
+  });
 });
