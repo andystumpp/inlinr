@@ -15,6 +15,65 @@ const {
 } = require('./helpers/selectionRequestHarness');
 
 test.describe('webview selection request contract', () => {
+  test('shows the popup quick action buttons after a selection is accepted', async ({ page }) => {
+    await mountWebview(page, {
+      markdown: 'Alpha beta gamma delta.'
+    });
+    const regionId = await findRegionIdContainingText(page, 'Alpha beta gamma delta.');
+
+    await selectFragment(page, {
+      startRegionId: regionId,
+      startText: 'beta',
+      endRegionId: regionId,
+      endText: 'gamma'
+    });
+
+    const [captureMessage] = await getPostedMessages(page);
+    await postExtensionMessage(page, createAcceptedSelectionMessage(captureMessage));
+
+    await expect(page.locator('[data-selection-request-action-kind="bold"]')).toBeVisible();
+    await expect(page.locator('[data-selection-request-action-kind="italic"]')).toBeVisible();
+    await expect(page.locator('[data-selection-request-action-kind="clearer"]')).toBeVisible();
+    await expect(page.locator('[data-selection-request-action-kind="tighten"]')).toBeVisible();
+    await expect(page.locator('[data-selection-request-action-kind="add-example"]')).toBeVisible();
+  });
+
+  test('submits the make clearer quick action from the popup', async ({ page }) => {
+    await mountWebview(page, {
+      markdown: 'Alpha beta gamma delta.'
+    });
+    const regionId = await findRegionIdContainingText(page, 'Alpha beta gamma delta.');
+
+    await selectFragment(page, {
+      startRegionId: regionId,
+      startText: 'beta',
+      endRegionId: regionId,
+      endText: 'gamma'
+    });
+
+    const [captureMessage] = await getPostedMessages(page);
+    await postExtensionMessage(page, createAcceptedSelectionMessage(captureMessage));
+    await clearPostedMessages(page);
+
+    await page.locator('[data-selection-request-action-kind="clearer"]').click();
+
+    await expect(page.locator('[data-selection-request-draft]')).toHaveValue(
+      'Make the selected text clearer without changing its meaning.'
+    );
+    expect(await getPostedMessages(page)).toEqual([
+      {
+        type: 'request.draftChanged',
+        sessionId: 'session-1',
+        draftText: 'Make the selected text clearer without changing its meaning.'
+      },
+      {
+        type: 'request.submit',
+        sessionId: 'session-1',
+        draftText: 'Make the selected text clearer without changing its meaning.'
+      }
+    ]);
+  });
+
   test('captures a normal text selection and opens the popup after acceptance', async ({ page }) => {
     const fixture = await mountWebview(page, {
       markdown: 'Alpha beta gamma delta.'
