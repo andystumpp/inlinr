@@ -3,7 +3,15 @@ import * as vscode from 'vscode';
 import { MarkdownCustomEditorProvider } from '../../src/editors/markdownCustomEditorProvider';
 import { FirstActionGuidanceState } from '../../src/onboarding/firstActionGuidanceState';
 import { DocumentSessionController } from '../../src/sessions/documentSessionController';
-import { closeAllEditors, createMockMemento, createMockWebviewPanel, getExtensionUri, getWorkspaceFile } from './helpers';
+import {
+  closeAllEditors,
+  createMockMemento,
+  createMockWebviewPanel,
+  getExtensionUri,
+  getWorkspaceFile,
+  openWorkspaceFileWithEditor,
+  waitFor
+} from './helpers';
 
 suite('Markdown viewer switching', () => {
   teardown(async () => {
@@ -55,5 +63,39 @@ suite('Markdown viewer switching', () => {
     assert.match(secondPanel.webview.html, /data-first-action-guidance-state="hidden"/);
 
     provider.dispose();
+  });
+
+  test('openWithInlinrViewer reopens an active Markdown text editor in the Inlinr viewer', async () => {
+    const markdownUri = await openWorkspaceFileWithEditor('sample.md', 'default');
+
+    await waitFor(
+      () => vscode.window.tabGroups.activeTabGroup.activeTab?.input,
+      (input): input is vscode.TabInputText =>
+        input instanceof vscode.TabInputText && input.uri.toString() === markdownUri.toString()
+    );
+
+    await vscode.commands.executeCommand('inlinr.openWithInlinrViewer');
+
+    await waitFor(
+      () => vscode.window.tabGroups.activeTabGroup.activeTab?.input,
+      (input): input is vscode.TabInputCustom =>
+        input instanceof vscode.TabInputCustom &&
+        input.viewType === MarkdownCustomEditorProvider.viewType &&
+        input.uri.toString() === markdownUri.toString()
+    );
+  });
+
+  test('openWithInlinrViewer reopens an explicit Markdown URI in the Inlinr viewer', async () => {
+    const markdownUri = getWorkspaceFile('second.md');
+
+    await vscode.commands.executeCommand('inlinr.openWithInlinrViewer', markdownUri);
+
+    await waitFor(
+      () => vscode.window.tabGroups.activeTabGroup.activeTab?.input,
+      (input): input is vscode.TabInputCustom =>
+        input instanceof vscode.TabInputCustom &&
+        input.viewType === MarkdownCustomEditorProvider.viewType &&
+        input.uri.toString() === markdownUri.toString()
+    );
   });
 });

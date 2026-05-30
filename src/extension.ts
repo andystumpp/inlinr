@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { openWithInlinrViewer } from './commands/openWithInlinrViewer';
 import { reopenWithDefaultEditor } from './commands/reopenWithDefaultEditor';
 import { MarkdownCustomEditorProvider } from './editors/markdownCustomEditorProvider';
 import { FirstActionGuidanceState } from './onboarding/firstActionGuidanceState';
@@ -39,6 +40,9 @@ export function activate(context: vscode.ExtensionContext): void {
     }),
     vscode.commands.registerCommand('inlinr.reopenWithDefaultEditor', (uri?: vscode.Uri) => {
       return reopenWithDefaultEditor(uri);
+    }),
+    vscode.commands.registerCommand('inlinr.openWithInlinrViewer', (uri?: vscode.Uri) => {
+      return openWithInlinrViewer(uri);
     })
   );
 }

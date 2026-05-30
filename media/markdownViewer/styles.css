@@ -31,12 +31,22 @@ body.viewer-shell {
 }
 
 .viewer-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 20px;
   padding: 20px 24px;
   border: 1px solid var(--viewer-border);
   border-radius: 20px;
   background: var(--viewer-surface);
   box-shadow: var(--viewer-shadow);
+}
+
+.viewer-header-content {
+  min-width: 0;
+  flex: 1 1 420px;
 }
 
 .viewer-kicker {
@@ -59,6 +69,26 @@ body.viewer-shell {
   color: var(--viewer-muted);
   font-size: 0.92rem;
   word-break: break-word;
+}
+
+.viewer-link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  padding: 0.5rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--viewer-accent) 38%, transparent);
+  color: var(--viewer-accent);
+  text-decoration: none;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--viewer-accent) 10%, transparent);
+}
+
+.viewer-link-button:hover,
+.viewer-link-button:focus-visible {
+  border-color: var(--viewer-accent);
+  background: color-mix(in srgb, var(--viewer-accent) 16%, transparent);
 }
 
 .viewer-main {
@@ -246,6 +276,10 @@ body.viewer-shell {
 .viewer-error-message {
   margin: 0 0 18px;
   line-height: 1.6;
+}
+
+.viewer-error-recovery {
+  margin: 0 0 18px;
 }
 
 .viewer-error-meta {
@@ -623,6 +657,10 @@ body.viewer-shell {
   .viewer-main {
     padding-left: 18px;
     padding-right: 18px;
+  }
+
+  .viewer-link-button {
+    width: 100%;
   }
 
   .selection-request-root {

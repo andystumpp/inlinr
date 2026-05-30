@@ -29,6 +29,15 @@ function renderBody(state: ViewerState): string {
       <p class="viewer-error-badge">Render failed</p>
       <h2 class="viewer-error-title">Preview unavailable</h2>
       <p class="viewer-error-message">${escapeHtml(state.message)}</p>
+      <p class="viewer-error-recovery">
+        <a
+          class="viewer-link-button"
+          data-testid="viewer-error-open-raw-markdown"
+          href="command:inlinr.reopenWithDefaultEditor"
+        >
+          Open Raw Markdown
+        </a>
+      </p>
       <dl class="viewer-error-meta">
         <div>
           <dt>Reason</dt>
@@ -36,7 +45,7 @@ function renderBody(state: ViewerState): string {
         </div>
         <div>
           <dt>Recovery</dt>
-          <dd>Run Inlinr: Reopen With Default Text Editor from the Command Palette.</dd>
+          <dd>Open raw Markdown in the default text editor.</dd>
         </div>
       </dl>
     </section>
@@ -81,9 +90,14 @@ export function getMarkdownViewerHtml(
   </head>
   <body class="viewer-shell" data-state-kind="${state.kind}" data-active-request-state="${state.kind === 'rendered' && state.activeRequest ? state.activeRequest.validationState : 'none'}" data-first-action-guidance-state="${state.kind === 'rendered' && state.firstActionGuidance ? state.firstActionGuidance.completionState : 'hidden'}">
     <header class="viewer-header">
-      <p class="viewer-kicker">Inlinr Markdown Viewer</p>
-      <h1 class="viewer-title">${escapeHtml(state.title)}</h1>
-      <p class="viewer-meta">${escapeHtml(state.uri)} | Version ${state.documentVersion} | Preview only</p>
+      <div class="viewer-header-content">
+        <p class="viewer-kicker">Inlinr Markdown Viewer</p>
+        <h1 class="viewer-title">${escapeHtml(state.title)}</h1>
+        <p class="viewer-meta">${escapeHtml(state.uri)} | Version ${state.documentVersion} | Preview only</p>
+      </div>
+      <a class="viewer-link-button" data-testid="viewer-open-raw-markdown" href="command:inlinr.reopenWithDefaultEditor">
+        Open Raw Markdown
+      </a>
     </header>
     <main class="viewer-main">
       ${renderBody(state)}
