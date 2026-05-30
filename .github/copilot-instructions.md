@@ -41,6 +41,14 @@
 - For docs-only PRs, comment only on contradictions that would mislead implementation, policy, or operations — not stylistic or editorial inconsistencies.
 - Do not flag gaps that are already acknowledged and documented as future work within the same file.
 
+## PR verification requirements
+
+- Every PR must include completed verification in its body: exact commands run or explicit blockers with open issue references.
+- Bug-fix PRs must name the regression test added or updated (file and test description). Flag as incomplete if absent.
+- PRs touching webview selection handling, popup behavior, selection anchors, or geometry logic must record `npm run test:webview` results.
+- PRs changing any user-visible UX surface must record a manual walkthrough. 
+- Treat "tests blocked locally" as a workflow defect to surface and track, not as acceptable context in a PR body.
+
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read `specs/004-scenario-monitoring/plan.md`

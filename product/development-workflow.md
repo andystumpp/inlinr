@@ -49,7 +49,18 @@ In these cases, update `architecture/high-level-architecture.md` first and add a
 - Prefer fast, deterministic tests over brittle or slow tests.
 - Cover rendered-view alignment, selection anchoring, diff application, Markdown integrity, and privacy boundaries first.
 - Once user scenarios are formally captured, preserve them or intentionally update the source docs and related tests.
-- Bug fixes should add or update a test that would have caught the issue.
+- Bug fixes must add or update a test that would have caught the issue. Name that test explicitly in the PR body.
+
+## PR verification requirements
+
+Every pull request must record explicit evidence of what was run before merge. Fill in the PR template verification section before requesting review.
+
+- **`npm run compile`** — required for all PRs. Record pass or explicit blocker.
+- **`npm run test`** — required for all PRs. Record pass or explicit blocker.
+- **`npm run test:webview`** — required when the PR touches rendered selection handling, popup behavior, selection anchors, bounding-rect or geometry logic, or the webview selection-to-popup contract. Record pass, not-applicable with reason, or explicit blocker.
+- **Manual walkthrough** — required when the PR changes any user-visible UX surface, interaction flow, or error state. Record what was tested and what was observed.
+
+A "tests blocked locally" note does not satisfy verification. If a required command cannot be run, treat it as a harness defect: open an issue and reference it in the PR body.
 
 ## Expected test layers
 
