@@ -203,6 +203,30 @@ function resolveSelectionRangeFromMetadata(
     const startRegion = findContainingStructuralRegion(sourceStart);
     const endProbe = Math.max(sourceStart, sourceEnd - 1);
     const endRegion = findContainingStructuralRegion(endProbe);
+
+    // When the selection falls within a single structural region (heading or list item),
+    // only expand to the full region boundaries if the selection covers the full visible
+    // prose content of that region. Partial selections (e.g. a single word or phrase)
+    // must use the exact bounds so the AI operates on exactly what the user selected.
+    if (startRegion && endRegion && startRegion.regionId === endRegion.regionId) {
+      const regionText = markdownSource.slice(startRegion.sourceStart, startRegion.sourceEnd);
+      const syntaxMatch = regionText.match(/^[ \t]*(?:#{1,6}[ \t]+|[-*+][ \t]+|\d+\.[ \t]+)/);
+      const proseStartOffset = startRegion.sourceStart + (syntaxMatch ? syntaxMatch[0].length : 0);
+      const proseEndOffset = startRegion.sourceStart + regionText.trimEnd().length;
+
+      const coversFullProse = sourceStart <= proseStartOffset && sourceEnd >= proseEndOffset;
+
+      if (!coversFullProse) {
+        return {
+          sourceStart,
+          sourceEnd,
+          visibleSourceStart: sourceStart,
+          visibleSourceEnd: sourceEnd,
+          scopeKind: 'exact-selection'
+        };
+      }
+    }
+
     const effectiveSourceStart = startRegion?.sourceStart ?? sourceStart;
     const effectiveSourceEnd = getStructuralRegionEnd(endRegion);
 
