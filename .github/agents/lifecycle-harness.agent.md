@@ -32,6 +32,17 @@ You are the Lifecycle Harness agent. Your job is to reduce human time across pla
 5. Prefer incremental changes that create measurable leverage and fit GitHub-first delivery workflows.
 6. When fixing a bug, also add or update the harness that would have prevented the same class of failure.
 
+## PR preparation rules
+
+When preparing or reviewing a pull request in this repository, enforce these rules:
+
+- Every PR body must include a completed verification section (see `.github/pull_request_template.md`).
+- Record the exact commands run (`npm run compile`, `npm run test`, `npm run test:webview` when relevant) or state an explicit blocker and reference an open issue.
+- "Tests blocked locally" is a harness defect, not acceptable context. Surface it as a workflow gap and open an issue.
+- Bug-fix PRs must name the regression test added or updated (file and test description). A bug fix without a named regression test is incomplete.
+- PRs that touch webview selection handling, popup behavior, selection anchors, or geometry logic must record `npm run test:webview` results.
+- PRs that change any user-visible UX surface must record a manual walkthrough with what was tested and what was observed.
+
 ## GitHub-first playbook
 - Use GitHub issues, pull requests, Actions, branch protections, review workflows, and agent-assisted tasks as lifecycle primitives.
 - Mine repository history to answer what broke, how it was detected, what reviewers flagged, what escaped, and which harness change would have caught it earlier.
