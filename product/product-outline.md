@@ -23,6 +23,7 @@ Create the best Markdown editing experience in VS Code for AI-driven development
 ## Core product experience
 
 - The user works in a Markdown document with a rendered view that makes structure and meaning easy to scan
+- The user can choose from a small set of theme-aware rendering presets so long Markdown artifacts can be read in a style that fits the task
 - The user can make lightweight Markdown authoring changes, such as formatting or structure adjustments, without leaving document context
 - The user selects text in a Markdown document and invokes an inline action for a specific AI-assisted change
 - Inlinr sends only the needed context to an AI layer
@@ -35,6 +36,7 @@ Create the best Markdown editing experience in VS Code for AI-driven development
 - Start with VS Code only
 - Focus on prompts, specs, plans, and working docs used in AI-driven development
 - Support a polished rendered view alongside trustworthy Markdown editing
+- Offer a curated set of theme-aware Markdown presentation presets without changing document source
 - Include lightweight Markdown authoring actions alongside selection-based AI editing
 - Keep edits targeted and reviewable rather than broad and autonomous
 - Support rapid iteration on prompts, specs, and working docs
