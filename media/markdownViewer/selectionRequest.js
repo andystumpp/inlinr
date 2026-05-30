@@ -1,10 +1,16 @@
 (function () {
-  const BOLD_QUICK_FORMAT_REQUEST = 'Format the selected text in Markdown bold using **double asterisks** without changing wording.';
-  const ITALIC_QUICK_FORMAT_REQUEST = 'Format the selected text in Markdown italic using *single asterisks* without changing wording.';
+  const QUICK_REQUEST_BY_KIND = {
+    bold: 'Format the selected text in Markdown bold using **double asterisks** without changing wording.',
+    italic: 'Format the selected text in Markdown italic using *single asterisks* without changing wording.',
+    clearer: 'Make the selected text clearer without changing its meaning.',
+    tighten: 'Tighten the selected text to be more concise without changing its meaning.',
+    'add-example': 'Add a concrete example that clarifies the selected text.'
+  };
   const vscodeApi = typeof acquireVsCodeApi === 'function' ? acquireVsCodeApi() : null;
   let viewerState = null;
   let activeRequest = null;
   let pendingSelectionRect = null;
+  let pendingSelectionRange = null;
   let requestRoot = null;
   let inlineReviewRoot = null;
   let mermaidInitialized = false;
@@ -302,6 +308,7 @@
     }
 
     pendingSelectionRect = selectionRect;
+    pendingSelectionRange = range;
 
     return {
       type: 'selection.capture',
@@ -329,6 +336,11 @@
   function clearActiveRequestOverlay() {
     activeRequest = null;
     pendingSelectionRect = null;
+    pendingSelectionRange = null;
+
+    if (typeof CSS !== 'undefined' && CSS.highlights) {
+      CSS.highlights.delete('inlinr-active-selection');
+    }
 
     clearInlineReview();
     syncSelectedRegionState();
@@ -375,7 +387,7 @@
     }
 
     const submitButton = requestRoot.querySelector('[data-selection-request-submit]');
-    const quickFormatButtons = requestRoot.querySelectorAll('[data-selection-request-quick-format]');
+    const quickActionButtons = requestRoot.querySelectorAll('[data-selection-request-quick-action]');
     const isBusy =
       activeRequest.validationState === 'submitted' ||
       activeRequest.validationState === 'submitting' ||
@@ -387,7 +399,7 @@
     }
 
     submitButton.disabled = isBusy || activeRequest.draftText.trim().length === 0;
-    quickFormatButtons.forEach(function (button) {
+    quickActionButtons.forEach(function (button) {
       if (button instanceof HTMLButtonElement) {
         button.disabled = isBusy;
       }
@@ -418,12 +430,15 @@
     });
   }
 
-  function applyQuickFormatRequest(formatKind, textarea) {
+  function applyQuickActionRequest(actionKind, textarea) {
     if (!activeRequest) {
       return;
     }
 
-    const draftText = formatKind === 'bold' ? BOLD_QUICK_FORMAT_REQUEST : ITALIC_QUICK_FORMAT_REQUEST;
+    const draftText = QUICK_REQUEST_BY_KIND[actionKind];
+    if (!draftText) {
+      return;
+    }
 
     activeRequest.draftText = draftText;
     activeRequest.validationState = 'drafting';
@@ -646,8 +661,11 @@
         >${escapeHtml(activeRequest.draftText)}</textarea>
         <p class="${validationClass}">${escapeHtml(activeRequest.validationMessage || '')}</p>
         <div class="selection-request-quick-prompts">
-          <button type="button" class="selection-request-quick-prompt" data-selection-request-quick-format data-selection-request-format-kind="bold" title="Make bold"><strong>B</strong> Bold</button>
-          <button type="button" class="selection-request-quick-prompt" data-selection-request-quick-format data-selection-request-format-kind="italic" title="Make italic"><em>I</em> Italic</button>
+          <button type="button" class="selection-request-quick-prompt" data-selection-request-quick-action data-selection-request-action-kind="bold" title="Make bold"><strong>B</strong> Bold</button>
+          <button type="button" class="selection-request-quick-prompt" data-selection-request-quick-action data-selection-request-action-kind="italic" title="Make italic"><em>I</em> Italic</button>
+          <button type="button" class="selection-request-quick-prompt" data-selection-request-quick-action data-selection-request-action-kind="clearer">Make clearer</button>
+          <button type="button" class="selection-request-quick-prompt" data-selection-request-quick-action data-selection-request-action-kind="tighten">Tighten</button>
+          <button type="button" class="selection-request-quick-prompt" data-selection-request-quick-action data-selection-request-action-kind="add-example">Add example</button>
         </div>
         <div class="selection-request-actions">
           <button type="button" class="selection-request-button selection-request-button-secondary" data-selection-request-cancel>Cancel</button>
@@ -660,7 +678,7 @@
     const textarea = requestRoot.querySelector('[data-selection-request-draft]');
     const submitButton = requestRoot.querySelector('[data-selection-request-submit]');
     const cancelButton = requestRoot.querySelector('[data-selection-request-cancel]');
-    const quickFormatButtons = requestRoot.querySelectorAll('[data-selection-request-quick-format]');
+    const quickActionButtons = requestRoot.querySelectorAll('[data-selection-request-quick-action]');
 
     if (textarea instanceof HTMLTextAreaElement) {
       focusRequestTextarea(textarea);
@@ -723,7 +741,7 @@
       });
     }
 
-    quickFormatButtons.forEach(function (button) {
+    quickActionButtons.forEach(function (button) {
       if (!(button instanceof HTMLButtonElement)) {
         return;
       }
@@ -733,12 +751,12 @@
           return;
         }
 
-        const formatKind = button.dataset.selectionRequestFormatKind;
-        if (formatKind !== 'bold' && formatKind !== 'italic') {
+        const actionKind = button.dataset.selectionRequestActionKind;
+        if (!actionKind) {
           return;
         }
 
-        applyQuickFormatRequest(formatKind, textarea);
+        applyQuickActionRequest(actionKind, textarea);
       });
     });
 
@@ -838,10 +856,22 @@
           suggestion: undefined,
           selectionRect: pendingSelectionRect || getSelectionRectFromRegionIds(message.selectedRegionIds)
         };
+
+        if (pendingSelectionRange && typeof CSS !== 'undefined' && CSS.highlights) {
+          try {
+            CSS.highlights.set('inlinr-active-selection', new Highlight(pendingSelectionRange));
+          } catch {
+            // CSS Custom Highlight API may not be available in all environments;
+            // the precise highlight is a visual enhancement only, so failures are safe to ignore.
+          }
+        }
+
+        pendingSelectionRange = null;
         renderOverlay();
         return;
       case 'selection.rejected':
         pendingSelectionRect = null;
+        pendingSelectionRange = null;
         return;
       case 'request.invalidated':
         if (!activeRequest || activeRequest.sessionId !== message.sessionId) {
