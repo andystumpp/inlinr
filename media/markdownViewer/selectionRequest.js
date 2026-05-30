@@ -635,9 +635,12 @@
 
     requestRoot.innerHTML = `
       <section class="selection-request-popover" aria-label="Selection request popup">
-        <div class="selection-request-quick-actions" role="group" aria-label="Quick formatting actions">
-          <button type="button" class="selection-request-quick-format-button" data-selection-request-quick-format data-selection-request-format-kind="bold" aria-label="Make selected text bold" title="Make selected text bold"><strong>B</strong></button>
-          <button type="button" class="selection-request-quick-format-button" data-selection-request-quick-format data-selection-request-format-kind="italic" aria-label="Make selected text italic" title="Make selected text italic"><em>I</em></button>
+        <div class="selection-request-header">
+          <h2 class="selection-request-title">INLINR - ASK FOR CHANGES</h2>
+          <div class="selection-request-hints">
+            <span class="selection-request-hint"><kbd>Return</kbd> to send</span>
+            <span class="selection-request-hint"><kbd>Esc</kbd> to cancel</span>
+          </div>
         </div>
         <textarea
           id="selection-request-textarea"
@@ -647,8 +650,13 @@
           data-selection-request-draft
         >${escapeHtml(activeRequest.draftText)}</textarea>
         <p class="${validationClass}">${escapeHtml(activeRequest.validationMessage || '')}</p>
+        <div class="selection-request-quick-prompts">
+          <button type="button" class="selection-request-quick-prompt" data-selection-request-quick-format data-selection-request-format-kind="bold" title="Make bold"><strong>B</strong> Bold</button>
+          <button type="button" class="selection-request-quick-prompt" data-selection-request-quick-format data-selection-request-format-kind="italic" title="Make italic"><em>I</em> Italic</button>
+        </div>
         <div class="selection-request-actions">
-          <button type="button" class="selection-request-button" data-selection-request-submit>Ask for changes</button>
+          <button type="button" class="selection-request-button selection-request-button-secondary" data-selection-request-cancel>Cancel</button>
+          <button type="button" class="selection-request-button" data-selection-request-submit>Ask</button>
         </div>
       </section>`;
 
@@ -656,6 +664,7 @@
 
     const textarea = requestRoot.querySelector('[data-selection-request-draft]');
     const submitButton = requestRoot.querySelector('[data-selection-request-submit]');
+    const cancelButton = requestRoot.querySelector('[data-selection-request-cancel]');
     const quickFormatButtons = requestRoot.querySelectorAll('[data-selection-request-quick-format]');
 
     if (textarea instanceof HTMLTextAreaElement) {
@@ -701,6 +710,21 @@
     if (submitButton instanceof HTMLButtonElement) {
       submitButton.addEventListener('click', function () {
         submitActiveRequestFromOverlay();
+      });
+    }
+
+    if (cancelButton instanceof HTMLButtonElement) {
+      cancelButton.addEventListener('click', function () {
+        if (!activeRequest) {
+          return;
+        }
+
+        const sessionId = activeRequest.sessionId;
+        clearActiveRequestOverlay();
+        postMessage({
+          type: 'request.cancel',
+          sessionId
+        });
       });
     }
 
@@ -899,10 +923,7 @@
           return;
         }
 
-        activeRequest.validationState = 'applying';
-        activeRequest.validationMessage = 'Refreshing document…';
-        activeRequest.suggestion = undefined;
-        renderOverlay();
+        clearActiveRequestOverlay();
         return;
       default:
         return;

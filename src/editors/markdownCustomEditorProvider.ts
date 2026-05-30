@@ -904,6 +904,7 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
       this.completeScenarioAttempt(applyAttempt, 'success');
       this.readyForNextRequestCycleByDocument.add(document.uri.toString());
       this.sessionController.clearActiveRequestSession(sessionId);
+      await this.sessionController.refresh(document);
 
       await postMessageToViewer({
         type: 'suggestion.applied',
