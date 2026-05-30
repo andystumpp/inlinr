@@ -75,6 +75,10 @@ body.viewer-shell {
   line-height: 1.7;
 }
 
+::highlight(inlinr-active-selection) {
+  background: color-mix(in srgb, var(--viewer-accent) 28%, transparent);
+}
+
 .viewer-document [data-selection-region-id].selection-request-target {
   border-radius: 12px;
   background: color-mix(in srgb, var(--viewer-accent) 10%, transparent);

@@ -33,12 +33,15 @@ suite('Rendered viewer state contract', () => {
     assert.match(html, /data-selection-request-root/);
   });
 
-  test('selection request popup script includes quick bold and italic actions', () => {
+  test('selection request popup script includes popup quick actions', () => {
     const scriptPath = path.join(getExtensionUri().fsPath, 'media', 'markdownViewer', 'selectionRequest.js');
     const script = fs.readFileSync(scriptPath, 'utf8');
 
-    assert.match(script, /data-selection-request-format-kind="bold"/);
-    assert.match(script, /data-selection-request-format-kind="italic"/);
+    assert.match(script, /data-selection-request-action-kind="bold"/);
+    assert.match(script, /data-selection-request-action-kind="italic"/);
+    assert.match(script, /data-selection-request-action-kind="clearer"/);
+    assert.match(script, /data-selection-request-action-kind="tighten"/);
+    assert.match(script, /data-selection-request-action-kind="add-example"/);
   });
 
   test('selection request popup script captures selection from mouse and keyboard interactions', () => {
