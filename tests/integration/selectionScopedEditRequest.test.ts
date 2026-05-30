@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import * as vscode from 'vscode';
 import { MarkdownCustomEditorProvider } from '../../src/editors/markdownCustomEditorProvider';
+import { FirstActionGuidanceState } from '../../src/onboarding/firstActionGuidanceState';
 import { renderMarkdownWithMetadata } from '../../src/rendering/markdownRenderer';
 import type { SelectionScopedRequestPayload } from '../../src/requests/requestPayloadBuilder';
 import { InMemoryRequestService } from '../../src/requests/requestService';
@@ -13,6 +14,7 @@ import {
   createOutOfRangeExecutionOutcome,
   createSuccessfulExecutionOutcome,
   createUnavailableExecutionOutcome,
+  createMockMemento,
   findPostedMessage,
   getExtensionUri,
   getWorkspaceFile,
@@ -148,8 +150,84 @@ suite('Selection-scoped edit request integration', () => {
 
     assert.ok(acceptedMessage);
     assert.equal(acceptedMessage.selectedTextPreview, 'selectable for the first request flow');
-  assert.deepEqual(acceptedMessage.selectedRegionIds, selectionCapture.renderedRegionIds);
+    assert.deepEqual(acceptedMessage.selectedRegionIds, selectionCapture.renderedRegionIds);
     assert.equal(requestService.getLastSubmittedPayload(), null);
+
+    provider.dispose();
+  });
+
+  test('persists first-action guidance completion when dismissed directly', async () => {
+    const guidanceState = new FirstActionGuidanceState(createMockMemento());
+    const provider = new MarkdownCustomEditorProvider(
+      getExtensionUri(),
+      new DocumentSessionController(),
+      undefined,
+      undefined,
+      undefined,
+      guidanceState
+    );
+    const document = await vscode.workspace.openTextDocument(getWorkspaceFile('selection-request-basic.md'));
+    const { panel, sendMessageToExtension } = createMockWebviewPanel();
+
+    await provider.resolveCustomTextEditor(document, panel, new vscode.CancellationTokenSource().token);
+
+    sendMessageToExtension({
+      type: 'firstActionGuidance.dismiss'
+    });
+
+    await waitFor(
+      () => guidanceState.getCompletionRecord(),
+      (record) => record !== null
+    );
+
+    assert.equal(guidanceState.getCompletionRecord()?.completionSource, 'dismissed');
+    assert.match(guidanceState.getCompletionRecord()?.completedAt ?? '', /^\d{4}-\d{2}-\d{2}T/);
+
+    provider.dispose();
+  });
+
+  test('persists first-action guidance completion after the first accepted selection', async () => {
+    const guidanceState = new FirstActionGuidanceState(createMockMemento());
+    const provider = new MarkdownCustomEditorProvider(
+      getExtensionUri(),
+      new DocumentSessionController(),
+      new InMemoryRequestService<SelectionScopedRequestPayload>(),
+      undefined,
+      undefined,
+      guidanceState
+    );
+    const document = await vscode.workspace.openTextDocument(getWorkspaceFile('selection-request-basic.md'));
+    const { panel, postedMessages, sendMessageToExtension } = createMockWebviewPanel();
+    const selectionCapture = buildSelectionCaptureFromText(document.getText(), 'selectable for the first request flow');
+
+    await provider.resolveCustomTextEditor(document, panel, new vscode.CancellationTokenSource().token);
+
+    sendMessageToExtension({
+      type: 'selection.capture',
+      documentVersion: document.version,
+      selectedText: 'selectable for the first request flow',
+      ...selectionCapture,
+      selectionRect: {
+        top: 164,
+        left: 276,
+        bottom: 184,
+        right: 332
+      }
+    });
+
+    await waitFor(
+      () => postedMessages.find((message) => {
+        return typeof message === 'object' && message !== null && 'type' in message && message.type === 'selection.accepted';
+      }),
+      (message) => Boolean(message)
+    );
+
+    await waitFor(
+      () => guidanceState.getCompletionRecord(),
+      (record) => record !== null
+    );
+
+    assert.equal(guidanceState.getCompletionRecord()?.completionSource, 'selection');
 
     provider.dispose();
   });

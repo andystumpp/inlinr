@@ -36,6 +36,9 @@ suite('Selection request contract', () => {
         sessionId: 'request-session-0'
       },
       {
+        type: 'firstActionGuidance.dismiss'
+      },
+      {
         type: 'suggestion.apply',
         sessionId: 'request-session-0',
         proposalId: 'proposal-0'
@@ -69,6 +72,14 @@ suite('Selection request contract', () => {
           bottom: 168,
           right: 264
         }
+      });
+    }, /Invalid viewer-to-extension message payload/i);
+  });
+
+  test('rejects unrecognized first-action guidance message types', () => {
+    assert.throws(() => {
+      assertValidViewerToExtensionMessage({
+        type: 'firstActionGuidance.dismissed'
       });
     }, /Invalid viewer-to-extension message payload/i);
   });

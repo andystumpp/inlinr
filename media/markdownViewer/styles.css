@@ -105,6 +105,60 @@ body.viewer-shell {
   line-height: 1.7;
 }
 
+.first-action-guidance-root[hidden] {
+  display: none;
+}
+
+.first-action-guidance-root {
+  margin: 0 0 18px;
+}
+
+.first-action-guidance {
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, var(--viewer-accent) 14%, var(--viewer-border));
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--viewer-accent) 7%, var(--viewer-surface));
+}
+
+.first-action-guidance-kicker {
+  margin: 0 0 6px;
+  color: var(--viewer-accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.first-action-guidance-title {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.first-action-guidance-body {
+  margin: 8px 0 0;
+  color: var(--viewer-muted);
+  line-height: 1.55;
+}
+
+.first-action-guidance-dismiss {
+  margin-top: 12px;
+  padding: 6px 12px;
+  border: 1px solid color-mix(in srgb, var(--viewer-accent) 18%, var(--viewer-border));
+  border-radius: 999px;
+  color: var(--viewer-accent);
+  background: color-mix(in srgb, var(--vscode-editor-background) 70%, transparent);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.first-action-guidance-dismiss:hover {
+  border-color: color-mix(in srgb, var(--viewer-accent) 32%, var(--viewer-border));
+  background: color-mix(in srgb, var(--viewer-accent) 10%, var(--vscode-editor-background));
+}
+
 ::highlight(inlinr-active-selection) {
   background: color-mix(in srgb, var(--viewer-accent) 28%, transparent);
 }

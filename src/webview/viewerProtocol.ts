@@ -30,6 +30,10 @@ export interface RequestCancelMessage {
   sessionId: string;
 }
 
+export interface FirstActionGuidanceDismissMessage {
+  type: 'firstActionGuidance.dismiss';
+}
+
 export interface SuggestionApplyMessage {
   type: 'suggestion.apply';
   sessionId: string;
@@ -47,6 +51,7 @@ export type ViewerToExtensionMessage =
   | RequestDraftChangeMessage
   | RequestSubmitMessage
   | RequestCancelMessage
+  | FirstActionGuidanceDismissMessage
   | SuggestionApplyMessage
   | SuggestionRejectMessage;
 
@@ -204,6 +209,8 @@ export function isViewerToExtensionMessage(value: unknown): value is ViewerToExt
       return isNonEmptyString(candidate.sessionId) && typeof candidate.draftText === 'string';
     case 'request.cancel':
       return isNonEmptyString(candidate.sessionId);
+    case 'firstActionGuidance.dismiss':
+      return true;
     case 'suggestion.apply':
       return isNonEmptyString(candidate.sessionId) && isNonEmptyString(candidate.proposalId);
     case 'suggestion.reject':

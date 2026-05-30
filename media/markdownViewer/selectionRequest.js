@@ -10,6 +10,7 @@
   let viewerState = null;
   let activeRequest = null;
   let pendingSelectionRect = null;
+  let firstActionGuidanceRoot = null;
   let pendingSelectionRange = null;
   let requestRoot = null;
   let inlineReviewRoot = null;
@@ -155,6 +156,46 @@
 
   function getSelectionRectFromRange(range) {
     return toSelectionRect(range.getBoundingClientRect());
+  }
+
+  function clearFirstActionGuidance() {
+    if (!firstActionGuidanceRoot) {
+      return;
+    }
+
+    firstActionGuidanceRoot.hidden = true;
+    firstActionGuidanceRoot.innerHTML = '';
+    document.body.dataset.firstActionGuidance = 'hidden';
+  }
+
+  function renderFirstActionGuidance() {
+    if (!firstActionGuidanceRoot || !viewerState || viewerState.kind !== 'rendered' || !viewerState.firstActionGuidance) {
+      clearFirstActionGuidance();
+      return;
+    }
+
+    firstActionGuidanceRoot.innerHTML = `
+      <section class="first-action-guidance" role="note" aria-live="polite">
+        <p class="first-action-guidance-kicker">Get started</p>
+        <h2 class="first-action-guidance-title">${escapeHtml(viewerState.firstActionGuidance.title)}</h2>
+        <p class="first-action-guidance-body">${escapeHtml(viewerState.firstActionGuidance.body)}</p>
+        <button type="button" class="first-action-guidance-dismiss" data-first-action-guidance-dismiss>
+          ${escapeHtml(viewerState.firstActionGuidance.dismissLabel)}
+        </button>
+      </section>`;
+    firstActionGuidanceRoot.hidden = false;
+    document.body.dataset.firstActionGuidance = viewerState.firstActionGuidance.completionState;
+
+    const dismissButton = firstActionGuidanceRoot.querySelector('[data-first-action-guidance-dismiss]');
+
+    if (dismissButton instanceof HTMLButtonElement) {
+      dismissButton.addEventListener('click', function () {
+        clearFirstActionGuidance();
+        postMessage({
+          type: 'firstActionGuidance.dismiss'
+        });
+      });
+    }
   }
 
   function resolveOverlayPosition(selectionRect) {
@@ -846,6 +887,7 @@
 
     switch (message.type) {
       case 'selection.accepted':
+        clearFirstActionGuidance();
         activeRequest = {
           sessionId: message.sessionId,
           selectedTextPreview: message.selectedTextPreview,
@@ -906,6 +948,7 @@
           return;
         }
 
+        clearFirstActionGuidance();
         activeRequest.validationState = 'review';
         activeRequest.validationMessage = 'Suggestion ready.';
         activeRequest.suggestion = message.proposal;
@@ -992,15 +1035,17 @@
 
   function bootstrapSelectionRequestShell() {
     viewerState = parseViewerState();
+    firstActionGuidanceRoot = document.querySelector('[data-first-action-guidance-root]');
     requestRoot = document.querySelector('[data-selection-request-root]');
     inlineReviewRoot = document.querySelector('[data-selection-inline-review-root]');
 
-    if (!viewerState || !requestRoot || !inlineReviewRoot) {
+    if (!viewerState || !firstActionGuidanceRoot || !requestRoot || !inlineReviewRoot) {
       return;
     }
 
     document.body.dataset.selectionMode = viewerState.kind === 'rendered' ? viewerState.selectionMode : 'disabled';
-  renderMermaidBlocks();
+    renderMermaidBlocks();
+    renderFirstActionGuidance();
     wireSelectionCapture(viewerState);
     hydrateActiveRequestFromViewerState(viewerState);
     renderOverlay();
