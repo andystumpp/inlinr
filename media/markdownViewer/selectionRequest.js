@@ -570,12 +570,19 @@
         (activeRequest.validationState === 'applying' ? 'Applying suggestion…' : 'Generating suggestion…');
       inlineReviewRoot.innerHTML = `
         <section class="selection-inline-review selection-inline-review-pending" aria-live="polite">
-          <p class="selection-inline-review-kicker">${escapeHtml(pendingKicker)}</p>
-          <p class="selection-inline-review-status">${escapeHtml(pendingMessage)}</p>
-          <div class="selection-inline-review-skeleton" aria-hidden="true">
-            <div class="selection-inline-review-skeleton-line" style="width: 92%;"></div>
-            <div class="selection-inline-review-skeleton-line" style="width: 78%;"></div>
-            <div class="selection-inline-review-skeleton-line" style="width: 60%;"></div>
+          <div class="selection-inline-review-pending-shell">
+            <div class="selection-inline-review-pending-header">
+              <div class="selection-inline-review-pending-copy">
+                <p class="selection-inline-review-kicker">${escapeHtml(pendingKicker)}</p>
+                <p class="selection-inline-review-status">${escapeHtml(pendingMessage)}</p>
+              </div>
+              <span class="selection-inline-review-pending-indicator" aria-hidden="true"></span>
+            </div>
+            <div class="selection-inline-review-skeleton" aria-hidden="true" data-selection-inline-review-skeleton>
+              <div class="selection-inline-review-skeleton-block"></div>
+              <div class="selection-inline-review-skeleton-line selection-inline-review-skeleton-line-wide"></div>
+              <div class="selection-inline-review-skeleton-line selection-inline-review-skeleton-line-medium"></div>
+            </div>
           </div>
         </section>`;
     }

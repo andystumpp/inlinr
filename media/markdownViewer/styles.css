@@ -241,24 +241,72 @@ body.viewer-shell {
   margin-top: 0.55rem;
 }
 
+.selection-inline-review-pending-shell {
+  padding: 14px 16px 16px;
+  border: 1px solid color-mix(in srgb, var(--viewer-accent) 14%, var(--viewer-border));
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--viewer-accent) 4%, var(--viewer-surface)) 0%, color-mix(in srgb, var(--viewer-panel) 96%, var(--vscode-editor-background)) 100%);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.04);
+}
+
+.selection-inline-review-pending-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.selection-inline-review-pending-copy {
+  min-width: 0;
+}
+
+.selection-inline-review-pending-indicator {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  margin-top: 0.3rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--viewer-accent) 78%, white);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--viewer-accent) 14%, transparent);
+  animation: pending-indicator-pulse 1.8s ease-in-out infinite;
+}
+
 .selection-inline-review-skeleton {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 0.75rem;
+  gap: 10px;
+  margin-top: 0.95rem;
 }
 
+.selection-inline-review-skeleton-block,
 .selection-inline-review-skeleton-line {
-  height: 14px;
-  border-radius: 6px;
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--viewer-accent) 8%, var(--viewer-border)) 25%,
-    color-mix(in srgb, var(--viewer-accent) 14%, var(--viewer-border)) 50%,
-    color-mix(in srgb, var(--viewer-accent) 8%, var(--viewer-border)) 75%
+    color-mix(in srgb, var(--viewer-accent) 7%, var(--viewer-border)) 20%,
+    color-mix(in srgb, var(--viewer-accent) 16%, var(--viewer-border)) 50%,
+    color-mix(in srgb, var(--viewer-accent) 7%, var(--viewer-border)) 80%
   );
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.4s linear infinite;
+}
+
+.selection-inline-review-skeleton-block {
+  min-height: 72px;
+  border-radius: 16px;
+}
+
+.selection-inline-review-skeleton-line {
+  height: 12px;
+  border-radius: 999px;
+}
+
+.selection-inline-review-skeleton-line-wide {
+  width: 82%;
+}
+
+.selection-inline-review-skeleton-line-medium {
+  width: 64%;
 }
 
 @keyframes skeleton-shimmer {
@@ -270,8 +318,27 @@ body.viewer-shell {
   }
 }
 
+@keyframes pending-indicator-pulse {
+  0%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .selection-inline-review-pending-indicator,
   .selection-inline-review-skeleton-line {
+    animation: none;
+    background: color-mix(in srgb, var(--viewer-accent) 12%, var(--viewer-border));
+  }
+
+  .selection-inline-review-skeleton-block {
     animation: none;
     background: color-mix(in srgb, var(--viewer-accent) 12%, var(--viewer-border));
   }
@@ -284,6 +351,12 @@ body.viewer-shell {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.selection-inline-review-pending .selection-inline-review-status {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 600;
 }
 
 .selection-inline-review-rendered {

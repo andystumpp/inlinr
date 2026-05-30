@@ -224,6 +224,35 @@ test.describe('webview selection request contract', () => {
     expect(await isRequestRootHidden(page)).toBe(true);
   });
 
+  test('renders a framed skeleton placeholder while a suggestion is pending', async ({ page }) => {
+    await mountWebview(page, {
+      markdown: 'Alpha beta gamma delta.'
+    });
+    const regionId = await findRegionIdContainingText(page, 'Alpha beta gamma delta.');
+
+    await postExtensionMessage(page, {
+      type: 'selection.accepted',
+      sessionId: 'session-pending',
+      selectedTextPreview: 'beta gamma',
+      selectedRegionIds: [regionId],
+      draftText: 'Rewrite this.',
+      validationState: 'drafting'
+    });
+    await postExtensionMessage(page, {
+      type: 'request.submitted',
+      sessionId: 'session-pending',
+      message: 'Generating suggestion…'
+    });
+
+    await expect(page.locator('[data-selection-inline-review-root]')).toBeVisible();
+    await expect(page.locator('.selection-inline-review-pending-shell')).toBeVisible();
+    await expect(page.locator('[data-selection-inline-review-skeleton]')).toHaveCount(1);
+    await expect(page.locator('.selection-inline-review-skeleton-block')).toHaveCount(1);
+    await expect(page.locator('.selection-inline-review-skeleton-line')).toHaveCount(2);
+    await expect(page.locator('.selection-inline-review-status')).toHaveText('Generating suggestion…');
+    expect(await getTargetedRegionIds(page)).toEqual([regionId]);
+  });
+
   test('clears the overlay after a suggestion is applied', async ({ page }) => {
     await mountWebview(page, {
       markdown: 'Alpha beta gamma delta.'
