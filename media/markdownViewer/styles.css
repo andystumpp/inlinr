@@ -242,19 +242,19 @@ body.viewer-shell {
 }
 
 .selection-inline-review-pending-shell {
-  padding: 14px 16px 16px;
+  padding: 12px 14px 13px;
   border: 1px solid color-mix(in srgb, var(--viewer-accent) 14%, var(--viewer-border));
-  border-radius: 18px;
+  border-radius: 16px;
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--viewer-accent) 4%, var(--viewer-surface)) 0%, color-mix(in srgb, var(--viewer-panel) 96%, var(--vscode-editor-background)) 100%);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.035);
 }
 
 .selection-inline-review-pending-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 12px;
+  gap: 10px;
 }
 
 .selection-inline-review-pending-copy {
@@ -263,20 +263,20 @@ body.viewer-shell {
 
 .selection-inline-review-pending-indicator {
   flex-shrink: 0;
-  width: 10px;
-  height: 10px;
-  margin-top: 0.3rem;
+  width: 8px;
+  height: 8px;
+  margin-top: 0.2rem;
   border-radius: 999px;
   background: color-mix(in srgb, var(--viewer-accent) 78%, white);
-  box-shadow: 0 0 0 6px color-mix(in srgb, var(--viewer-accent) 14%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--viewer-accent) 14%, transparent);
   animation: pending-indicator-pulse 1.8s ease-in-out infinite;
 }
 
 .selection-inline-review-skeleton {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-top: 0.95rem;
+  gap: 8px;
+  margin-top: 0.7rem;
 }
 
 .selection-inline-review-skeleton-block,
@@ -292,21 +292,21 @@ body.viewer-shell {
 }
 
 .selection-inline-review-skeleton-block {
-  min-height: 72px;
-  border-radius: 16px;
+  min-height: 46px;
+  border-radius: 14px;
 }
 
 .selection-inline-review-skeleton-line {
-  height: 12px;
+  height: 10px;
   border-radius: 999px;
 }
 
 .selection-inline-review-skeleton-line-wide {
-  width: 82%;
+  width: 78%;
 }
 
 .selection-inline-review-skeleton-line-medium {
-  width: 64%;
+  width: 58%;
 }
 
 @keyframes skeleton-shimmer {
@@ -345,7 +345,7 @@ body.viewer-shell {
 }
 
 .selection-inline-review-kicker {
-  margin: 0 0 0.35rem;
+  margin: 0 0 0.2rem;
   color: var(--viewer-accent);
   font-size: 0.76rem;
   font-weight: 700;
@@ -355,8 +355,9 @@ body.viewer-shell {
 
 .selection-inline-review-pending .selection-inline-review-status {
   margin: 0;
-  font-size: 0.98rem;
+  font-size: 0.92rem;
   font-weight: 600;
+  line-height: 1.35;
 }
 
 .selection-inline-review-rendered {

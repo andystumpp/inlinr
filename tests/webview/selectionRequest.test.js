@@ -250,6 +250,8 @@ test.describe('webview selection request contract', () => {
     await expect(page.locator('.selection-inline-review-skeleton-block')).toHaveCount(1);
     await expect(page.locator('.selection-inline-review-skeleton-line')).toHaveCount(2);
     await expect(page.locator('.selection-inline-review-status')).toHaveText('Generating suggestion…');
+    const pendingShellBox = await page.locator('.selection-inline-review-pending-shell').boundingBox();
+    expect(pendingShellBox?.height ?? 0).toBeLessThan(140);
     expect(await getTargetedRegionIds(page)).toEqual([regionId]);
   });
 
