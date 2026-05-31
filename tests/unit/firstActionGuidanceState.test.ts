@@ -7,7 +7,7 @@ suite('First action guidance state', () => {
     const guidanceState = new FirstActionGuidanceState(createMockMemento());
 
     assert.deepEqual(guidanceState.getPendingViewState(), {
-      title: 'Select text to start editing',
+      title: 'Welcome to Inlinr — edit Markdown by asking, right where you select',
       body: 'Highlight Markdown you want to change, then describe the edit.',
       dismissLabel: 'Got it',
       completionState: 'pending'

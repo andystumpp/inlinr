@@ -297,7 +297,7 @@ async function isFirstActionGuidanceHidden(page) {
 }
 
 async function dismissFirstActionGuidance(page) {
-  await page.locator('[data-first-action-guidance-dismiss]').click();
+  await page.locator('[data-first-action-guidance-dismiss]').first().click();
 }
 
 async function getTargetedRegionIds(page) {

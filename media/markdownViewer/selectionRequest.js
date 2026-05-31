@@ -168,34 +168,71 @@
     document.body.dataset.firstActionGuidance = 'hidden';
   }
 
+  function getPlatformShortcuts() {
+    const isMac = typeof navigator !== 'undefined' &&
+      (navigator.userAgentData?.platform?.toLowerCase().includes('mac') ||
+       navigator.platform.toLowerCase().includes('mac') ||
+       /macintosh/i.test(navigator.userAgent));
+
+    return {
+      request: isMac ? '⌘K' : 'Ctrl+K',
+      apply: isMac ? '⌘↵' : 'Ctrl+↵'
+    };
+  }
+
   function renderFirstActionGuidance() {
     if (!firstActionGuidanceRoot || !viewerState || viewerState.kind !== 'rendered' || !viewerState.firstActionGuidance) {
       clearFirstActionGuidance();
       return;
     }
 
+    const shortcuts = getPlatformShortcuts();
+
     firstActionGuidanceRoot.innerHTML = `
-      <section class="first-action-guidance" role="note" aria-live="polite">
-        <p class="first-action-guidance-kicker">Get started</p>
-        <h2 class="first-action-guidance-title">${escapeHtml(viewerState.firstActionGuidance.title)}</h2>
-        <p class="first-action-guidance-body">${escapeHtml(viewerState.firstActionGuidance.body)}</p>
-        <button type="button" class="first-action-guidance-dismiss" data-first-action-guidance-dismiss>
-          ${escapeHtml(viewerState.firstActionGuidance.dismissLabel)}
-        </button>
-      </section>`;
+      <div class="first-action-guidance" role="note" aria-live="polite">
+        <div class="first-action-guidance-identity">
+          <span class="first-action-guidance-icon" aria-hidden="true">✱</span>
+          <span class="first-action-guidance-headline">${escapeHtml(viewerState.firstActionGuidance.title)}</span>
+          <span class="first-action-guidance-badge" aria-hidden="true">NEW</span>
+        </div>
+        <ol class="first-action-guidance-steps" aria-label="How to get started">
+          <li class="first-action-guidance-step">
+            <span class="first-action-guidance-step-num" aria-hidden="true">1</span>
+            <span><strong>Select</strong> any text in the document</span>
+          </li>
+          <li class="first-action-guidance-step-sep" aria-hidden="true">›</li>
+          <li class="first-action-guidance-step">
+            <span class="first-action-guidance-step-num" aria-hidden="true">2</span>
+            <span>Press <kbd>${escapeHtml(shortcuts.request)}</kbd> and <strong>ask for a change</strong></span>
+          </li>
+          <li class="first-action-guidance-step-sep" aria-hidden="true">›</li>
+          <li class="first-action-guidance-step">
+            <span class="first-action-guidance-step-num" aria-hidden="true">3</span>
+            <span><strong>Review the diff</strong>, then <kbd>${escapeHtml(shortcuts.apply)}</kbd> to apply</span>
+          </li>
+        </ol>
+        <div class="first-action-guidance-actions">
+          <button type="button" class="first-action-guidance-dismiss" data-first-action-guidance-dismiss>
+            ${escapeHtml(viewerState.firstActionGuidance.dismissLabel)}
+          </button>
+          <button type="button" class="first-action-guidance-close" data-first-action-guidance-dismiss aria-label="Dismiss guidance">×</button>
+        </div>
+      </div>`;
     firstActionGuidanceRoot.hidden = false;
     document.body.dataset.firstActionGuidance = viewerState.firstActionGuidance.completionState;
 
-    const dismissButton = firstActionGuidanceRoot.querySelector('[data-first-action-guidance-dismiss]');
+    const dismissButtons = firstActionGuidanceRoot.querySelectorAll('[data-first-action-guidance-dismiss]');
 
-    if (dismissButton instanceof HTMLButtonElement) {
-      dismissButton.addEventListener('click', function () {
-        clearFirstActionGuidance();
-        postMessage({
-          type: 'firstActionGuidance.dismiss'
+    dismissButtons.forEach(function (btn) {
+      if (btn instanceof HTMLButtonElement) {
+        btn.addEventListener('click', function () {
+          clearFirstActionGuidance();
+          postMessage({
+            type: 'firstActionGuidance.dismiss'
+          });
         });
-      });
-    }
+      }
+    });
   }
 
   function resolveOverlayPosition(selectionRect) {
