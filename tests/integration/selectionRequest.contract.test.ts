@@ -39,6 +39,10 @@ suite('Selection request contract', () => {
         type: 'firstActionGuidance.dismiss'
       },
       {
+        type: 'presentationPreset.change',
+        preset: 'dense-spec'
+      },
+      {
         type: 'suggestion.apply',
         sessionId: 'request-session-0',
         proposalId: 'proposal-0'
@@ -80,6 +84,15 @@ suite('Selection request contract', () => {
     assert.throws(() => {
       assertValidViewerToExtensionMessage({
         type: 'firstActionGuidance.dismissed'
+      });
+    }, /Invalid viewer-to-extension message payload/i);
+  });
+
+  test('rejects presentation preset messages with an unknown preset id', () => {
+    assert.throws(() => {
+      assertValidViewerToExtensionMessage({
+        type: 'presentationPreset.change',
+        preset: 'wide-artifact'
       });
     }, /Invalid viewer-to-extension message payload/i);
   });

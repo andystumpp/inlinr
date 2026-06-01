@@ -12,8 +12,75 @@
   --viewer-table-header: color-mix(in srgb, var(--viewer-accent) 7%, var(--viewer-surface));
   --viewer-table-row-alt: color-mix(in srgb, var(--viewer-accent) 3%, var(--vscode-editor-background));
   --viewer-blockquote-surface: color-mix(in srgb, var(--viewer-accent) 6%, transparent);
-  --viewer-shadow: 0 18px 48px rgba(0, 0, 0, 0.14);
   --viewer-popup-shadow: 0 20px 44px rgba(0, 0, 0, 0.16), 0 4px 14px rgba(0, 0, 0, 0.08);
+  --viewer-page-background: var(--vscode-editor-background);
+  --viewer-shell-width: 960px;
+  --viewer-line-height: 1.7;
+  --viewer-header-padding: 16px 20px;
+  --viewer-main-padding: 24px 28px 36px;
+  --viewer-chrome-shadow: none;
+  --viewer-selection-highlight: color-mix(in srgb, var(--viewer-accent) 28%, transparent);
+  --viewer-selection-target-surface: color-mix(in srgb, var(--viewer-accent) 10%, transparent);
+  --viewer-selection-target-border: color-mix(in srgb, var(--viewer-accent) 16%, transparent);
+  --viewer-selection-review-surface: color-mix(in srgb, var(--viewer-accent) 14%, transparent);
+  --viewer-selection-review-border: color-mix(in srgb, var(--viewer-accent) 24%, transparent);
+  --viewer-table-layout: auto;
+  --viewer-table-cell-padding: 0.72rem 0.92rem;
+  --viewer-table-font-size: 0.95rem;
+}
+
+body.viewer-shell[data-presentation-preset='balanced'] {
+  --viewer-page-background: var(--vscode-editor-background);
+  --viewer-shell-width: 960px;
+  --viewer-line-height: 1.7;
+  --viewer-header-padding: 16px 20px;
+  --viewer-main-padding: 24px 28px 36px;
+  --viewer-surface: color-mix(in srgb, var(--vscode-editor-background) 98%, var(--vscode-sideBar-background));
+  --viewer-panel: color-mix(in srgb, var(--vscode-editor-background) 99%, var(--vscode-sideBar-background));
+  --viewer-chrome-shadow: none;
+}
+
+body.viewer-shell[data-presentation-preset='dense-spec'] {
+  --viewer-page-background: var(--vscode-editor-background);
+  --viewer-shell-width: 1180px;
+  --viewer-line-height: 1.58;
+  --viewer-header-padding: 14px 18px;
+  --viewer-main-padding: 20px 22px 28px;
+  --viewer-surface: color-mix(in srgb, var(--vscode-editor-background) 99%, var(--vscode-sideBar-background));
+  --viewer-panel: color-mix(in srgb, var(--vscode-editor-background) 98%, var(--vscode-sideBar-background));
+  --viewer-chrome-shadow: none;
+  --viewer-table-layout: fixed;
+  --viewer-table-cell-padding: 0.58rem 0.7rem;
+  --viewer-table-font-size: 0.88rem;
+}
+
+body.viewer-shell[data-presentation-preset='comfortable-reading'] {
+  --viewer-page-background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--viewer-accent) 12%, transparent), transparent 32%),
+    linear-gradient(180deg, color-mix(in srgb, var(--vscode-editor-background) 98%, white), var(--vscode-editor-background));
+  --viewer-shell-width: 920px;
+  --viewer-line-height: 1.78;
+  --viewer-header-padding: 20px 24px;
+  --viewer-main-padding: 28px 30px 40px;
+  --viewer-surface: color-mix(in srgb, var(--vscode-editor-background) 94%, var(--vscode-sideBar-background));
+  --viewer-panel: color-mix(in srgb, var(--vscode-editor-background) 90%, var(--vscode-sideBar-background));
+  --viewer-chrome-shadow: 0 18px 48px rgba(0, 0, 0, 0.14);
+}
+
+body.viewer-shell[data-presentation-preset='review-focus'] {
+  --viewer-page-background: var(--vscode-editor-background);
+  --viewer-shell-width: 1040px;
+  --viewer-line-height: 1.65;
+  --viewer-header-padding: 16px 20px;
+  --viewer-main-padding: 24px 28px 36px;
+  --viewer-surface: color-mix(in srgb, var(--vscode-editor-background) 98%, var(--vscode-sideBar-background));
+  --viewer-panel: color-mix(in srgb, var(--vscode-editor-background) 98%, var(--vscode-sideBar-background));
+  --viewer-chrome-shadow: none;
+  --viewer-selection-highlight: color-mix(in srgb, var(--viewer-accent) 34%, transparent);
+  --viewer-selection-target-surface: color-mix(in srgb, var(--viewer-accent) 14%, transparent);
+  --viewer-selection-target-border: color-mix(in srgb, var(--viewer-accent) 26%, transparent);
+  --viewer-selection-review-surface: color-mix(in srgb, var(--viewer-accent) 18%, transparent);
+  --viewer-selection-review-border: color-mix(in srgb, var(--viewer-accent) 32%, transparent);
 }
 
 * {
@@ -24,15 +91,13 @@ body.viewer-shell {
   margin: 0;
   padding: 24px;
   color: var(--vscode-editor-foreground);
-  background:
-    radial-gradient(circle at top right, color-mix(in srgb, var(--viewer-accent) 12%, transparent), transparent 32%),
-    linear-gradient(180deg, color-mix(in srgb, var(--vscode-editor-background) 98%, white), var(--vscode-editor-background));
+  background: var(--viewer-page-background);
   font-family: var(--vscode-font-family);
 }
 
 .viewer-header,
 .viewer-main {
-  width: min(960px, 100%);
+  width: min(var(--viewer-shell-width), 100%);
   margin: 0 auto;
 }
 
@@ -43,11 +108,11 @@ body.viewer-shell {
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 20px;
-  padding: 20px 24px;
+  padding: var(--viewer-header-padding);
   border: 1px solid var(--viewer-border);
   border-radius: 20px;
   background: var(--viewer-surface);
-  box-shadow: var(--viewer-shadow);
+  box-shadow: var(--viewer-chrome-shadow);
 }
 
 .viewer-header-content {
@@ -65,6 +130,45 @@ body.viewer-shell {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.viewer-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.viewer-preset-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--viewer-border) 88%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--viewer-surface) 88%, var(--vscode-editor-background));
+  font-size: 0.86rem;
+}
+
+.viewer-preset-label {
+  color: var(--viewer-muted);
+  font-weight: 600;
+}
+
+.viewer-preset-select {
+  min-width: 12.5rem;
+  border: none;
+  color: var(--vscode-editor-foreground);
+  background: transparent;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.viewer-preset-select:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--viewer-accent) 50%, transparent);
+  outline-offset: 2px;
 }
 
 .viewer-link-button {
@@ -89,16 +193,16 @@ body.viewer-shell {
 
 .viewer-main {
   position: relative;
-  padding: 28px 30px 40px;
+  padding: var(--viewer-main-padding);
   border: 1px solid var(--viewer-border);
   border-radius: 24px;
   background: var(--viewer-panel);
-  box-shadow: var(--viewer-shadow);
+  box-shadow: var(--viewer-chrome-shadow);
 }
 
 .viewer-document {
   font-size: 1rem;
-  line-height: 1.7;
+  line-height: var(--viewer-line-height);
 }
 
 .viewer-document [data-selection-region-id] {
@@ -345,18 +449,18 @@ body.viewer-shell {
 }
 
 ::highlight(inlinr-active-selection) {
-  background: color-mix(in srgb, var(--viewer-accent) 28%, transparent);
+  background: var(--viewer-selection-highlight);
 }
 
 .viewer-document [data-selection-region-id].selection-request-target {
   border-radius: 12px;
-  background: color-mix(in srgb, var(--viewer-accent) 10%, transparent);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--viewer-accent) 16%, transparent);
+  background: var(--viewer-selection-target-surface);
+  box-shadow: 0 0 0 1px var(--viewer-selection-target-border);
 }
 
 .viewer-document [data-selection-region-id].selection-request-target-review {
-  background: color-mix(in srgb, var(--viewer-accent) 14%, transparent);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--viewer-accent) 24%, transparent);
+  background: var(--viewer-selection-review-surface);
+  box-shadow: 0 0 0 1px var(--viewer-selection-review-border);
   color: color-mix(in srgb, var(--viewer-muted) 82%, var(--vscode-editor-foreground));
   text-decoration-line: line-through;
   text-decoration-color: color-mix(in srgb, var(--viewer-muted) 75%, var(--vscode-editor-foreground));
@@ -451,17 +555,18 @@ body.viewer-shell {
 }
 
 .viewer-document table {
-  display: block;
-  width: max-content;
+  display: table;
+  width: 100%;
   max-width: 100%;
-  min-width: min(100%, 36rem);
+  min-width: 0;
   margin: 1.3rem 0;
-  overflow-x: auto;
   border: 1px solid color-mix(in srgb, var(--viewer-border) 92%, transparent);
   border-radius: 14px;
   border-collapse: separate;
   border-spacing: 0;
+  table-layout: var(--viewer-table-layout);
   background: color-mix(in srgb, var(--viewer-surface) 96%, var(--vscode-editor-background));
+  font-size: var(--viewer-table-font-size);
 }
 
 .viewer-document thead th {
@@ -471,11 +576,14 @@ body.viewer-shell {
 
 .viewer-document th,
 .viewer-document td {
-  padding: 0.72rem 0.92rem;
+  padding: var(--viewer-table-cell-padding);
   border-right: 1px solid color-mix(in srgb, var(--viewer-border) 88%, transparent);
   border-bottom: 1px solid color-mix(in srgb, var(--viewer-border) 88%, transparent);
   text-align: left;
   vertical-align: top;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
 }
 
 .viewer-document :where(th, td):last-child {

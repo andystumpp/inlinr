@@ -4,6 +4,12 @@ import {
   FirstActionGuidanceState,
   type FirstActionGuidanceCompletionSource
 } from '../onboarding/firstActionGuidanceState';
+import { PresentationPresetState } from '../presentation/presentationPresetState';
+import {
+  DEFAULT_PRESENTATION_PRESET,
+  PRESENTATION_PRESETS,
+  type PresentationPreset
+} from '../presentation/presentationPresets';
 import {
   renderMarkdown,
   renderMarkdownDocumentWithMetadata,
@@ -283,6 +289,7 @@ export function createViewerStateForDocument(
   activeRequest: TrackedActiveRequestSession | null = null,
   options?: {
     firstActionGuidance?: ReturnType<FirstActionGuidanceState['getPendingViewState']>;
+    presentationPreset?: PresentationPreset;
   }
 ): ViewerState {
   const title = getDocumentTitle(document);
@@ -304,6 +311,7 @@ export function createViewerStateForDocument(
       uri: document.uri.toString(),
       title,
       documentVersion: document.version,
+      presentationPreset: options?.presentationPreset ?? DEFAULT_PRESENTATION_PRESET,
       html: renderedDocument.html,
       selectionMetadata: renderedDocument.selectionMetadata,
       firstActionGuidance: options?.firstActionGuidance ?? null,
@@ -316,6 +324,7 @@ export function createViewerStateForDocument(
       uri: document.uri.toString(),
       title,
       documentVersion: document.version,
+      presentationPreset: options?.presentationPreset ?? DEFAULT_PRESENTATION_PRESET,
       reasonCode: viewerError.reasonCode,
       message: viewerError.message
     });
@@ -337,7 +346,8 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     private readonly requestService: RequestService<SelectionScopedRequestPayload> = new UnsupportedRequestService<SelectionScopedRequestPayload>(),
     private readonly executionService: ExecutionService = new UnsupportedExecutionService(),
     private readonly telemetryAdapter?: TelemetryAdapter,
-    private readonly firstActionGuidanceState?: FirstActionGuidanceState
+    private readonly firstActionGuidanceState?: FirstActionGuidanceState,
+    private readonly presentationPresetState?: PresentationPresetState
   ) {
     this.disposables.push(
       vscode.workspace.onDidChangeTextDocument((event) => {
@@ -399,7 +409,8 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
         targetDocument,
         this.sessionController.getActiveRequestSession(targetDocument),
         {
-          firstActionGuidance: this.firstActionGuidanceState?.getPendingViewState() ?? null
+          firstActionGuidance: this.firstActionGuidanceState?.getPendingViewState() ?? null,
+          presentationPreset: this.getCurrentPresentationPreset()
         }
       );
 
@@ -506,6 +517,9 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
         return;
       case 'firstActionGuidance.dismiss':
         await this.completeFirstActionGuidance('dismissed');
+        return;
+      case 'presentationPreset.change':
+        await this.setPresentationPreset(message.preset);
         return;
       case 'suggestion.apply':
         await this.applyActiveSuggestion(document, message.sessionId, message.proposalId, postMessageToViewer);
@@ -1032,9 +1046,57 @@ export class MarkdownCustomEditorProvider implements vscode.CustomTextEditorProv
     });
   }
 
+  public async switchPresentationPreset(): Promise<void> {
+    const currentPreset = this.getCurrentPresentationPreset();
+    const selection = await vscode.window.showQuickPick(
+      PRESENTATION_PRESETS.map((preset) => ({
+        label: preset.label,
+        description: preset.description,
+        picked: preset.id === currentPreset,
+        preset: preset.id
+      })),
+      {
+        title: 'Choose Markdown presentation',
+        placeHolder: 'Select a presentation preset for the Inlinr viewer'
+      }
+    );
+
+    if (!selection) {
+      return;
+    }
+
+    await this.setPresentationPreset(selection.preset);
+  }
+
   public dispose(): void {
     while (this.disposables.length > 0) {
       this.disposables.pop()?.dispose();
+    }
+  }
+
+  private getCurrentPresentationPreset(): PresentationPreset {
+    return this.presentationPresetState?.getCurrentPreset() ?? DEFAULT_PRESENTATION_PRESET;
+  }
+
+  private async setPresentationPreset(preset: PresentationPreset): Promise<void> {
+    if (preset === this.getCurrentPresentationPreset()) {
+      return;
+    }
+
+    if (this.presentationPresetState) {
+      await this.presentationPresetState.setCurrentPreset(preset);
+    }
+
+    await this.refreshOpenViewerSessions();
+  }
+
+  private async refreshOpenViewerSessions(): Promise<void> {
+    for (const document of vscode.workspace.textDocuments) {
+      if (this.sessionController.getSessionCount(document) === 0) {
+        continue;
+      }
+
+      await this.sessionController.refresh(document);
     }
   }
 

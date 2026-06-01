@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import * as vscode from 'vscode';
 import { MarkdownCustomEditorProvider } from '../../src/editors/markdownCustomEditorProvider';
 import { DEFAULT_FIRST_ACTION_GUIDANCE_VIEW_STATE, FirstActionGuidanceState } from '../../src/onboarding/firstActionGuidanceState';
+import { PresentationPresetState } from '../../src/presentation/presentationPresetState';
 import { DocumentSessionController } from '../../src/sessions/documentSessionController';
 import {
   closeAllEditors,
@@ -84,5 +85,32 @@ suite('Markdown viewer opening', () => {
     assert.ok(webview.html.includes(DEFAULT_FIRST_ACTION_GUIDANCE_VIEW_STATE.body));
 
     provider.dispose();
+  });
+
+  test('hydrates the stored presentation preset into the viewer header', async () => {
+    const provider = new MarkdownCustomEditorProvider(
+      getExtensionUri(),
+      new DocumentSessionController(),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      new PresentationPresetState(createMockMemento({
+        'inlinr.presentationPreset': 'comfortable-reading'
+      }))
+    );
+    const document = await vscode.workspace.openTextDocument(getWorkspaceFile('sample.md'));
+    const { panel, webview } = createMockWebviewPanel();
+
+    try {
+      await provider.resolveCustomTextEditor(document, panel, new vscode.CancellationTokenSource().token);
+
+      assert.match(webview.html, /data-presentation-preset="comfortable-reading"/);
+      assert.match(webview.html, /data-testid="viewer-preset-select"/);
+      assert.match(webview.html, /<option value="comfortable-reading" selected>Comfortable Reading<\/option>/);
+    } finally {
+      panel.dispose();
+      provider.dispose();
+    }
   });
 });

@@ -3,6 +3,11 @@ import {
   assertValidRenderedSelectionMetadata,
   type RenderedSelectionMetadata
 } from '../rendering/renderedSelectionMetadata';
+import {
+  DEFAULT_PRESENTATION_PRESET,
+  isPresentationPreset,
+  type PresentationPreset
+} from '../presentation/presentationPresets';
 import type { ActiveRequestState } from '../sessions/documentSessionController';
 
 export type ViewerErrorReasonCode =
@@ -40,6 +45,7 @@ export interface ViewerRenderedState {
   uri: string;
   title: string;
   documentVersion: number;
+  presentationPreset: PresentationPreset;
   previewOnly: true;
   sourceMode: false;
   canFallbackToDefaultEditor: false;
@@ -55,6 +61,7 @@ export interface ViewerErrorState {
   uri: string;
   title: string;
   documentVersion: number;
+  presentationPreset: PresentationPreset;
   previewOnly: true;
   canFallbackToDefaultEditor: false;
   message: string;
@@ -123,6 +130,7 @@ export function createRenderedState(input: {
   uri: string;
   title: string;
   documentVersion: number;
+  presentationPreset?: PresentationPreset;
   html: string;
   selectionMetadata?: RenderedSelectionMetadata;
   firstActionGuidance?: FirstActionGuidanceViewState | null;
@@ -133,14 +141,15 @@ export function createRenderedState(input: {
     uri: input.uri,
     title: input.title,
     documentVersion: input.documentVersion,
+    presentationPreset: input.presentationPreset ?? DEFAULT_PRESENTATION_PRESET,
     previewOnly: true,
     sourceMode: false,
-      canFallbackToDefaultEditor: false,
-      html: input.html,
-      selectionMode: 'enabled',
-      firstActionGuidance: input.firstActionGuidance ?? null,
-      activeRequest: input.activeRequest ?? null,
-      selectionMetadata: input.selectionMetadata ?? EMPTY_RENDERED_SELECTION_METADATA
+    canFallbackToDefaultEditor: false,
+    html: input.html,
+    selectionMode: 'enabled',
+    firstActionGuidance: input.firstActionGuidance ?? null,
+    activeRequest: input.activeRequest ?? null,
+    selectionMetadata: input.selectionMetadata ?? EMPTY_RENDERED_SELECTION_METADATA
   };
 }
 
@@ -148,6 +157,7 @@ export function createErrorState(input: {
   uri: string;
   title: string;
   documentVersion: number;
+  presentationPreset?: PresentationPreset;
   message: string;
   reasonCode: ViewerErrorReasonCode;
 }): ViewerErrorState {
@@ -156,6 +166,7 @@ export function createErrorState(input: {
     uri: input.uri,
     title: input.title,
     documentVersion: input.documentVersion,
+    presentationPreset: input.presentationPreset ?? DEFAULT_PRESENTATION_PRESET,
     previewOnly: true,
     canFallbackToDefaultEditor: false,
     message: input.message,
@@ -171,6 +182,10 @@ export function isViewerState(value: unknown): value is ViewerState {
   const candidate = value as Partial<ViewerState>;
 
   if (!isNonEmptyString(candidate.uri) || !isNonEmptyString(candidate.title) || typeof candidate.documentVersion !== 'number') {
+    return false;
+  }
+
+  if (!isPresentationPreset(candidate.presentationPreset)) {
     return false;
   }
 

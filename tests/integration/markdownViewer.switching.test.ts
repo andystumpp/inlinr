@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import * as vscode from 'vscode';
 import { MarkdownCustomEditorProvider } from '../../src/editors/markdownCustomEditorProvider';
 import { DEFAULT_FIRST_ACTION_GUIDANCE_VIEW_STATE, FirstActionGuidanceState } from '../../src/onboarding/firstActionGuidanceState';
+import { PresentationPresetState } from '../../src/presentation/presentationPresetState';
 import { DocumentSessionController } from '../../src/sessions/documentSessionController';
 import {
   closeAllEditors,
@@ -97,5 +98,41 @@ suite('Markdown viewer switching', () => {
         input.viewType === MarkdownCustomEditorProvider.viewType &&
         input.uri.toString() === markdownUri.toString()
     );
+  });
+
+  test('rerenders open viewers when the header preset selector changes', async () => {
+    const presetStore = createMockMemento();
+    const provider = new MarkdownCustomEditorProvider(
+      getExtensionUri(),
+      new DocumentSessionController(),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      new PresentationPresetState(presetStore)
+    );
+    const document = await vscode.workspace.openTextDocument(getWorkspaceFile('sample.md'));
+    const { panel, webview, sendMessageToExtension } = createMockWebviewPanel();
+    const token = new vscode.CancellationTokenSource().token;
+
+    try {
+      await provider.resolveCustomTextEditor(document, panel, token);
+      sendMessageToExtension({
+        type: 'presentationPreset.change',
+        preset: 'dense-spec'
+      });
+
+      await waitFor(
+        () => webview.html,
+        (html) => /data-presentation-preset="dense-spec"/.test(html)
+      );
+
+      assert.deepEqual(presetStore.snapshot(), {
+        'inlinr.presentationPreset': 'dense-spec'
+      });
+    } finally {
+      panel.dispose();
+      provider.dispose();
+    }
   });
 });
