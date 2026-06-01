@@ -6,6 +6,12 @@
   --viewer-muted: var(--vscode-descriptionForeground);
   --viewer-accent: var(--vscode-textLink-foreground);
   --viewer-error: var(--vscode-errorForeground);
+  --viewer-inline-code-surface: color-mix(in srgb, var(--viewer-accent) 8%, var(--vscode-editor-background));
+  --viewer-inline-code-border: color-mix(in srgb, var(--viewer-accent) 16%, var(--viewer-border));
+  --viewer-code-block-surface: color-mix(in srgb, var(--vscode-editor-background) 80%, black);
+  --viewer-table-header: color-mix(in srgb, var(--viewer-accent) 7%, var(--viewer-surface));
+  --viewer-table-row-alt: color-mix(in srgb, var(--viewer-accent) 3%, var(--vscode-editor-background));
+  --viewer-blockquote-surface: color-mix(in srgb, var(--viewer-accent) 6%, transparent);
   --viewer-shadow: 0 18px 48px rgba(0, 0, 0, 0.14);
   --viewer-popup-shadow: 0 20px 44px rgba(0, 0, 0, 0.16), 0 4px 14px rgba(0, 0, 0, 0.08);
 }
@@ -93,6 +99,85 @@ body.viewer-shell {
 .viewer-document {
   font-size: 1rem;
   line-height: 1.7;
+}
+
+.viewer-document [data-selection-region-id] {
+  scroll-margin-top: 1.5rem;
+}
+
+.viewer-document :where(h1, h2, h3, h4, h5, h6) {
+  max-width: 32em;
+  margin: 1.9rem 0 0.9rem;
+  color: var(--vscode-editor-foreground);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.viewer-document h1 {
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--viewer-border) 92%, transparent);
+  font-size: clamp(2rem, 5vw, 2.55rem);
+}
+
+.viewer-document h2 {
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--viewer-border) 76%, transparent);
+  font-size: clamp(1.55rem, 3vw, 1.9rem);
+}
+
+.viewer-document h3 {
+  font-size: 1.35rem;
+}
+
+.viewer-document h4 {
+  font-size: 1.12rem;
+}
+
+.viewer-document h5 {
+  font-size: 0.98rem;
+}
+
+.viewer-document h6 {
+  font-size: 0.9rem;
+  color: var(--viewer-muted);
+  letter-spacing: 0.01em;
+}
+
+.viewer-document :where(p, ul, ol, blockquote, hr) {
+  max-width: 74ch;
+}
+
+.viewer-document p {
+  margin: 0 0 1rem;
+}
+
+.viewer-document :where(ul, ol) {
+  margin: 0.9rem 0 1rem;
+  padding-left: 1.5rem;
+}
+
+.viewer-document li {
+  margin: 0.35rem 0;
+  padding-left: 0.25rem;
+}
+
+.viewer-document li::marker {
+  color: color-mix(in srgb, var(--viewer-accent) 62%, var(--vscode-editor-foreground));
+  font-weight: 600;
+}
+
+.viewer-document li > :where(p, ul, ol) {
+  max-width: none;
+}
+
+.viewer-document li > p {
+  margin: 0.35rem 0;
+}
+
+.viewer-document :where(ul, ol) :where(ul, ol) {
+  margin-top: 0.45rem;
+  margin-bottom: 0.45rem;
 }
 
 .first-action-guidance-root[hidden] {
@@ -289,14 +374,29 @@ body.viewer-shell {
 
 .viewer-document code {
   font-family: var(--vscode-editor-font-family);
-  font-size: 0.95em;
+  padding: 0.16em 0.4em;
+  border: 1px solid var(--viewer-inline-code-border);
+  border-radius: 6px;
+  background: var(--viewer-inline-code-surface);
+  font-size: 0.92em;
 }
 
 .viewer-document pre {
   overflow-x: auto;
-  padding: 16px;
+  margin: 1.25rem 0;
+  padding: 16px 18px;
+  border: 1px solid color-mix(in srgb, var(--viewer-border) 92%, transparent);
   border-radius: 14px;
-  background: color-mix(in srgb, var(--vscode-editor-background) 80%, black);
+  background: var(--viewer-code-block-surface);
+  line-height: 1.55;
+}
+
+.viewer-document pre code {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 0.95em;
 }
 
 .viewer-document .mermaid-diagram-block {
@@ -338,14 +438,75 @@ body.viewer-shell {
 }
 
 .viewer-document blockquote {
-  margin-left: 0;
-  padding-left: 16px;
-  border-left: 3px solid var(--viewer-accent);
-  color: var(--viewer-muted);
+  margin: 1.2rem 0;
+  padding: 0.2rem 1rem 0.25rem 1.1rem;
+  border-left: 4px solid color-mix(in srgb, var(--viewer-accent) 82%, transparent);
+  border-radius: 0 14px 14px 0;
+  background: var(--viewer-blockquote-surface);
+  color: color-mix(in srgb, var(--viewer-muted) 82%, var(--vscode-editor-foreground));
+}
+
+.viewer-document blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+.viewer-document table {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  min-width: min(100%, 36rem);
+  margin: 1.3rem 0;
+  overflow-x: auto;
+  border: 1px solid color-mix(in srgb, var(--viewer-border) 92%, transparent);
+  border-radius: 14px;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: color-mix(in srgb, var(--viewer-surface) 96%, var(--vscode-editor-background));
+}
+
+.viewer-document thead th {
+  background: var(--viewer-table-header);
+  font-weight: 700;
+}
+
+.viewer-document th,
+.viewer-document td {
+  padding: 0.72rem 0.92rem;
+  border-right: 1px solid color-mix(in srgb, var(--viewer-border) 88%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--viewer-border) 88%, transparent);
+  text-align: left;
+  vertical-align: top;
+}
+
+.viewer-document :where(th, td):last-child {
+  border-right: 0;
+}
+
+.viewer-document tbody tr:nth-child(even) {
+  background: var(--viewer-table-row-alt);
+}
+
+.viewer-document tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.viewer-document hr {
+  height: 1px;
+  margin: 2rem 0;
+  border: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--viewer-border) 90%, transparent) 16%,
+    color-mix(in srgb, var(--viewer-border) 90%, transparent) 84%,
+    transparent
+  );
 }
 
 .viewer-document a {
   color: var(--viewer-accent);
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.14em;
 }
 
 .viewer-error {
