@@ -1,17 +1,12 @@
 import assert from 'node:assert/strict';
-import { FirstActionGuidanceState } from '../../src/onboarding/firstActionGuidanceState';
+import { DEFAULT_FIRST_ACTION_GUIDANCE_VIEW_STATE, FirstActionGuidanceState } from '../../src/onboarding/firstActionGuidanceState';
 import { createMockMemento } from '../integration/helpers';
 
 suite('First action guidance state', () => {
   test('returns pending guidance when no completion has been recorded', () => {
     const guidanceState = new FirstActionGuidanceState(createMockMemento());
 
-    assert.deepEqual(guidanceState.getPendingViewState(), {
-      title: 'Select text to start editing',
-      body: 'Highlight Markdown you want to change, then describe the edit.',
-      dismissLabel: 'Got it',
-      completionState: 'pending'
-    });
+    assert.deepEqual(guidanceState.getPendingViewState(), DEFAULT_FIRST_ACTION_GUIDANCE_VIEW_STATE);
     assert.equal(guidanceState.isCompleted(), false);
   });
 

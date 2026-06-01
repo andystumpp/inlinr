@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { DEFAULT_FIRST_ACTION_GUIDANCE_VIEW_STATE } from '../../src/onboarding/firstActionGuidanceState';
 import { assertValidViewerState } from '../../src/webview/viewerState';
 
 suite('Viewer state', () => {
@@ -14,12 +15,7 @@ suite('Viewer state', () => {
         canFallbackToDefaultEditor: false,
         html: '<p>Document body</p>',
         selectionMode: 'enabled',
-        firstActionGuidance: {
-          title: 'Select text to start editing',
-          body: 'Highlight Markdown you want to change, then describe the edit.',
-          dismissLabel: 'Got it',
-          completionState: 'pending'
-        },
+        firstActionGuidance: DEFAULT_FIRST_ACTION_GUIDANCE_VIEW_STATE,
         activeRequest: {
           sessionId: 'request-session-0',
           selectedTextPreview: 'Original text',
@@ -53,12 +49,7 @@ suite('Viewer state', () => {
         canFallbackToDefaultEditor: false,
         html: '<p>Document body</p>',
         selectionMode: 'enabled',
-        firstActionGuidance: {
-          title: 'Select text to start editing',
-          body: 'Highlight Markdown you want to change, then describe the edit.',
-          dismissLabel: 'Got it',
-          completionState: 'pending'
-        },
+        firstActionGuidance: DEFAULT_FIRST_ACTION_GUIDANCE_VIEW_STATE,
         activeRequest: {
           sessionId: 'request-session-0',
           selectedTextPreview: 'Original text',
@@ -92,9 +83,7 @@ suite('Viewer state', () => {
         html: '<p>Document body</p>',
         selectionMode: 'enabled',
         firstActionGuidance: {
-          title: 'Select text to start editing',
-          body: 'Highlight Markdown you want to change, then describe the edit.',
-          dismissLabel: 'Got it',
+          ...DEFAULT_FIRST_ACTION_GUIDANCE_VIEW_STATE,
           completionState: 'complete'
         },
         activeRequest: null,

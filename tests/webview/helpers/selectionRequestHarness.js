@@ -281,7 +281,7 @@ async function isRequestRootHidden(page) {
 
 function createFirstActionGuidanceState(overrides = {}) {
   return {
-    title: overrides.title ?? 'Select text to start editing',
+    title: overrides.title ?? 'Welcome to Inlinr — edit Markdown by asking, right where you select',
     body: overrides.body ?? 'Highlight Markdown you want to change, then describe the edit.',
     dismissLabel: overrides.dismissLabel ?? 'Got it',
     completionState: overrides.completionState ?? 'pending'
@@ -297,7 +297,7 @@ async function isFirstActionGuidanceHidden(page) {
 }
 
 async function dismissFirstActionGuidance(page) {
-  await page.locator('[data-first-action-guidance-dismiss]').click();
+  await page.locator('[data-first-action-guidance-dismiss]').first().click();
 }
 
 async function getTargetedRegionIds(page) {

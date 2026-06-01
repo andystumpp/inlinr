@@ -17,7 +17,6 @@ function escapeJsonForHtml(value: string): string {
 function renderBody(state: ViewerState): string {
   if (state.kind === 'rendered') {
     return `
-      <aside class="first-action-guidance-root" data-first-action-guidance-root hidden></aside>
       <article class="viewer-document markdown-body" data-selection-mode="${state.selectionMode}">${state.html}</article>
       <section class="selection-inline-review-root" data-selection-inline-review-root hidden></section>
       <aside class="selection-request-root" data-selection-request-root hidden></aside>
@@ -89,6 +88,7 @@ export function getMarkdownViewerHtml(
     <title>${escapeHtml(state.title)}</title>
   </head>
   <body class="viewer-shell" data-state-kind="${state.kind}" data-active-request-state="${state.kind === 'rendered' && state.activeRequest ? state.activeRequest.validationState : 'none'}" data-first-action-guidance-state="${state.kind === 'rendered' && state.firstActionGuidance ? state.firstActionGuidance.completionState : 'hidden'}">
+    <div class="first-action-guidance-root" data-first-action-guidance-root hidden></div>
     <header class="viewer-header">
       <div class="viewer-header-content">
         <p class="viewer-kicker">Inlinr Markdown Viewer</p>

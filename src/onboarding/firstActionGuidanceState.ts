@@ -3,6 +3,13 @@ import type { FirstActionGuidanceViewState } from '../webview/viewerState';
 
 const FIRST_ACTION_GUIDANCE_STORAGE_KEY = 'inlinr.firstActionGuidance';
 
+export const DEFAULT_FIRST_ACTION_GUIDANCE_VIEW_STATE: FirstActionGuidanceViewState = {
+  title: 'Welcome to Inlinr — edit Markdown by asking, right where you select',
+  body: 'Highlight Markdown you want to change, then describe the edit.',
+  dismissLabel: 'Got it',
+  completionState: 'pending'
+};
+
 export type FirstActionGuidanceCompletionSource = 'dismissed' | 'selection' | 'successful-request';
 
 export interface FirstActionGuidanceCompletionRecord {
@@ -45,12 +52,7 @@ export class FirstActionGuidanceState {
       return null;
     }
 
-    return {
-      title: 'Select text to start editing',
-      body: 'Highlight Markdown you want to change, then describe the edit.',
-      dismissLabel: 'Got it',
-      completionState: 'pending'
-    };
+    return { ...DEFAULT_FIRST_ACTION_GUIDANCE_VIEW_STATE };
   }
 
   public async markCompleted(completionSource: FirstActionGuidanceCompletionSource): Promise<void> {
