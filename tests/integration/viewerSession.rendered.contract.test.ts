@@ -20,6 +20,7 @@ suite('Rendered viewer state contract', () => {
     assert.equal(state.kind, 'rendered');
     assert.equal(state.previewOnly, true);
     assert.equal(state.sourceMode, false);
+    assert.equal(state.presentationPreset, 'balanced');
     assert.match(state.html, /<h1[^>]*>Contract<\/h1>/);
     assert.match(state.html, /data-mermaid-block/);
 
@@ -31,6 +32,8 @@ suite('Rendered viewer state contract', () => {
     assert.match(html, /node_modules[\\/]mermaid[\\/]dist[\\/]mermaid\.min\.js/);
     assert.match(html, /data-selection-inline-review-root/);
     assert.match(html, /data-selection-request-root/);
+    assert.match(html, /data-presentation-preset="balanced"/);
+    assert.match(html, /data-testid="viewer-preset-select"/);
   });
 
   test('selection request script includes collapsed-toolbar quick actions and composer affordance', () => {

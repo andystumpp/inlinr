@@ -3,6 +3,7 @@ import { openWithInlinrViewer } from './commands/openWithInlinrViewer';
 import { reopenWithDefaultEditor } from './commands/reopenWithDefaultEditor';
 import { MarkdownCustomEditorProvider } from './editors/markdownCustomEditorProvider';
 import { FirstActionGuidanceState } from './onboarding/firstActionGuidanceState';
+import { PresentationPresetState } from './presentation/presentationPresetState';
 import { VscodeLanguageModelExecutionService } from './requests/executionService';
 import { InMemoryRequestService } from './requests/requestService';
 import { DocumentSessionController } from './sessions/documentSessionController';
@@ -15,20 +16,22 @@ export function activate(context: vscode.ExtensionContext): void {
   const requestService = new InMemoryRequestService<SelectionScopedRequestPayload>();
   const executionService = new VscodeLanguageModelExecutionService(context);
   const firstActionGuidanceState = new FirstActionGuidanceState(context.globalState);
+  const presentationPresetState = new PresentationPresetState(context.globalState);
   const telemetryAdapter = createTelemetryAdapter({
     environment: process.env,
     cloudRoleName: getTelemetryCloudRoleName(process.env, context.extension.id),
     samplingEnabled: isTelemetrySamplingConfigured(process.env),
     mode: vscode.env.isTelemetryEnabled ? undefined : 'noop'
   });
-    const provider = new MarkdownCustomEditorProvider(
-      context.extensionUri,
-      sessionController,
-      requestService,
-      executionService,
-      telemetryAdapter,
-      firstActionGuidanceState
-    );
+  const provider = new MarkdownCustomEditorProvider(
+    context.extensionUri,
+    sessionController,
+    requestService,
+    executionService,
+    telemetryAdapter,
+    firstActionGuidanceState,
+    presentationPresetState
+  );
 
   context.subscriptions.push(
     new vscode.Disposable(() => {
@@ -43,6 +46,9 @@ export function activate(context: vscode.ExtensionContext): void {
     }),
     vscode.commands.registerCommand('inlinr.openWithInlinrViewer', (uri?: vscode.Uri) => {
       return openWithInlinrViewer(uri);
+    }),
+    vscode.commands.registerCommand('inlinr.switchPresentationPreset', () => {
+      return provider.switchPresentationPreset();
     })
   );
 }

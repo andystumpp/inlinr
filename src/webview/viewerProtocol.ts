@@ -1,3 +1,5 @@
+import { isPresentationPreset, type PresentationPreset } from '../presentation/presentationPresets';
+
 export interface SelectionCaptureMessage {
   type: 'selection.capture';
   documentVersion: number;
@@ -34,6 +36,11 @@ export interface FirstActionGuidanceDismissMessage {
   type: 'firstActionGuidance.dismiss';
 }
 
+export interface PresentationPresetChangeMessage {
+  type: 'presentationPreset.change';
+  preset: PresentationPreset;
+}
+
 export interface SuggestionApplyMessage {
   type: 'suggestion.apply';
   sessionId: string;
@@ -52,6 +59,7 @@ export type ViewerToExtensionMessage =
   | RequestSubmitMessage
   | RequestCancelMessage
   | FirstActionGuidanceDismissMessage
+  | PresentationPresetChangeMessage
   | SuggestionApplyMessage
   | SuggestionRejectMessage;
 
@@ -211,6 +219,8 @@ export function isViewerToExtensionMessage(value: unknown): value is ViewerToExt
       return isNonEmptyString(candidate.sessionId);
     case 'firstActionGuidance.dismiss':
       return true;
+    case 'presentationPreset.change':
+      return isPresentationPreset(candidate.preset);
     case 'suggestion.apply':
       return isNonEmptyString(candidate.sessionId) && isNonEmptyString(candidate.proposalId);
     case 'suggestion.reject':

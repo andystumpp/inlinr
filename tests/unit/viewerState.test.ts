@@ -10,6 +10,7 @@ suite('Viewer state', () => {
         uri: 'file:///contract.md',
         title: 'contract.md',
         documentVersion: 1,
+        presentationPreset: 'balanced',
         previewOnly: true,
         sourceMode: false,
         canFallbackToDefaultEditor: false,
@@ -44,6 +45,7 @@ suite('Viewer state', () => {
         uri: 'file:///contract.md',
         title: 'contract.md',
         documentVersion: 1,
+        presentationPreset: 'balanced',
         previewOnly: true,
         sourceMode: false,
         canFallbackToDefaultEditor: false,
@@ -77,6 +79,7 @@ suite('Viewer state', () => {
         uri: 'file:///contract.md',
         title: 'contract.md',
         documentVersion: 1,
+        presentationPreset: 'balanced',
         previewOnly: true,
         sourceMode: false,
         canFallbackToDefaultEditor: false,
@@ -102,6 +105,7 @@ suite('Viewer state', () => {
         uri: 'file:///contract.md',
         title: 'contract.md',
         documentVersion: 1,
+        presentationPreset: 'balanced',
         previewOnly: true,
         sourceMode: false,
         canFallbackToDefaultEditor: false,
@@ -127,5 +131,21 @@ suite('Viewer state', () => {
         }
       });
     });
+  });
+
+  test('rejects viewer state payloads with an unknown presentation preset', () => {
+    assert.throws(() => {
+      assertValidViewerState({
+        kind: 'error',
+        uri: 'file:///contract.md',
+        title: 'contract.md',
+        documentVersion: 1,
+        presentationPreset: 'storybook',
+        previewOnly: true,
+        canFallbackToDefaultEditor: false,
+        message: 'Preview unavailable.',
+        reasonCode: 'render-failed'
+      });
+    }, /Invalid viewer state payload/i);
   });
 });

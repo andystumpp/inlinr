@@ -94,10 +94,32 @@ Success signal: long Markdown documents feel intentionally designed instead of b
 
 Goal: support different reading preferences without fragmenting the product.
 
-- Introduce preset selection in the rendered viewer.
+- Introduce preset selection in the rendered viewer with one primary in-view control.
 - Ship the first curated preset set: Balanced, Dense Spec, Comfortable Reading, and Review Focus.
 - Store preset preference per user, not in the Markdown file.
 - Make preset switching immediate so users can compare layouts in context.
+
+Recommended Phase 2 delivery scope:
+
+- Add a single preset model shared by the extension host and webview so preset changes only affect presentation tokens, spacing, width, and emphasis settings.
+- Implement presets as layered CSS variables on top of one semantic HTML structure rather than separate rendering templates.
+- Default new users to **Balanced** and persist the last selected preset as a user-level VS Code preference.
+- Rehydrate the saved preset whenever a Markdown document opens in the Inlinr viewer.
+- Apply preset changes without disrupting selection state, request popup state, inline review state, or source alignment.
+- Keep preset labels task-oriented and plain language so the choice feels like a reading mode, not a theme system.
+
+Recommended switch location:
+
+- Put the primary switch in the **viewer header**, next to **Open Raw Markdown**, as a compact dropdown or segmented button labeled with the active preset, such as **View: Balanced**.
+- Keep the switch visible at the document level because presets are a viewer concern and users should be able to compare modes while reading the current file.
+- Add a secondary command-palette and editor-title action such as **Inlinr: Switch Presentation Preset** for keyboard-first access, but treat the in-view header control as the main affordance.
+- Do not bury the first implementation only in extension settings; settings can provide a default, but the actual switch should live on the rendered surface.
+
+Implementation notes:
+
+- Add the active preset to viewer state so the webview can render the correct mode immediately on load.
+- Attach the preset to the viewer root as a stable attribute or class, then let CSS preset tokens control density, width, heading treatment, table compactness, and selection emphasis.
+- Keep switching local and instant; Phase 2 should not require provider calls, document edits, or file metadata changes.
 
 Success signal: users can choose a reading mode that fits dense specs, review work, or more relaxed reading without losing orientation.
 

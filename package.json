@@ -60,6 +60,11 @@
         "command": "inlinr.openWithInlinrViewer",
         "title": "Open in Inlinr Viewer",
         "category": "Inlinr"
+      },
+      {
+        "command": "inlinr.switchPresentationPreset",
+        "title": "Switch Presentation Preset",
+        "category": "Inlinr"
       }
     ],
     "menus": {

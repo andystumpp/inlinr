@@ -244,6 +244,23 @@
     });
   }
 
+  function wirePresentationPresetControl() {
+    const presetSelect = document.querySelector('[data-presentation-preset-select]');
+
+    if (!(presetSelect instanceof HTMLSelectElement)) {
+      return;
+    }
+
+    presetSelect.addEventListener('change', function () {
+      const nextPreset = presetSelect.value;
+      document.body.dataset.presentationPreset = nextPreset;
+      postMessage({
+        type: 'presentationPreset.change',
+        preset: nextPreset
+      });
+    });
+  }
+
   function resolveOverlayPosition(selectionRect) {
     if (!selectionRect || !hasFiniteSelectionRect(selectionRect)) {
       return null;
@@ -1181,6 +1198,7 @@
     document.body.dataset.selectionMode = viewerState.kind === 'rendered' ? viewerState.selectionMode : 'disabled';
     renderMermaidBlocks();
     renderFirstActionGuidance();
+    wirePresentationPresetControl();
     wireSelectionCapture(viewerState);
     hydrateActiveRequestFromViewerState(viewerState);
     renderOverlay();

@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { PRESENTATION_PRESETS, getPresentationPresetLabel } from '../presentation/presentationPresets';
 import { assertValidViewerState, type ViewerState } from './viewerState';
 
 function escapeHtml(value: string): string {
@@ -87,6 +88,29 @@ function renderBody(state: ViewerState): string {
   `;
 }
 
+function renderPresentationPresetControl(state: ViewerState): string {
+  const activeLabel = getPresentationPresetLabel(state.presentationPreset);
+  const options = PRESENTATION_PRESETS.map((preset) => {
+    const selected = preset.id === state.presentationPreset ? ' selected' : '';
+    return `<option value="${preset.id}"${selected}>${escapeHtml(preset.label)}</option>`;
+  }).join('');
+
+  return `
+    <label class="viewer-preset-control" data-testid="viewer-preset-control">
+      <span class="viewer-preset-label">View</span>
+      <select
+        class="viewer-preset-select"
+        data-testid="viewer-preset-select"
+        data-presentation-preset-select
+        aria-label="Markdown presentation preset"
+        title="Current preset: ${escapeHtml(activeLabel)}"
+      >
+        ${options}
+      </select>
+    </label>
+  `;
+}
+
 export function getMarkdownViewerHtml(
   webview: vscode.Webview,
   extensionUri: vscode.Uri,
@@ -126,15 +150,18 @@ export function getMarkdownViewerHtml(
     <link rel="stylesheet" href="${stylesheetUri}" />
     <title>${escapeHtml(pageTitle)}</title>
   </head>
-  <body class="viewer-shell" data-state-kind="${state.kind}" data-active-request-state="${state.kind === 'rendered' && state.activeRequest ? state.activeRequest.validationState : 'none'}" data-first-action-guidance-state="${state.kind === 'rendered' && state.firstActionGuidance ? state.firstActionGuidance.completionState : 'hidden'}">
+  <body class="viewer-shell" data-state-kind="${state.kind}" data-presentation-preset="${state.presentationPreset}" data-active-request-state="${state.kind === 'rendered' && state.activeRequest ? state.activeRequest.validationState : 'none'}" data-first-action-guidance-state="${state.kind === 'rendered' && state.firstActionGuidance ? state.firstActionGuidance.completionState : 'hidden'}">
     <div class="first-action-guidance-root" data-first-action-guidance-root hidden></div>
     <header class="viewer-header">
       <div class="viewer-header-content" title="${escapeHtml(documentPathLabel)}">
         <h1 class="viewer-title">${escapeHtml(documentDisplayTitle)}</h1>
       </div>
-      <a class="viewer-link-button" data-testid="viewer-open-raw-markdown" href="command:inlinr.reopenWithDefaultEditor">
-        Open Raw Markdown
-      </a>
+      <div class="viewer-header-actions">
+        ${renderPresentationPresetControl(state)}
+        <a class="viewer-link-button" data-testid="viewer-open-raw-markdown" href="command:inlinr.reopenWithDefaultEditor">
+          Open Raw Markdown
+        </a>
+      </div>
     </header>
     <main class="viewer-main">
       ${renderBody(state)}
