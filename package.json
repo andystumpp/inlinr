@@ -102,6 +102,7 @@
   "scripts": {
     "vscode:prepublish": "npm run bundle -- --production",
     "bundle": "node scripts/bundle.mjs",
+    "devhost": "node scripts/launch-devhost.mjs",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile",
