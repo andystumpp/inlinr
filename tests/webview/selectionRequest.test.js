@@ -26,7 +26,7 @@ test.describe('webview selection request contract', () => {
     });
 
     expect(await isFirstActionGuidanceHidden(page)).toBe(false);
-    await expect(getFirstActionGuidance(page)).toContainText('Select text to start editing');
+    await expect(getFirstActionGuidance(page)).toContainText('Welcome to Inlinr — edit Markdown by asking, right where you select');
     await expect(getFirstActionGuidance(page)).toContainText('Got it');
   });
 

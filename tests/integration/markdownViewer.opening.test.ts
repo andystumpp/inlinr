@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import * as vscode from 'vscode';
 import { MarkdownCustomEditorProvider } from '../../src/editors/markdownCustomEditorProvider';
-import { FirstActionGuidanceState } from '../../src/onboarding/firstActionGuidanceState';
+import { DEFAULT_FIRST_ACTION_GUIDANCE_VIEW_STATE, FirstActionGuidanceState } from '../../src/onboarding/firstActionGuidanceState';
 import { DocumentSessionController } from '../../src/sessions/documentSessionController';
 import { closeAllEditors, createMockMemento, createMockWebviewPanel, getExtensionUri, getWorkspaceFile } from './helpers';
 
@@ -39,8 +39,8 @@ suite('Markdown viewer opening', () => {
     await provider.resolveCustomTextEditor(document, panel, new vscode.CancellationTokenSource().token);
 
     assert.match(webview.html, /data-first-action-guidance-root/);
-    assert.match(webview.html, /Select text to start editing/);
-    assert.match(webview.html, /Highlight Markdown you want to change, then describe the edit\./);
+    assert.ok(webview.html.includes(DEFAULT_FIRST_ACTION_GUIDANCE_VIEW_STATE.title));
+    assert.ok(webview.html.includes(DEFAULT_FIRST_ACTION_GUIDANCE_VIEW_STATE.body));
 
     provider.dispose();
   });

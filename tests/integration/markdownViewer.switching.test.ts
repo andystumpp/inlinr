@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import * as vscode from 'vscode';
 import { MarkdownCustomEditorProvider } from '../../src/editors/markdownCustomEditorProvider';
-import { FirstActionGuidanceState } from '../../src/onboarding/firstActionGuidanceState';
+import { DEFAULT_FIRST_ACTION_GUIDANCE_VIEW_STATE, FirstActionGuidanceState } from '../../src/onboarding/firstActionGuidanceState';
 import { DocumentSessionController } from '../../src/sessions/documentSessionController';
 import {
   closeAllEditors,
@@ -58,8 +58,8 @@ suite('Markdown viewer switching', () => {
     await provider.resolveCustomTextEditor(firstDocument, firstPanel.panel, token);
     await provider.resolveCustomTextEditor(secondDocument, secondPanel.panel, token);
 
-    assert.doesNotMatch(firstPanel.webview.html, /Select text to start editing/);
-    assert.doesNotMatch(secondPanel.webview.html, /Select text to start editing/);
+    assert.equal(firstPanel.webview.html.includes(DEFAULT_FIRST_ACTION_GUIDANCE_VIEW_STATE.title), false);
+    assert.equal(secondPanel.webview.html.includes(DEFAULT_FIRST_ACTION_GUIDANCE_VIEW_STATE.title), false);
     assert.match(secondPanel.webview.html, /data-first-action-guidance-state="hidden"/);
 
     provider.dispose();
