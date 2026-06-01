@@ -16,6 +16,7 @@
   let inlineReviewRoot = null;
   let mermaidInitialized = false;
   let mermaidRenderSequence = 0;
+  let requestDisplayMode = 'toolbar';
 
   function parseViewerState() {
     const stateElement = document.getElementById('inlinr-viewer-state');
@@ -156,6 +157,14 @@
 
   function getSelectionRectFromRange(range) {
     return toSelectionRect(range.getBoundingClientRect());
+  }
+
+  function setRequestDisplayMode(nextMode) {
+    requestDisplayMode = nextMode;
+
+    if (requestRoot instanceof HTMLElement) {
+      requestRoot.dataset.mode = nextMode;
+    }
   }
 
   function clearFirstActionGuidance() {
@@ -415,6 +424,7 @@
     activeRequest = null;
     pendingSelectionRect = null;
     pendingSelectionRange = null;
+    setRequestDisplayMode('toolbar');
 
     if (typeof CSS !== 'undefined' && CSS.highlights) {
       CSS.highlights.delete('inlinr-active-selection');
@@ -500,7 +510,7 @@
     }
 
     activeRequest.validationState = 'submitting';
-    syncSubmitButtonState();
+    renderOverlay();
     postMessage({
       type: 'request.submit',
       sessionId: activeRequest.sessionId,
@@ -508,7 +518,7 @@
     });
   }
 
-  function applyQuickActionRequest(actionKind, textarea) {
+  function applyQuickActionRequest(actionKind) {
     if (!activeRequest) {
       return;
     }
@@ -521,10 +531,6 @@
     activeRequest.draftText = draftText;
     activeRequest.validationState = 'drafting';
     activeRequest.validationMessage = undefined;
-
-    if (textarea instanceof HTMLTextAreaElement) {
-      textarea.value = draftText;
-    }
 
     postMessage({
       type: 'request.draftChanged',
@@ -554,11 +560,34 @@
 
   function shouldRenderInlinePanel() {
     return !!activeRequest && (
+      activeRequest.validationState === 'submitting' ||
       activeRequest.validationState === 'submitted' ||
       activeRequest.validationState === 'executing' ||
       activeRequest.validationState === 'review' ||
       activeRequest.validationState === 'applying'
     );
+  }
+
+  function shouldShowComposerForRequest(request) {
+    return !!request && (
+      request.draftText.trim().length > 0 ||
+      request.validationState === 'invalid' ||
+      request.validationState === 'failed' ||
+      request.validationState === 'unavailable'
+    );
+  }
+
+  function isComposerExpanded() {
+    return requestDisplayMode === 'composer';
+  }
+
+  function expandRequestComposer() {
+    if (!activeRequest || shouldRenderInlinePanel()) {
+      return;
+    }
+
+    setRequestDisplayMode('composer');
+    renderOverlay();
   }
 
   function clearInlineReview() {
@@ -658,9 +687,17 @@
         });
       }
     } else {
-      const pendingKicker = activeRequest.validationState === 'applying' ? 'Updating document' : 'Processing request';
+      const pendingKicker = activeRequest.validationState === 'applying'
+        ? 'Updating document'
+        : activeRequest.validationState === 'submitting'
+        ? 'Submitting request'
+        : 'Processing request';
       const pendingMessage = activeRequest.validationMessage ||
-        (activeRequest.validationState === 'applying' ? 'Applying suggestion…' : 'Generating suggestion…');
+        (activeRequest.validationState === 'applying'
+          ? 'Applying suggestion…'
+          : activeRequest.validationState === 'submitting'
+          ? 'Submitting request…'
+          : 'Generating suggestion…');
       inlineReviewRoot.innerHTML = `
         <section class="selection-inline-review selection-inline-review-pending" aria-live="polite">
           <p class="selection-inline-review-kicker">${escapeHtml(pendingKicker)}</p>
@@ -714,6 +751,71 @@
     }
 
     clearInlineReview();
+    requestRoot.dataset.mode = requestDisplayMode;
+
+    if (!isComposerExpanded()) {
+      const shortcuts = getPlatformShortcuts();
+      requestRoot.innerHTML = `
+        <section class="selection-request-toolbar" aria-label="Selection request toolbar">
+          <button type="button" class="selection-request-toolbar-primary" data-selection-request-expand>
+            <span>Ask for changes</span>
+            <span class="selection-request-toolbar-shortcut" aria-hidden="true">${escapeHtml(shortcuts.request)}</span>
+          </button>
+          <div class="selection-request-toolbar-actions" role="group" aria-label="Quick selection actions">
+            <button
+              type="button"
+              class="selection-request-quick-prompt selection-request-quick-prompt-icon"
+              data-selection-request-quick-action
+              data-selection-request-action-kind="bold"
+              aria-label="Bold"
+              title="Bold"
+            ><strong aria-hidden="true">B</strong></button>
+            <button
+              type="button"
+              class="selection-request-quick-prompt selection-request-quick-prompt-icon"
+              data-selection-request-quick-action
+              data-selection-request-action-kind="italic"
+              aria-label="Italic"
+              title="Italic"
+            ><em aria-hidden="true">I</em></button>
+            <button type="button" class="selection-request-quick-prompt" data-selection-request-quick-action data-selection-request-action-kind="clearer">Clearer</button>
+            <button type="button" class="selection-request-quick-prompt" data-selection-request-quick-action data-selection-request-action-kind="tighten">Tighten</button>
+            <button type="button" class="selection-request-quick-prompt" data-selection-request-quick-action data-selection-request-action-kind="add-example">Add example</button>
+          </div>
+        </section>`;
+
+      syncOverlayPosition();
+
+      const expandButton = requestRoot.querySelector('[data-selection-request-expand]');
+      const quickActionButtons = requestRoot.querySelectorAll('[data-selection-request-quick-action]');
+
+      if (expandButton instanceof HTMLButtonElement) {
+        expandButton.addEventListener('click', function () {
+          expandRequestComposer();
+        });
+      }
+
+      quickActionButtons.forEach(function (button) {
+        if (!(button instanceof HTMLButtonElement)) {
+          return;
+        }
+
+        button.addEventListener('click', function () {
+          if (!activeRequest) {
+            return;
+          }
+
+          const actionKind = button.dataset.selectionRequestActionKind;
+          if (!actionKind) {
+            return;
+          }
+
+          applyQuickActionRequest(actionKind);
+        });
+      });
+
+      return;
+    }
 
     const validationClass = activeRequest.validationState === 'unavailable' || activeRequest.validationState === 'failed'
       ? 'selection-request-validation selection-request-validation-submitted'
@@ -722,43 +824,19 @@
       : 'selection-request-validation';
 
     requestRoot.innerHTML = `
-      <section class="selection-request-popover" aria-label="Selection request popup">
-        <div class="selection-request-header">
-          <h2 class="selection-request-title">INLINR - ASK FOR CHANGES</h2>
-          <div class="selection-request-hints">
-            <span class="selection-request-hint"><kbd>Return</kbd> to send</span>
-            <span class="selection-request-hint"><kbd>Esc</kbd> to cancel</span>
-          </div>
+      <section class="selection-request-popover selection-request-composer" aria-label="Selection request popup">
+        <div class="selection-request-composer-header">
+          <label class="selection-request-composer-label" for="selection-request-textarea">Ask for changes</label>
+          <span class="selection-request-hint"><kbd>Enter</kbd> to send</span>
         </div>
         <textarea
           id="selection-request-textarea"
           class="selection-request-textarea"
           aria-label="Ask for changes"
-          placeholder="Try: 'make this clearer' or 'expand with examples'"
+          placeholder="Describe changes"
           data-selection-request-draft
         >${escapeHtml(activeRequest.draftText)}</textarea>
         <p class="${validationClass}">${escapeHtml(activeRequest.validationMessage || '')}</p>
-        <div class="selection-request-quick-prompts">
-          <button
-            type="button"
-            class="selection-request-quick-prompt selection-request-quick-prompt-icon"
-            data-selection-request-quick-action
-            data-selection-request-action-kind="bold"
-            aria-label="Bold"
-            title="Bold"
-          ><strong aria-hidden="true">B</strong></button>
-          <button
-            type="button"
-            class="selection-request-quick-prompt selection-request-quick-prompt-icon"
-            data-selection-request-quick-action
-            data-selection-request-action-kind="italic"
-            aria-label="Italic"
-            title="Italic"
-          ><em aria-hidden="true">I</em></button>
-          <button type="button" class="selection-request-quick-prompt" data-selection-request-quick-action data-selection-request-action-kind="clearer">Make clearer</button>
-          <button type="button" class="selection-request-quick-prompt" data-selection-request-quick-action data-selection-request-action-kind="tighten">Tighten</button>
-          <button type="button" class="selection-request-quick-prompt" data-selection-request-quick-action data-selection-request-action-kind="add-example">Add example</button>
-        </div>
         <div class="selection-request-actions">
           <button type="button" class="selection-request-button selection-request-button-secondary" data-selection-request-cancel>Cancel</button>
           <button type="button" class="selection-request-button" data-selection-request-submit>Ask</button>
@@ -770,10 +848,16 @@
     const textarea = requestRoot.querySelector('[data-selection-request-draft]');
     const submitButton = requestRoot.querySelector('[data-selection-request-submit]');
     const cancelButton = requestRoot.querySelector('[data-selection-request-cancel]');
-    const quickActionButtons = requestRoot.querySelectorAll('[data-selection-request-quick-action]');
 
     if (textarea instanceof HTMLTextAreaElement) {
-      focusRequestTextarea(textarea);
+      if (
+        activeRequest.validationState === 'drafting' ||
+        activeRequest.validationState === 'invalid' ||
+        activeRequest.validationState === 'failed' ||
+        activeRequest.validationState === 'unavailable'
+      ) {
+        focusRequestTextarea(textarea);
+      }
 
       textarea.addEventListener('input', function () {
         if (!activeRequest) {
@@ -833,25 +917,6 @@
       });
     }
 
-    quickActionButtons.forEach(function (button) {
-      if (!(button instanceof HTMLButtonElement)) {
-        return;
-      }
-
-      button.addEventListener('click', function () {
-        if (!activeRequest) {
-          return;
-        }
-
-        const actionKind = button.dataset.selectionRequestActionKind;
-        if (!actionKind) {
-          return;
-        }
-
-        applyQuickActionRequest(actionKind, textarea);
-      });
-    });
-
     syncSubmitButtonState();
   }
 
@@ -867,6 +932,7 @@
   function hydrateActiveRequestFromViewerState(currentViewerState) {
     if (!currentViewerState || currentViewerState.kind !== 'rendered' || !currentViewerState.activeRequest) {
       activeRequest = null;
+      setRequestDisplayMode('toolbar');
       return;
     }
 
@@ -877,17 +943,26 @@
       draftText: currentViewerState.activeRequest.draftText || '',
       validationState: currentViewerState.activeRequest.validationState,
       validationMessage: currentViewerState.activeRequest.validationMessage,
-        suggestion: currentViewerState.activeRequest.suggestion,
+      suggestion: currentViewerState.activeRequest.suggestion,
       selectionRect: getSelectionRectFromRegionIds(currentViewerState.activeRequest.selectedRegionIds)
     };
+    setRequestDisplayMode(shouldShowComposerForRequest(activeRequest) ? 'composer' : 'toolbar');
   }
 
   function handleKeyDown(event) {
-    if (!(event instanceof KeyboardEvent) || event.key !== 'Escape') {
+    if (!(event instanceof KeyboardEvent) || !activeRequest) {
       return;
     }
 
-    if (!activeRequest) {
+    const isComposerShortcut = (event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === 'k';
+
+    if (isComposerShortcut && !isReviewState() && !blocksReplacementSelection() && !isComposerExpanded()) {
+      event.preventDefault();
+      expandRequestComposer();
+      return;
+    }
+
+    if (event.key !== 'Escape') {
       return;
     }
 
@@ -949,6 +1024,7 @@
           suggestion: undefined,
           selectionRect: pendingSelectionRect || getSelectionRectFromRegionIds(message.selectedRegionIds)
         };
+        setRequestDisplayMode(shouldShowComposerForRequest(activeRequest) ? 'composer' : 'toolbar');
 
         if (pendingSelectionRange && typeof CSS !== 'undefined' && CSS.highlights) {
           try {
@@ -974,6 +1050,7 @@
         activeRequest.validationState = 'invalid';
         activeRequest.validationMessage = message.message;
         activeRequest.suggestion = undefined;
+        setRequestDisplayMode('composer');
         renderOverlay();
         return;
       case 'request.submitted':
@@ -1013,6 +1090,7 @@
         activeRequest.validationState = 'failed';
         activeRequest.validationMessage = message.message;
         activeRequest.suggestion = undefined;
+        setRequestDisplayMode('composer');
         renderOverlay();
         return;
       case 'request.unavailable':
@@ -1023,6 +1101,7 @@
         activeRequest.validationState = 'unavailable';
         activeRequest.validationMessage = message.message;
         activeRequest.suggestion = undefined;
+        setRequestDisplayMode('composer');
         renderOverlay();
         return;
       case 'suggestion.rejected':
@@ -1034,6 +1113,7 @@
         activeRequest.validationMessage = message.message;
         activeRequest.draftText = message.draftText || activeRequest.draftText;
         activeRequest.suggestion = undefined;
+        setRequestDisplayMode('composer');
         renderOverlay();
         return;
       case 'suggestion.applied':
@@ -1056,8 +1136,12 @@
       return;
     }
 
-    const captureSelection = function () {
+    const captureSelection = function (event) {
       if (blocksReplacementSelection()) {
+        return;
+      }
+
+      if (requestRoot && event && requestRoot.contains(event.target)) {
         return;
       }
 

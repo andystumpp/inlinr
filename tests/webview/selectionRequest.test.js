@@ -64,7 +64,7 @@ test.describe('webview selection request contract', () => {
     expect(await isFirstActionGuidanceHidden(page)).toBe(true);
   });
 
-  test('shows the popup quick action buttons after a selection is accepted', async ({ page }) => {
+  test('shows the collapsed toolbar quick action buttons after a selection is accepted', async ({ page }) => {
     await mountWebview(page, {
       markdown: 'Alpha beta gamma delta.'
     });
@@ -80,9 +80,12 @@ test.describe('webview selection request contract', () => {
     const [captureMessage] = await getPostedMessages(page);
     await postExtensionMessage(page, createAcceptedSelectionMessage(captureMessage));
 
+    const askButton = page.locator('[data-selection-request-expand]');
     const boldButton = page.locator('[data-selection-request-action-kind="bold"]');
     const italicButton = page.locator('[data-selection-request-action-kind="italic"]');
 
+    await expect(askButton).toBeVisible();
+    await expect(askButton).toContainText('Ask for changes');
     await expect(boldButton).toBeVisible();
     await expect(boldButton).toHaveAttribute('aria-label', 'Bold');
     await expect(boldButton).toHaveText('B');
@@ -92,9 +95,10 @@ test.describe('webview selection request contract', () => {
     await expect(page.locator('[data-selection-request-action-kind="clearer"]')).toBeVisible();
     await expect(page.locator('[data-selection-request-action-kind="tighten"]')).toBeVisible();
     await expect(page.locator('[data-selection-request-action-kind="add-example"]')).toBeVisible();
+    await expect(page.locator('[data-selection-request-draft]')).toHaveCount(0);
   });
 
-  test('submits the make clearer quick action from the popup', async ({ page }) => {
+  test('submits the make clearer quick action from the collapsed toolbar', async ({ page }) => {
     await mountWebview(page, {
       markdown: 'Alpha beta gamma delta.'
     });
@@ -113,9 +117,7 @@ test.describe('webview selection request contract', () => {
 
     await page.locator('[data-selection-request-action-kind="clearer"]').click();
 
-    await expect(page.locator('[data-selection-request-draft]')).toHaveValue(
-      'Make the selected text clearer without changing its meaning.'
-    );
+    await expect(page.locator('[data-selection-inline-review-root]')).toBeVisible();
     expect(await getPostedMessages(page)).toEqual([
       {
         type: 'request.draftChanged',
@@ -130,7 +132,50 @@ test.describe('webview selection request contract', () => {
     ]);
   });
 
-  test('captures a normal text selection and opens the popup after acceptance', async ({ page }) => {
+  test('expands the composer when the ask button is clicked', async ({ page }) => {
+    await mountWebview(page, {
+      markdown: 'Alpha beta gamma delta.'
+    });
+    const regionId = await findRegionIdContainingText(page, 'Alpha beta gamma delta.');
+
+    await selectFragment(page, {
+      startRegionId: regionId,
+      startText: 'beta',
+      endRegionId: regionId,
+      endText: 'gamma'
+    });
+
+    const [captureMessage] = await getPostedMessages(page);
+    await postExtensionMessage(page, createAcceptedSelectionMessage(captureMessage));
+
+    await page.locator('[data-selection-request-expand]').click();
+
+    await expect(page.locator('[data-selection-request-draft]')).toBeVisible();
+    await expect(page.locator('[data-selection-request-action-kind="clearer"]')).toHaveCount(0);
+  });
+
+  test('expands the composer when Ctrl+K is pressed from the collapsed toolbar', async ({ page }) => {
+    await mountWebview(page, {
+      markdown: 'Alpha beta gamma delta.'
+    });
+    const regionId = await findRegionIdContainingText(page, 'Alpha beta gamma delta.');
+
+    await selectFragment(page, {
+      startRegionId: regionId,
+      startText: 'beta',
+      endRegionId: regionId,
+      endText: 'gamma'
+    });
+
+    const [captureMessage] = await getPostedMessages(page);
+    await postExtensionMessage(page, createAcceptedSelectionMessage(captureMessage));
+
+    await page.keyboard.press('Control+K');
+
+    await expect(page.locator('[data-selection-request-draft]')).toBeVisible();
+  });
+
+  test('captures a normal text selection and opens the collapsed toolbar after acceptance', async ({ page }) => {
     const fixture = await mountWebview(page, {
       markdown: 'Alpha beta gamma delta.'
     });
@@ -154,7 +199,8 @@ test.describe('webview selection request contract', () => {
     await postExtensionMessage(page, createAcceptedSelectionMessage(captureMessage));
 
     expect(await isRequestRootHidden(page)).toBe(false);
-    await expect(page.locator('[data-selection-request-draft]')).toBeVisible();
+    await expect(page.locator('[data-selection-request-expand]')).toBeVisible();
+    await expect(page.locator('[data-selection-request-draft]')).toHaveCount(0);
     expect(await getTargetedRegionIds(page)).toEqual([regionId]);
   });
 
