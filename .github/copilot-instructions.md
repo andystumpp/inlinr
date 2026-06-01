@@ -30,9 +30,13 @@
 - Put internal contributor guidance in `docs/internal/`, not in Marketplace-facing documentation.
 - Keep docs concise, decision-oriented, and easy for future agents to apply.
 - Do not invent build, test, or lint commands until the corresponding tooling exists in the repo.
-- When using SpecKit, stay on the current branch; do not create or switch Git branches for `/speckit.specify` or related planning commands.
 - If a task changes product or architecture direction, update the relevant source doc instead of leaving the decision only in code or chat history.
 - For scenario monitoring work, keep `monitoring/monitoring-scenarios.md` and `monitoring/telemetry-guidelines.md` aligned with the runtime behavior, especially privacy-safe property allowlists, scenario status classification, and Azure fail-open rules.
+
+## SpecKit branch handling
+
+- Stay on the current branch when using `/speckit.specify` or related SpecKit planning commands.
+- Do not create or switch Git branches as part of a SpecKit planning flow in this repository.
 
 ## Code review guidelines
 
