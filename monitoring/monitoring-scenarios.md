@@ -62,6 +62,33 @@ Each scenario stays crisp and monitoring-oriented: a real user journey, the key 
 3. The next request uses the current document state rather than stale prior review state.
 **Monitoring intent:** Catch regressions where one completed request leaves the session stuck, stale, or unable to continue.
 
+### See first-action guidance on initial open
+**Criticality:** Important
+**Journey:** A new user opens a Markdown document in Inlinr for the first time and sees clear, non-blocking guidance that teaches them to select text to begin editing.
+**Key checkpoints:**
+1. The first-action guidance appears automatically when a user has not yet completed or dismissed it.
+2. The guidance is visible enough to teach the workflow without blocking document content.
+3. The guidance dismisses after the user makes a qualifying selection or explicitly dismisses it.
+**Monitoring intent:** Catch activation failures where new users never discover the core selection-based editing workflow.
+
+### Switch presentation presets without losing workflow state
+**Criticality:** Watch
+**Journey:** A user switches between presentation presets such as a denser spec view or a more comfortable reading view, and the viewer updates immediately without losing selection state, pending requests, or document position.
+**Key checkpoints:**
+1. The preset command is available and responds successfully.
+2. The rendered view updates to reflect the new presentation preset.
+3. Any active selection, pending request, or document scroll position is preserved.
+**Monitoring intent:** Catch regressions where presentation changes break workflow continuity or force users to restart their editing session.
+
+### Apply lightweight formatting from the inline popup
+**Criticality:** Watch
+**Journey:** A user selects a small range of Markdown text and applies a quick formatting action such as bold or italic from the inline popup without triggering a full AI request cycle.
+**Key checkpoints:**
+1. The quick-format action is available in the popup for eligible selections.
+2. The formatting is applied immediately to the selected range.
+3. The document updates with the correct Markdown formatting syntax.
+**Monitoring intent:** Catch failures where lightweight authoring actions break or become unavailable, forcing users into slower full-request workflows for simple tasks.
+
 ## Recovery scenarios
 
 ### Keep the viewer stable when preview rendering fails
