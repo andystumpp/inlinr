@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.0.9
+
+- Republish the current preview build to the VS Code Marketplace as version 0.0.9.
+
 ## 0.0.8
 
 - Republish the current preview build to the VS Code Marketplace with updated extension version metadata.
