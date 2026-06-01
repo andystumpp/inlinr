@@ -668,6 +668,10 @@ body.viewer-shell {
 }
 
 .selection-request-quick-prompt {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   padding: 6px 12px;
   border: 1px solid color-mix(in srgb, var(--viewer-accent) 20%, var(--viewer-border));
   border-radius: 12px;
@@ -677,6 +681,11 @@ body.viewer-shell {
   font-weight: 500;
   cursor: pointer;
   transition: border-color 120ms ease, background 120ms ease, transform 120ms ease;
+}
+
+.selection-request-quick-prompt-icon {
+  min-width: 36px;
+  padding: 6px 10px;
 }
 
 .selection-request-quick-prompt:hover:not(:disabled) {
@@ -690,9 +699,10 @@ body.viewer-shell {
   cursor: not-allowed;
 }
 
-.selection-request-quick-prompt strong,
-.selection-request-quick-prompt em {
-  margin-right: 4px;
+.selection-request-quick-prompt-icon strong,
+.selection-request-quick-prompt-icon em {
+  font-size: 0.92rem;
+  line-height: 1;
 }
 
 .selection-request-suggestion {
