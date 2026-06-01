@@ -14,6 +14,42 @@ function escapeJsonForHtml(value: string): string {
   return value.replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026');
 }
 
+function stripMarkdownExtension(title: string): string {
+  const strippedTitle = title.replace(/\.(?:md|markdown)$/i, '');
+  return strippedTitle.length > 0 ? strippedTitle : title;
+}
+
+function middleTruncate(value: string, maxLength: number): string {
+  if (value.length <= maxLength) {
+    return value;
+  }
+
+  const ellipsis = '...';
+  const remainingLength = maxLength - ellipsis.length;
+  const startLength = Math.ceil(remainingLength / 2);
+  const endLength = Math.floor(remainingLength / 2);
+
+  return `${value.slice(0, startLength)}${ellipsis}${value.slice(-endLength)}`;
+}
+
+function getDocumentPathLabel(uriValue: string): string {
+  try {
+    const parsedUri = vscode.Uri.parse(uriValue);
+
+    if (parsedUri.scheme === 'file') {
+      return parsedUri.fsPath || parsedUri.path || uriValue;
+    }
+
+    if (parsedUri.scheme === 'untitled') {
+      return parsedUri.path || uriValue;
+    }
+
+    return parsedUri.fsPath || parsedUri.path || parsedUri.toString(true);
+  } catch {
+    return uriValue;
+  }
+}
+
 function renderBody(state: ViewerState): string {
   if (state.kind === 'rendered') {
     return `
@@ -68,6 +104,9 @@ export function getMarkdownViewerHtml(
     vscode.Uri.joinPath(extensionUri, 'media', 'markdownViewer', 'selectionRequest.js')
   );
   const serializedState = escapeJsonForHtml(JSON.stringify(state));
+  const documentDisplayTitle = middleTruncate(stripMarkdownExtension(state.title), 44);
+  const documentPathLabel = getDocumentPathLabel(state.uri);
+  const pageTitle = `${state.title} · Inlinr Markdown Viewer`;
 
   const csp = [
     "default-src 'none'",
@@ -85,15 +124,13 @@ export function getMarkdownViewerHtml(
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
     <link rel="stylesheet" href="${stylesheetUri}" />
-    <title>${escapeHtml(state.title)}</title>
+    <title>${escapeHtml(pageTitle)}</title>
   </head>
   <body class="viewer-shell" data-state-kind="${state.kind}" data-active-request-state="${state.kind === 'rendered' && state.activeRequest ? state.activeRequest.validationState : 'none'}" data-first-action-guidance-state="${state.kind === 'rendered' && state.firstActionGuidance ? state.firstActionGuidance.completionState : 'hidden'}">
     <div class="first-action-guidance-root" data-first-action-guidance-root hidden></div>
     <header class="viewer-header">
-      <div class="viewer-header-content">
-        <p class="viewer-kicker">Inlinr Markdown Viewer</p>
-        <h1 class="viewer-title">${escapeHtml(state.title)}</h1>
-        <p class="viewer-meta">${escapeHtml(state.uri)} | Version ${state.documentVersion} | Preview only</p>
+      <div class="viewer-header-content" title="${escapeHtml(documentPathLabel)}">
+        <h1 class="viewer-title">${escapeHtml(documentDisplayTitle)}</h1>
       </div>
       <a class="viewer-link-button" data-testid="viewer-open-raw-markdown" href="command:inlinr.reopenWithDefaultEditor">
         Open Raw Markdown
