@@ -196,7 +196,7 @@ export function isViewerState(value: unknown): value is ViewerState {
   if (candidate.kind === 'rendered') {
     return (
       candidate.sourceMode === false &&
-      isNonEmptyString(candidate.html) &&
+      typeof candidate.html === 'string' &&
       candidate.selectionMode === 'enabled' &&
       (candidate.firstActionGuidance === null || isFirstActionGuidanceViewState(candidate.firstActionGuidance)) &&
       (candidate.activeRequest === null || isActiveRequestViewState(candidate.activeRequest)) &&
