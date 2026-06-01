@@ -3,7 +3,14 @@ import * as vscode from 'vscode';
 import { MarkdownCustomEditorProvider } from '../../src/editors/markdownCustomEditorProvider';
 import { DEFAULT_FIRST_ACTION_GUIDANCE_VIEW_STATE, FirstActionGuidanceState } from '../../src/onboarding/firstActionGuidanceState';
 import { DocumentSessionController } from '../../src/sessions/documentSessionController';
-import { closeAllEditors, createMockMemento, createMockWebviewPanel, getExtensionUri, getWorkspaceFile } from './helpers';
+import {
+  closeAllEditors,
+  createMockMemento,
+  createMockWebviewPanel,
+  createTemporaryMarkdownDocument,
+  getExtensionUri,
+  getWorkspaceFile
+} from './helpers';
 
 suite('Markdown viewer opening', () => {
   teardown(async () => {
@@ -19,9 +26,43 @@ suite('Markdown viewer opening', () => {
 
     assert.equal(panel.title, 'sample.md Preview');
     assert.match(webview.html, /Inlinr Markdown Viewer/);
+    assert.match(webview.html, /<h1 class="viewer-title">sample<\/h1>/);
+    assert.doesNotMatch(webview.html, /Preview only/);
+    assert.doesNotMatch(webview.html, /Version \d+/);
     assert.match(webview.html, /This is the first Markdown document\./);
 
     provider.dispose();
+  });
+
+  test('uses a compact document-context header for long file names', async () => {
+    const provider = new MarkdownCustomEditorProvider(getExtensionUri(), new DocumentSessionController());
+    const { document, uri, cleanup } = await createTemporaryMarkdownDocument(
+      'very-long-selection-request-document-name-for-header-truncation-behavior-check',
+      '# Header\n\nBody'
+    );
+    const { panel, webview } = createMockWebviewPanel();
+    const expectedTitleStem = uri.path.split('/').pop()?.replace(/\.md$/i, '');
+
+    try {
+      await provider.resolveCustomTextEditor(document, panel, new vscode.CancellationTokenSource().token);
+
+      const titleMatch = webview.html.match(/<h1 class="viewer-title">([^<]+)<\/h1>/);
+      assert.ok(titleMatch, 'Expected the rendered header title to exist.');
+      assert.ok(expectedTitleStem, 'Expected the temporary document title stem to exist.');
+      assert.equal(titleMatch[1].includes('.md'), false);
+      assert.equal(titleMatch[1].includes('...'), true);
+      assert.equal(titleMatch[1].startsWith(expectedTitleStem.slice(0, 10)), true);
+      assert.equal(titleMatch[1].endsWith(expectedTitleStem.slice(-10)), true);
+
+      const headerContextMatch = webview.html.match(/<div class="viewer-header-content" title="([^"]+)">/);
+      assert.ok(headerContextMatch, 'Expected the header context tooltip to exist.');
+      assert.equal(headerContextMatch[1], uri.fsPath);
+      assert.doesNotMatch(webview.html, /Preview only/);
+      assert.doesNotMatch(webview.html, /Version \d+/);
+    } finally {
+      provider.dispose();
+      await cleanup();
+    }
   });
 
   test('includes first-action guidance for a first-run user', async () => {
