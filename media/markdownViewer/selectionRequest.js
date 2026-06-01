@@ -739,8 +739,22 @@
         >${escapeHtml(activeRequest.draftText)}</textarea>
         <p class="${validationClass}">${escapeHtml(activeRequest.validationMessage || '')}</p>
         <div class="selection-request-quick-prompts">
-          <button type="button" class="selection-request-quick-prompt" data-selection-request-quick-action data-selection-request-action-kind="bold" title="Make bold"><strong>B</strong> Bold</button>
-          <button type="button" class="selection-request-quick-prompt" data-selection-request-quick-action data-selection-request-action-kind="italic" title="Make italic"><em>I</em> Italic</button>
+          <button
+            type="button"
+            class="selection-request-quick-prompt selection-request-quick-prompt-icon"
+            data-selection-request-quick-action
+            data-selection-request-action-kind="bold"
+            aria-label="Bold"
+            title="Bold"
+          ><strong aria-hidden="true">B</strong></button>
+          <button
+            type="button"
+            class="selection-request-quick-prompt selection-request-quick-prompt-icon"
+            data-selection-request-quick-action
+            data-selection-request-action-kind="italic"
+            aria-label="Italic"
+            title="Italic"
+          ><em aria-hidden="true">I</em></button>
           <button type="button" class="selection-request-quick-prompt" data-selection-request-quick-action data-selection-request-action-kind="clearer">Make clearer</button>
           <button type="button" class="selection-request-quick-prompt" data-selection-request-quick-action data-selection-request-action-kind="tighten">Tighten</button>
           <button type="button" class="selection-request-quick-prompt" data-selection-request-quick-action data-selection-request-action-kind="add-example">Add example</button>
