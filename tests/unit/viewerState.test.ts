@@ -133,6 +133,29 @@ suite('Viewer state', () => {
     });
   });
 
+  test('accepts rendered viewer state with empty html for empty markdown documents', () => {
+    assert.doesNotThrow(() => {
+      assertValidViewerState({
+        kind: 'rendered',
+        uri: 'file:///empty.md',
+        title: 'empty.md',
+        documentVersion: 1,
+        presentationPreset: 'balanced',
+        previewOnly: true,
+        sourceMode: false,
+        canFallbackToDefaultEditor: false,
+        html: '',
+        selectionMode: 'enabled',
+        firstActionGuidance: null,
+        activeRequest: null,
+        selectionMetadata: {
+          regions: [],
+          markers: []
+        }
+      });
+    });
+  });
+
   test('rejects viewer state payloads with an unknown presentation preset', () => {
     assert.throws(() => {
       assertValidViewerState({
