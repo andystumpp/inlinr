@@ -28,8 +28,3 @@ If a supported model is unavailable or access is denied, Inlinr keeps the reques
 3. Trigger the inline editing flow from the selected text.
 4. Review the proposed change in context before applying it.
 
-## Feedback
-
-Inlinr is currently in preview. If you hit a bug or want to suggest an improvement, open an issue in the GitHub repository:
-
-- <https://github.com/andystumpp/inlinr/issues>
