@@ -80,8 +80,15 @@ test.describe('webview selection request contract', () => {
     const [captureMessage] = await getPostedMessages(page);
     await postExtensionMessage(page, createAcceptedSelectionMessage(captureMessage));
 
-    await expect(page.locator('[data-selection-request-action-kind="bold"]')).toBeVisible();
-    await expect(page.locator('[data-selection-request-action-kind="italic"]')).toBeVisible();
+    const boldButton = page.locator('[data-selection-request-action-kind="bold"]');
+    const italicButton = page.locator('[data-selection-request-action-kind="italic"]');
+
+    await expect(boldButton).toBeVisible();
+    await expect(boldButton).toHaveAttribute('aria-label', 'Bold');
+    await expect(boldButton).toHaveText('B');
+    await expect(italicButton).toBeVisible();
+    await expect(italicButton).toHaveAttribute('aria-label', 'Italic');
+    await expect(italicButton).toHaveText('I');
     await expect(page.locator('[data-selection-request-action-kind="clearer"]')).toBeVisible();
     await expect(page.locator('[data-selection-request-action-kind="tighten"]')).toBeVisible();
     await expect(page.locator('[data-selection-request-action-kind="add-example"]')).toBeVisible();
