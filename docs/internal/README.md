@@ -6,7 +6,9 @@ This document is for contributors working in the repository. Keep Marketplace-fa
 
 1. Run `npm install`.
 2. Run `npm run compile` for a one-off build or `npm run watch` while developing.
-3. Run `npm test` to execute the default VS Code-hosted integration and unit suites.
+3. Run `npm test` to execute the default VS Code-hosted integration and unit suites. To reuse an
+   already-installed VS Code build instead of downloading a test copy, set
+   `INLINR_VSCODE_EXECUTABLE_PATH` (or `VSCODE_EXECUTABLE_PATH`) before running the test command.
 4. To run the dedicated browser-based webview suite, first install the Playwright browser once with `npm run test:webview:install`, then run `npm run test:webview`.
 5. Open Run and Debug, choose `Run Inlinr Extension`, and press `F5` to launch an Extension Development Host.
 6. Run `npm run package:vsix` to build a Marketplace-ready extension package.

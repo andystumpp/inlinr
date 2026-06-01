@@ -22,11 +22,13 @@ async function runSuite(options: {
   extensionTestsPath: string;
   workspacePath: string;
   version?: 'insiders';
+  vscodeExecutablePath?: string;
 }): Promise<void> {
   await runTests({
     extensionDevelopmentPath: options.extensionDevelopmentPath,
     extensionTestsPath: options.extensionTestsPath,
     launchArgs: [options.workspacePath, '--disable-extensions'],
+    ...(options.vscodeExecutablePath ? { vscodeExecutablePath: options.vscodeExecutablePath } : {}),
     ...(options.version ? { version: options.version } : {})
   });
 }
@@ -44,12 +46,15 @@ async function main(): Promise<void> {
     'index.js'
   );
   const workspacePath = path.join(extensionDevelopmentPath, 'tests', 'fixtures', 'workspace');
+  const vscodeExecutablePath =
+    process.env.INLINR_VSCODE_EXECUTABLE_PATH ?? process.env.VSCODE_EXECUTABLE_PATH;
 
   try {
     await runSuite({
       extensionDevelopmentPath,
       extensionTestsPath,
-      workspacePath
+      workspacePath,
+      vscodeExecutablePath
     });
   } catch (error) {
     if (!(error instanceof TestRunFailedError) || process.platform !== 'win32') {
@@ -62,6 +67,7 @@ async function main(): Promise<void> {
       extensionDevelopmentPath,
       extensionTestsPath,
       workspacePath,
+      vscodeExecutablePath,
       version: 'insiders'
     });
   }
