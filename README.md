@@ -14,9 +14,7 @@ Inlinr is a preview VS Code extension for inline, selection-based AI editing of 
 
 Inlinr is currently in preview. The selection-scoped editing workflow is functional, but the experience is still evolving and some behaviors may change as the inline review flow is refined.
 
-### Marketplace screenshot
-
-![Inlinr Markdown inline review screenshot](design/template/screenshots/initial.png)
+![Inlinr Markdown inline review screenshot](media/marketplace-screenshot.png)
 
 ## Requirements
 
