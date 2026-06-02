@@ -14,6 +14,10 @@ Inlinr is a preview VS Code extension for inline, selection-based AI editing of 
 
 Inlinr is currently in preview. The selection-scoped editing workflow is functional, but the experience is still evolving and some behaviors may change as the inline review flow is refined.
 
+### Marketplace screenshot
+
+![Inlinr Markdown inline review screenshot](design/template/screenshots/initial.png)
+
 ## Requirements
 
 - VS Code `1.90.0` or newer
@@ -27,4 +31,3 @@ If a supported model is unavailable or access is denied, Inlinr keeps the reques
 2. Select the passage you want to revise.
 3. Trigger the inline editing flow from the selected text.
 4. Review the proposed change in context before applying it.
-
