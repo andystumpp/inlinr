@@ -175,6 +175,39 @@ test.describe('webview selection request contract', () => {
     await expect(page.locator('[data-selection-request-draft]')).toBeVisible();
   });
 
+  test('keeps character typing in the composer from bubbling to global key handlers', async ({ page }) => {
+    await mountWebview(page, {
+      markdown: 'Alpha beta gamma delta.'
+    });
+    const regionId = await findRegionIdContainingText(page, 'Alpha beta gamma delta.');
+
+    await selectFragment(page, {
+      startRegionId: regionId,
+      startText: 'beta',
+      endRegionId: regionId,
+      endText: 'gamma'
+    });
+
+    const [captureMessage] = await getPostedMessages(page);
+    await postExtensionMessage(page, createAcceptedSelectionMessage(captureMessage));
+    await page.locator('[data-selection-request-expand]').click();
+
+    await page.evaluate(() => {
+      window.__inlinrGlobalComposerKeypressCount = 0;
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'r') {
+          window.__inlinrGlobalComposerKeypressCount += 1;
+        }
+      });
+    });
+
+    await page.locator('[data-selection-request-draft]').press('r');
+
+    await expect(page.locator('[data-selection-request-draft]')).toHaveValue('r');
+    const keypressCount = await page.evaluate(() => window.__inlinrGlobalComposerKeypressCount);
+    expect(keypressCount).toBe(0);
+  });
+
   test('captures a normal text selection and opens the collapsed toolbar after acceptance', async ({ page }) => {
     const fixture = await mountWebview(page, {
       markdown: 'Alpha beta gamma delta.'
