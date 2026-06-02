@@ -193,10 +193,10 @@ test.describe('webview selection request contract', () => {
     await page.locator('[data-selection-request-expand]').click();
 
     await page.evaluate(() => {
-      window.__inlinrGlobalComposerKeypressCount = 0;
+      window.__inlinrDocumentKeypressCount = 0;
       document.addEventListener('keydown', (event) => {
         if (event.key === 'r') {
-          window.__inlinrGlobalComposerKeypressCount += 1;
+          window.__inlinrDocumentKeypressCount += 1;
         }
       });
     });
@@ -204,7 +204,7 @@ test.describe('webview selection request contract', () => {
     await page.locator('[data-selection-request-draft]').press('r');
 
     await expect(page.locator('[data-selection-request-draft]')).toHaveValue('r');
-    const keypressCount = await page.evaluate(() => window.__inlinrGlobalComposerKeypressCount);
+    const keypressCount = await page.evaluate(() => window.__inlinrDocumentKeypressCount);
     expect(keypressCount).toBe(0);
   });
 
