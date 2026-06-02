@@ -273,7 +273,6 @@ scenarios:
           order: 2
           description: The document renders as Markdown rather than raw source.
           component: viewer
-          latency_sensitive: true
         - checkpoint_id: viewer_usable
           order: 3
           description: The viewer shows correct content and remains usable for the next interaction.
@@ -313,7 +312,6 @@ scenarios:
           order: 2
           description: The popup appears near the selected text.
           component: selection
-          latency_sensitive: true
         - checkpoint_id: scope_accurate
           order: 3
           description: The popup opens for the intended scope rather than drifting.
@@ -399,7 +397,6 @@ scenarios:
           order: 3
           description: The rendered document refreshes to the newly integrated content.
           component: viewer
-          latency_sensitive: true
     telemetry:
       result_event: scenario_result
       safe_block_status: blocked_safe
