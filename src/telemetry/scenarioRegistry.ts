@@ -20,8 +20,7 @@ export const CURRENT_MONITORING_SCENARIOS: readonly MonitoringScenarioDefinition
         checkpointId: 'render_markdown',
         order: 2,
         description: 'The document renders as Markdown rather than raw source.',
-        component: 'viewer',
-        latencySensitive: true
+        component: 'viewer'
       },
       {
         checkpointId: 'viewer_usable',
@@ -52,8 +51,7 @@ export const CURRENT_MONITORING_SCENARIOS: readonly MonitoringScenarioDefinition
         checkpointId: 'popup_shown',
         order: 2,
         description: 'The popup appears near the selected text.',
-        component: 'selection',
-        latencySensitive: true
+        component: 'selection'
       },
       {
         checkpointId: 'scope_accurate',
@@ -122,8 +120,7 @@ export const CURRENT_MONITORING_SCENARIOS: readonly MonitoringScenarioDefinition
         checkpointId: 'render_refresh',
         order: 3,
         description: 'The rendered document refreshes to the newly integrated content.',
-        component: 'viewer',
-        latencySensitive: true
+        component: 'viewer'
       }
     ],
     primaryAlert: 'real_user_failure_rate',
