@@ -62,6 +62,15 @@ Each scenario stays crisp and monitoring-oriented: a real user journey, the key 
 3. The next request uses the current document state rather than stale prior review state.
 **Monitoring intent:** Catch regressions where one completed request leaves the session stuck, stale, or unable to continue.
 
+### Discover the first action through empty state guidance
+**Criticality:** Important
+**Journey:** A new user opens a Markdown file in Inlinr and sees subtle in-document guidance that teaches the core selection-based editing workflow, then dismisses or completes the guidance after their first qualifying interaction.
+**Key checkpoints:**
+1. The guidance appears for eligible first-time users when opening a Markdown file.
+2. The guidance is visible but does not block document reading or selection.
+3. The guidance is dismissed after the first qualifying selection or explicit dismissal.
+**Monitoring intent:** Catch regressions where first-run guidance fails to appear, blocks the editing workflow, or persists incorrectly after dismissal.
+
 ## Recovery scenarios
 
 ### Keep the viewer stable when preview rendering fails
