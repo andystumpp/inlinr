@@ -632,11 +632,82 @@
       <aside class="summary">
         <h2>Reading guide</h2>
         <p>
-          Start with the workflow catalog right below — it lists every named workflow we built, grouped by
-          lifecycle phase, with the input each one consumes and the output it produces. The two visual maps that
-          follow show the same workflows arranged as the dev lifecycle strip and the monitoring loop.
+          Start with the high-level lifecycle strip right below — it shows how work moves from discovery to
+          release. The workflow catalog then lists every named workflow grouped by phase, with the input each
+          one consumes and the output it produces. The monitoring strategy panel covers the parallel loop that
+          keeps scenarios, contract, telemetry, and alerts aligned.
         </p>
       </aside>
+    </section>
+
+    <section class="panel" aria-labelledby="lifecycle-title">
+      <h2 id="lifecycle-title">High-level lifecycle</h2>
+      <p class="caption">
+        Discovery agents file issues. Issue Triage routes them. Implementation produces a reviewable pull request.
+        Three specialized review agents plus CI decide merge readiness. Release packages, deploys monitoring, and
+        publishes to the Marketplace.
+      </p>
+
+      <div class="track-shell">
+        <div class="track">
+          <section class="phase">
+            <div class="node node-product">1</div>
+            <div class="phase-tag">Discovery</div>
+            <h3>Find the work</h3>
+            <ul class="phase-list">
+              <li>Head of Product</li>
+              <li>UX Review</li>
+              <li>Spec Librarian</li>
+            </ul>
+          </section>
+
+          <section class="phase">
+            <div class="node node-triage">2</div>
+            <div class="phase-tag">Intake</div>
+            <h3>Bound the work</h3>
+            <ul class="phase-list">
+              <li>Issue Triage</li>
+            </ul>
+          </section>
+
+          <section class="phase">
+            <div class="node node-build">3</div>
+            <div class="phase-tag">Build</div>
+            <h3>Spec, implement, and verify locally</h3>
+            <ul class="phase-list">
+              <li>Spec Kit (specify, plan, tasks, implement)</li>
+              <li>Mocha unit tests (<code>tests/unit</code>)</li>
+              <li>Mocha integration tests on VS Code host (<code>tests/integration</code>)</li>
+              <li>Playwright webview selection tests (<code>tests/webview</code>)</li>
+              <li><code>npm run verify:release</code> before PR</li>
+            </ul>
+          </section>
+
+          <section class="phase">
+            <div class="node node-review">4</div>
+            <div class="phase-tag">PR gates</div>
+            <h3>Review in parallel</h3>
+            <ul class="phase-list">
+              <li>Practicality Review</li>
+              <li>PR Security Review</li>
+              <li>PR Maintainability Review</li>
+              <li>CI</li>
+              <li>PR Auto-merge enabler</li>
+            </ul>
+          </section>
+
+          <section class="phase">
+            <div class="node node-release">5</div>
+            <div class="phase-tag">Release</div>
+            <h3>Ship the build</h3>
+            <ul class="phase-list">
+              <li>Release workflow</li>
+              <li>Monitoring deploy + verify</li>
+              <li>Marketplace publish</li>
+            </ul>
+          </section>
+        </div>
+      </div>
     </section>
 
     <section class="panel" aria-labelledby="catalog-title">
@@ -669,7 +740,7 @@
               <div class="wf-head"><h3>UX Review</h3><div class="wf-tags"><span class="pill">Twice weekly</span><span class="kind">Agentic</span></div></div>
               <p>UX design lead. Audits editor-native fit, motion, and perceived speed. Files distinct UX issues only.</p>
               <dl class="wf-io">
-                <div><dt>In</dt><dd><code>product/ux-principles.md</code>, user scenarios, recorded UI surfaces.</dd></div>
+                <div><dt>In</dt><dd><code>product/</code>, <code>architecture/</code>, <code>specs/</code>, <code>src/</code>, <code>media/</code>, <code>package.json</code>, plus VS Code UX docs and Marketplace references.</dd></div>
                 <div><dt>Out</dt><dd>UX issues with reproduction notes.</dd></div>
               </dl>
             </article>
@@ -694,19 +765,10 @@
           <div class="wf-grid">
             <article class="wf-card accent-triage">
               <div class="wf-head"><h3>Issue Triage</h3><div class="wf-tags"><span class="pill">On issue</span><span class="kind">Agentic</span></div></div>
-              <p>Classifies issues, applies routing labels, and assigns Copilot only when work is bounded and low-risk.</p>
+              <p>Classifies issues, applies routing labels, posts a single triage comment, and assigns Copilot only when work is bounded and low-risk.</p>
               <dl class="wf-io">
                 <div><dt>In</dt><dd>New or updated issue body and metadata.</dd></div>
-                <div><dt>Out</dt><dd>Routing labels and optional Copilot assignment.</dd></div>
-              </dl>
-            </article>
-
-            <article class="wf-card accent-triage">
-              <div class="wf-head"><h3>Copilot Setup Steps</h3><div class="wf-tags"><span class="pill">Setup</span><span class="kind">Deterministic</span></div></div>
-              <p>Provisions the Copilot agent environment with the gh-aw CLI so agentic workflows can run.</p>
-              <dl class="wf-io">
-                <div><dt>In</dt><dd><code>workflow_dispatch</code> trigger.</dd></div>
-                <div><dt>Out</dt><dd>Provisioned agent runtime with gh-aw installed.</dd></div>
+                <div><dt>Out</dt><dd>Routing labels, one triage comment, and optional Copilot assignment.</dd></div>
               </dl>
             </article>
           </div>
@@ -928,77 +990,6 @@
           </div>
         </section>
 
-      </div>
-    </section>
-
-    <section class="panel" aria-labelledby="lifecycle-title">
-      <h2 id="lifecycle-title">High-level lifecycle</h2>
-      <p class="caption">
-        Discovery agents file issues. Issue Triage routes them. Implementation produces a reviewable pull request.
-        Three specialized review agents plus CI decide merge readiness. Release packages, deploys monitoring, and
-        publishes to the Marketplace.
-      </p>
-
-      <div class="track-shell">
-        <div class="track">
-          <section class="phase">
-            <div class="node node-product">1</div>
-            <div class="phase-tag">Discovery</div>
-            <h3>Find the work</h3>
-            <ul class="phase-list">
-              <li>Head of Product</li>
-              <li>UX Review</li>
-              <li>Spec Librarian</li>
-            </ul>
-          </section>
-
-          <section class="phase">
-            <div class="node node-triage">2</div>
-            <div class="phase-tag">Intake</div>
-            <h3>Bound the work</h3>
-            <ul class="phase-list">
-              <li>Issue Triage</li>
-              <li>Copilot Setup Steps</li>
-            </ul>
-          </section>
-
-          <section class="phase">
-            <div class="node node-build">3</div>
-            <div class="phase-tag">Build</div>
-            <h3>Spec, implement, and verify locally</h3>
-            <ul class="phase-list">
-              <li>Spec Kit (specify, plan, tasks, implement)</li>
-              <li>Mocha unit tests (<code>tests/unit</code>)</li>
-              <li>Mocha integration tests on VS Code host (<code>tests/integration</code>)</li>
-              <li>Playwright webview selection tests (<code>tests/webview</code>)</li>
-              <li><code>npm run verify:release</code> before PR</li>
-            </ul>
-          </section>
-
-          <section class="phase">
-            <div class="node node-review">4</div>
-            <div class="phase-tag">PR gates</div>
-            <h3>Review in parallel</h3>
-            <ul class="phase-list">
-              <li>Practicality Review</li>
-              <li>PR Security Review</li>
-              <li>PR Maintainability Review</li>
-              <li>CI</li>
-              <li>PR Auto-merge enabler</li>
-            </ul>
-          </section>
-
-          <section class="phase">
-            <div class="node node-release">5</div>
-            <div class="phase-tag">Release</div>
-            <h3>Ship the build</h3>
-            <ul class="phase-list">
-              <li>Release workflow</li>
-              <li>Monitoring deploy + verify</li>
-              <li>Marketplace publish</li>
-            </ul>
-          </section>
-        </div>
       </div>
     </section>
 
