@@ -666,6 +666,185 @@
 
     .repo-row ul li::marker { color: color-mix(in srgb, var(--accent) 60%, transparent); }
 
+    /* Monitoring traceability example */
+    .mon-trace {
+      margin-top: 24px;
+      padding-top: 22px;
+      border-top: 1px dashed var(--line);
+    }
+
+    .mon-trace-head {
+      display: grid;
+      gap: 4px;
+      margin-bottom: 14px;
+    }
+
+    .mon-trace-head h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      letter-spacing: -0.01em;
+      color: color-mix(in srgb, var(--monitoring) 78%, black);
+    }
+
+    .mon-trace-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    .mon-trace-rows { display: grid; gap: 10px; }
+
+    .mon-trace-row {
+      display: grid;
+      grid-template-columns: minmax(170px, 0.22fr) minmax(0, 1fr);
+      column-gap: 16px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(29, 36, 48, 0.04);
+      border: 1px solid rgba(29, 36, 48, 0.06);
+      align-items: start;
+    }
+
+    .mon-trace-label {
+      display: grid;
+      gap: 2px;
+    }
+
+    .mon-trace-label .step {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent, var(--monitoring));
+    }
+
+    .mon-trace-label .file {
+      font-family: "Cascadia Mono", "Consolas", monospace;
+      font-size: 0.78rem;
+      color: var(--muted);
+      word-break: break-all;
+    }
+
+    .mon-trace-body p {
+      margin: 0 0 6px;
+      color: var(--ink);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .mon-trace-body pre {
+      margin: 0;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(29, 36, 48, 0.85);
+      color: #f4ead7;
+      font-family: "Cascadia Mono", "Consolas", monospace;
+      font-size: 0.78rem;
+      line-height: 1.5;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .mon-trace-checkpoints {
+      margin: 0 0 6px;
+      padding-left: 22px;
+      color: var(--ink);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      display: grid;
+      gap: 3px;
+    }
+
+    .mon-trace-checkpoints li::marker {
+      color: color-mix(in srgb, var(--accent, var(--monitoring)) 65%, transparent);
+      font-weight: 600;
+    }
+
+    .mon-trace-row.accent-product { --accent: var(--product); }
+    .mon-trace-row.accent-monitoring { --accent: var(--monitoring); }
+    .mon-trace-row.accent-build { --accent: var(--build); }
+    .mon-trace-row.accent-release { --accent: var(--release); }
+
+    @media (max-width: 720px) {
+      .mon-trace-row { grid-template-columns: 1fr; gap: 6px; }
+    }
+
+    /* Example outputs */
+    .ex-groups { display: grid; gap: 0; }
+
+    .ex-group { padding: 22px 0; }
+    .ex-group + .ex-group { border-top: 1px dashed var(--line); }
+    .ex-group:first-of-type { padding-top: 6px; }
+    .ex-group:last-of-type { padding-bottom: 6px; }
+
+    .ex-group-head {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 14px;
+      row-gap: 2px;
+      align-items: baseline;
+      margin-bottom: 12px;
+    }
+
+    .ex-group-head .ex-group-marker {
+      grid-row: 1 / span 2;
+      align-self: center;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 18%, transparent);
+    }
+
+    .ex-group-head h3 {
+      margin: 0;
+      font-size: 1.18rem;
+      letter-spacing: -0.01em;
+      color: color-mix(in srgb, var(--accent) 78%, black);
+    }
+
+    .ex-group-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .ex-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+
+    .ex-list li {
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: rgba(29, 36, 48, 0.04);
+      border: 1px solid rgba(29, 36, 48, 0.06);
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 12px;
+      align-items: baseline;
+    }
+
+    .ex-list .ex-num {
+      font-family: "Cascadia Mono", "Consolas", monospace;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: color-mix(in srgb, var(--accent) 80%, black);
+    }
+
+    .ex-list a {
+      color: var(--ink);
+      text-decoration: none;
+      font-size: 0.92rem;
+      line-height: 1.45;
+      border-bottom: 1px dashed color-mix(in srgb, var(--accent) 40%, transparent);
+    }
+
+    .ex-list a:hover { border-bottom-style: solid; }
+
+    @media (max-width: 720px) {
+      .ex-list li { grid-template-columns: 1fr; gap: 4px; }
+    }
+
     @media (max-width: 720px) {
       main {
         width: min(100% - 20px, 1380px);
@@ -837,6 +1016,101 @@
             <h4>Release deploy + verify</h4>
             <p>Release stage deploys generated alerts to prod and verifies the rule count.</p>
           </section>
+        </div>
+      </div>
+
+      <div class="mon-trace">
+        <header class="mon-trace-head">
+          <h3>Trace one requirement end to end</h3>
+          <p>
+            A single non-functional requirement, traced through each layer it touches. Same intent, four
+            representations, one writer per layer.
+          </p>
+        </header>
+
+        <div class="mon-trace-rows">
+
+          <div class="mon-trace-row accent-product">
+            <div class="mon-trace-label">
+              <span class="step">Product requirement</span>
+              <span class="file">product/user-scenarios.md</span>
+            </div>
+            <div class="mon-trace-body">
+              <p>For the inline request flow, a user should see a reviewable suggested change within 2 seconds of submitting a request from the popup.</p>
+            </div>
+          </div>
+
+          <div class="mon-trace-row accent-monitoring">
+            <div class="mon-trace-label">
+              <span class="step">Monitoring scenario</span>
+              <span class="file">monitoring/monitoring-scenarios.md</span>
+            </div>
+            <div class="mon-trace-body">
+              <p><strong>Submit a request and receive inline review state</strong></p>
+              <p><strong>Criticality:</strong> Core</p>
+              <p><strong>Journey:</strong> A user enters a request, submits it from the inline popup, and sees pending feedback followed by a reviewable suggested change rendered in the document flow at the targeted location within 2 seconds of submit.</p>
+              <p><strong>Key checkpoints:</strong></p>
+              <ol class="mon-trace-checkpoints">
+                <li>The request input accepts text and submits successfully.</li>
+                <li>The system shows a visible pending state while work is in progress.</li>
+                <li>A reviewable inline suggestion appears at the targeted document location within 2 seconds.</li>
+              </ol>
+              <p><strong>Monitoring intent:</strong> Catch failures where request submission stalls, suggestion generation exceeds the expected latency budget, the user never reaches review, or the returned suggestion is detached from the intended document context.</p>
+            </div>
+          </div>
+
+          <div class="mon-trace-row accent-build">
+            <div class="mon-trace-label">
+              <span class="step">Monitoring contract</span>
+              <span class="file">monitoring/scenario-contract.yaml</span>
+            </div>
+            <div class="mon-trace-body">
+<pre>- scenario_id: submit_request_receive_review
+  title: Submit a request and receive inline review state
+  criticality: core
+  journey:
+    success_condition: Pending feedback appears and a reviewable
+      inline suggestion is rendered at the targeted document
+      location within 2 seconds of submit.
+  runtime:
+    owner_component: request_execution
+    checkpoints:
+      - { checkpoint_id: request_submitted,     order: 1 }
+      - { checkpoint_id: pending_visible,       order: 2 }
+      - { checkpoint_id: review_rendered_inline, order: 3,
+          latency_sensitive: true }
+  alerting:
+    profile: core_request_execution</pre>
+            </div>
+          </div>
+
+          <div class="mon-trace-row accent-release">
+            <div class="mon-trace-label">
+              <span class="step">Telemetry code</span>
+              <span class="file">src/editors/markdownCustomEditorProvider.ts</span>
+            </div>
+            <div class="mon-trace-body">
+<pre>const submitAttempt = this.startScenarioAttempt(
+  document, 'submit_request_receive_review', { sessionId }
+);
+const submitStartedAt = Date.now();
+
+// ...accept input, validate draft...
+this.emitScenarioCheckpoint(submitAttempt, 'request_submitted', 'pass');
+
+// ...resolve anchor, dispatch to provider...
+this.emitScenarioCheckpoint(submitAttempt, 'pending_visible', 'pass');
+
+const executionResult = await this.executionService.execute(payload);
+
+// ...render suggestion into the document...
+this.emitScenarioCheckpoint(submitAttempt, 'review_rendered_inline', 'pass', {
+  durationMs: Math.max(0, Date.now() - submitStartedAt) // 2 s budget
+});
+this.completeScenarioAttempt(submitAttempt, 'success');</pre>
+            </div>
+          </div>
+
         </div>
       </div>
     </section>
@@ -1321,6 +1595,50 @@
               </ul>
             </div>
           </div>
+        </section>
+
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="examples-title">
+      <h2 id="examples-title">Example outputs</h2>
+      <p class="caption">
+        Real issues filed by these workflows in this repository. Each link is an actual artifact produced by the
+        agent named in its title prefix &mdash; not a mockup.
+      </p>
+
+      <div class="ex-groups">
+
+        <section class="ex-group accent-product">
+          <header class="ex-group-head">
+            <span class="ex-group-marker" aria-hidden="true"></span>
+            <h3>Head of Product</h3>
+            <p>Discovery agent that turns scenarios and gaps into bounded, criticality-tagged work items.</p>
+          </header>
+          <ul class="ex-list">
+            <li>
+              <span class="ex-num">#6</span>
+              <a href="https://github.com/andystumpp/inlinr/issues/6" target="_blank" rel="noopener">[head-of-product] Add first-run guidance that gets users to their first successful edit within 60 seconds</a>
+            </li>
+            <li>
+              <span class="ex-num">#218</span>
+              <a href="https://github.com/andystumpp/inlinr/issues/218" target="_blank" rel="noopener">[head-of-product] Add bulk operations for multi-section document refinement</a>
+            </li>
+          </ul>
+        </section>
+
+        <section class="ex-group accent-review">
+          <header class="ex-group-head">
+            <span class="ex-group-marker" aria-hidden="true"></span>
+            <h3>UX Review</h3>
+            <p>Review agent that flags UX-risk gaps and proposes concrete affordances.</p>
+          </header>
+          <ul class="ex-list">
+            <li>
+              <span class="ex-num">#214</span>
+              <a href="https://github.com/andystumpp/inlinr/issues/214" target="_blank" rel="noopener">UX: Add animated progress feedback during AI processing wait state</a>
+            </li>
+          </ul>
         </section>
 
       </div>
