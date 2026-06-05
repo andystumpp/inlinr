@@ -714,9 +714,9 @@
         <h2>Reading guide</h2>
         <p>
           Start with the high-level lifecycle strip right below — it shows how work moves from discovery to
-          release. The workflow catalog then lists every named workflow grouped by phase, with the input each
-          one consumes and the output it produces. The monitoring strategy panel covers the parallel loop that
-          keeps scenarios, contract, telemetry, and alerts aligned.
+          release. The monitoring strategy panel then covers the parallel loop that keeps scenarios, contract,
+          telemetry, and alerts aligned. The workflow catalog lists every named workflow grouped by phase,
+          with the input each one consumes and the output it produces.
         </p>
       </aside>
     </section>
@@ -786,6 +786,56 @@
               <li>Monitoring deploy + verify</li>
               <li>Marketplace publish</li>
             </ul>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="monitoring-title">
+      <h2 id="monitoring-title">Monitoring strategy</h2>
+      <p class="caption">
+        Inlinr's monitoring is layered intentionally. Three agentic workflows maintain the readable scenario catalog,
+        the canonical machine contract, and the runtime telemetry implementation. A separate deterministic pipeline
+        validates that contract and generates alert policies, and the release workflow deploys them to Azure.
+        Each layer has a single source of truth and a clear writer.
+      </p>
+
+      <div class="mon-track-shell">
+        <div class="mon-track">
+          <section class="mon-step mon-step-input">
+            <div class="mon-node mon-node-input">Input</div>
+            <h4>Requirements</h4>
+            <p>Product scenarios, ADRs, and reliability goals from <code>product/</code> and <code>architecture/</code>.</p>
+          </section>
+
+          <section class="mon-step">
+            <div class="mon-node">Scenarios<br>Agent</div>
+            <h4>Monitoring Scenarios</h4>
+            <p>Maintains <code>monitoring/monitoring-scenarios.md</code>, the readable scenario catalog.</p>
+          </section>
+
+          <section class="mon-step">
+            <div class="mon-node">Contract<br>Agent</div>
+            <h4>Monitoring Contract</h4>
+            <p>Translates intent into <code>monitoring/scenario-contract.yaml</code>, the canonical machine contract.</p>
+          </section>
+
+          <section class="mon-step">
+            <div class="mon-node">Telemetry<br>Agent</div>
+            <h4>Monitoring Telemetry</h4>
+            <p>Keeps runtime emission in <code>src/telemetry/**</code> aligned with the contract.</p>
+          </section>
+
+          <section class="mon-step">
+            <div class="mon-node">Alerts<br>Pipeline</div>
+            <h4>Monitoring Alerts</h4>
+            <p>Validates the contract and generates alert policies on PR and main.</p>
+          </section>
+
+          <section class="mon-step">
+            <div class="mon-node">Azure<br>Deploy</div>
+            <h4>Release deploy + verify</h4>
+            <p>Release stage deploys generated alerts to prod and verifies the rule count.</p>
           </section>
         </div>
       </div>
@@ -1071,56 +1121,6 @@
           </div>
         </section>
 
-      </div>
-    </section>
-
-    <section class="panel" aria-labelledby="monitoring-title">
-      <h2 id="monitoring-title">Monitoring strategy</h2>
-      <p class="caption">
-        Inlinr's monitoring is layered intentionally. Three agentic workflows maintain the readable scenario catalog,
-        the canonical machine contract, and the runtime telemetry implementation. A separate deterministic pipeline
-        validates that contract and generates alert policies, and the release workflow deploys them to Azure.
-        Each layer has a single source of truth and a clear writer.
-      </p>
-
-      <div class="mon-track-shell">
-        <div class="mon-track">
-          <section class="mon-step mon-step-input">
-            <div class="mon-node mon-node-input">Input</div>
-            <h4>Requirements</h4>
-            <p>Product scenarios, ADRs, and reliability goals from <code>product/</code> and <code>architecture/</code>.</p>
-          </section>
-
-          <section class="mon-step">
-            <div class="mon-node">Scenarios<br>Agent</div>
-            <h4>Monitoring Scenarios</h4>
-            <p>Maintains <code>monitoring/monitoring-scenarios.md</code>, the readable scenario catalog.</p>
-          </section>
-
-          <section class="mon-step">
-            <div class="mon-node">Contract<br>Agent</div>
-            <h4>Monitoring Contract</h4>
-            <p>Translates intent into <code>monitoring/scenario-contract.yaml</code>, the canonical machine contract.</p>
-          </section>
-
-          <section class="mon-step">
-            <div class="mon-node">Telemetry<br>Agent</div>
-            <h4>Monitoring Telemetry</h4>
-            <p>Keeps runtime emission in <code>src/telemetry/**</code> aligned with the contract.</p>
-          </section>
-
-          <section class="mon-step">
-            <div class="mon-node">Alerts<br>Pipeline</div>
-            <h4>Monitoring Alerts</h4>
-            <p>Validates the contract and generates alert policies on PR and main.</p>
-          </section>
-
-          <section class="mon-step">
-            <div class="mon-node">Azure<br>Deploy</div>
-            <h4>Release deploy + verify</h4>
-            <p>Release stage deploys generated alerts to prod and verifies the rule count.</p>
-          </section>
-        </div>
       </div>
     </section>
 
