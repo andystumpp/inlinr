@@ -15,5 +15,6 @@
 ## Non-functional requirements
 
 - For the inline request flow, a user should see a reviewable suggested change within 2 seconds of submitting a request from the popup.
+- For rendered selections, the inline request popup should appear within a defined latency budget.
 
 These scenarios are the starting point for behavior that should keep working unless intentionally changed by source-of-truth docs.
