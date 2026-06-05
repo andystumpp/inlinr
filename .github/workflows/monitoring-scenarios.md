@@ -3,6 +3,15 @@ name: Monitoring Scenarios
 description: Maintain Inlinr's monitoring scenario catalog from current implementation, active work, and product context.
 on:
   schedule: daily on weekdays
+  push:
+    branches: [main]
+    paths:
+      - "product/user-scenarios.md"
+      - "product/product-outline.md"
+      - "product/ux-principles.md"
+      - "src/**"
+      - "specs/**"
+  workflow_dispatch:
 permissions:
   contents: read
   issues: read
