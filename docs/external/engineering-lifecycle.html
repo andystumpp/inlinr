@@ -654,6 +654,18 @@
       line-height: 1.5;
     }
 
+    .repo-row ul {
+      margin: 6px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.5;
+      display: grid;
+      gap: 2px;
+    }
+
+    .repo-row ul li::marker { color: color-mix(in srgb, var(--accent) 60%, transparent); }
+
     @media (max-width: 720px) {
       main {
         width: min(100% - 20px, 1380px);
@@ -1132,19 +1144,50 @@
           <div class="repo-list">
             <div class="repo-row">
               <code>product/</code>
-              <p>Product outline, user scenarios, non-goals, UX principles, glossary, and development workflow. Read first by every planning and review agent.</p>
+              <p>Human-authored product intent. Read first by every planning and review agent.</p>
+              <ul>
+                <li>Product outline</li>
+                <li>User scenarios</li>
+                <li>Non-goals</li>
+                <li>UX principles</li>
+                <li>Glossary</li>
+                <li>Development workflow</li>
+                <li>Markdown presentation roadmap</li>
+              </ul>
             </div>
             <div class="repo-row">
               <code>architecture/</code>
-              <p>High-level architecture, engineering principles, security principles, data-contract rules, and ADRs (<code>adr-001</code>&hellip;<code>adr-007</code>). Source for technical decisions.</p>
+              <p>Technical source of truth for system shape and decisions.</p>
+              <ul>
+                <li>High-level architecture</li>
+                <li>Engineering principles</li>
+                <li>Security principles</li>
+                <li>Data-contract rules</li>
+                <li>ADRs</li>
+              </ul>
             </div>
             <div class="repo-row">
               <code>specs/</code>
-              <p>SpecKit feature specs: <code>spec.md</code>, <code>plan.md</code>, <code>tasks.md</code>, <code>data-model.md</code>, contracts, and checklists per feature. Drives the build phase.</p>
+              <p>SpecKit feature specs that drive the build phase.</p>
+              <ul>
+                <li>Spec (<code>spec.md</code>)</li>
+                <li>Plan (<code>plan.md</code>)</li>
+                <li>Tasks (<code>tasks.md</code>)</li>
+                <li>Data model</li>
+                <li>Contracts</li>
+                <li>Checklists</li>
+                <li>Quickstart</li>
+              </ul>
             </div>
             <div class="repo-row">
               <code>monitoring/</code>
-              <p>Readable scenario catalog, canonical machine contract (<code>scenario-contract.yaml</code>), alert policies, and telemetry guidelines. Drives the monitoring loop.</p>
+              <p>Scenario and telemetry source of truth that drives the monitoring loop.</p>
+              <ul>
+                <li>Monitoring scenarios catalog</li>
+                <li>Scenario contract (canonical YAML)</li>
+                <li>Alert policies</li>
+                <li>Telemetry guidelines</li>
+              </ul>
             </div>
           </div>
         </section>
@@ -1158,19 +1201,44 @@
           <div class="repo-list">
             <div class="repo-row">
               <code>src/</code>
-              <p>VS Code extension TypeScript: <code>commands/</code>, <code>editors/</code>, <code>presentation/</code>, <code>rendering/</code>, <code>requests/</code>, <code>sessions/</code>, <code>telemetry/</code>, <code>webview/</code>, plus <code>extension.ts</code>.</p>
+              <p>VS Code extension TypeScript, organized by surface.</p>
+              <ul>
+                <li>Commands</li>
+                <li>Editors</li>
+                <li>Presentation</li>
+                <li>Rendering</li>
+                <li>Requests</li>
+                <li>Sessions</li>
+                <li>Telemetry</li>
+                <li>Webview</li>
+                <li>Onboarding</li>
+                <li>Extension entry point</li>
+              </ul>
             </div>
             <div class="repo-row">
               <code>media/</code>
-              <p>Webview assets shipped with the extension (Markdown viewer scripts and styles).</p>
+              <p>Webview assets shipped with the extension.</p>
+              <ul>
+                <li>Markdown viewer scripts</li>
+                <li>Markdown viewer styles</li>
+              </ul>
             </div>
             <div class="repo-row">
               <code>tests/</code>
-              <p>Mocha <code>unit/</code> and <code>integration/</code> suites plus Playwright <code>webview/</code> contract tests. Required evidence on every PR that touches the matching surface.</p>
+              <p>Test suites. Required evidence on every PR that touches the matching surface.</p>
+              <ul>
+                <li>Unit (Mocha)</li>
+                <li>Integration (Mocha)</li>
+                <li>Webview contract (Playwright)</li>
+                <li>Fixtures</li>
+              </ul>
             </div>
             <div class="repo-row">
               <code>prompts/</code>
-              <p>Curated model prompts used at runtime (for example <code>selection-scoped-edit.md</code>).</p>
+              <p>Curated model prompts used at runtime.</p>
+              <ul>
+                <li>Selection-scoped edit prompt</li>
+              </ul>
             </div>
           </div>
         </section>
@@ -1184,19 +1252,39 @@
           <div class="repo-list">
             <div class="repo-row">
               <code>.github/</code>
-              <p>Agentic and deterministic GitHub workflows, shared workflow fragments, PR and issue templates, and Copilot instructions.</p>
+              <p>Lifecycle automation and contributor guardrails.</p>
+              <ul>
+                <li>Agentic workflows</li>
+                <li>Deterministic workflows</li>
+                <li>Shared workflow fragments</li>
+                <li>PR and issue templates</li>
+                <li>Copilot instructions</li>
+              </ul>
             </div>
             <div class="repo-row">
               <code>infra/</code>
-              <p>Azure Bicep for monitoring infrastructure and generated alert templates under <code>infra/monitoring/generated/</code>. Deployed by the release stage.</p>
+              <p>Azure infrastructure for monitoring. Deployed by the release stage.</p>
+              <ul>
+                <li>Monitoring Bicep</li>
+                <li>Generated alert templates</li>
+                <li>Action group definitions</li>
+              </ul>
             </div>
             <div class="repo-row">
               <code>scripts/</code>
-              <p>Build helpers: <code>bundle.mjs</code> for the extension bundle, <code>launch-devhost.mjs</code> for the dev host.</p>
+              <p>Build and dev-loop helpers.</p>
+              <ul>
+                <li>Extension bundler</li>
+                <li>Dev host launcher</li>
+              </ul>
             </div>
             <div class="repo-row">
               <code>tools/</code>
-              <p>Deterministic tooling for the monitoring pipeline and the release verifier.</p>
+              <p>Deterministic tooling that backs lifecycle pipelines.</p>
+              <ul>
+                <li>Monitoring pipeline tools</li>
+                <li>Release verifier</li>
+              </ul>
             </div>
           </div>
         </section>
@@ -1210,15 +1298,27 @@
           <div class="repo-list">
             <div class="repo-row">
               <code>docs/external/</code>
-              <p>Public GitHub Pages content, including this engineering-lifecycle page.</p>
+              <p>Public GitHub Pages content.</p>
+              <ul>
+                <li>Engineering lifecycle page (this doc)</li>
+                <li>Scenario traceability matrix</li>
+              </ul>
             </div>
             <div class="repo-row">
               <code>docs/internal/</code>
               <p>Contributor-only notes that must stay out of the Marketplace README.</p>
+              <ul>
+                <li>Contributor setup and workflow notes</li>
+              </ul>
             </div>
             <div class="repo-row">
-              <code>README.md</code> &middot; <code>CHANGELOG.md</code>
+              <code>Root</code>
               <p>Marketplace-public surfaces. Treated as user-facing copy, not contributor docs.</p>
+              <ul>
+                <li><code>README.md</code></li>
+                <li><code>CHANGELOG.md</code></li>
+                <li><code>LICENSE</code></li>
+              </ul>
             </div>
           </div>
         </section>
