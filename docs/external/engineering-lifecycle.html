@@ -465,21 +465,6 @@
       font-size: 0.92rem;
     }
 
-    .wf-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      font-size: 0.74rem;
-      color: var(--muted);
-    }
-
-    .wf-meta span {
-      padding: 4px 8px;
-      border-radius: 999px;
-      background: rgba(29, 36, 48, 0.05);
-      border: 1px solid rgba(29, 36, 48, 0.06);
-    }
-
     .accent-product { --accent: var(--product); }
     .accent-triage { --accent: var(--triage); }
     .accent-build { --accent: var(--build); }
@@ -487,6 +472,107 @@
     .accent-release { --accent: var(--release); }
     .accent-monitoring { --accent: var(--monitoring); }
     .accent-feedback { --accent: var(--feedback); }
+
+    /* Phase-grouped catalog */
+    .wf-catalog { display: grid; gap: 0; }
+
+    .wf-group { display: grid; gap: 14px; padding: 22px 0; }
+    .wf-group + .wf-group {
+      border-top: 1px dashed var(--line);
+    }
+    .wf-group:first-of-type { padding-top: 6px; }
+    .wf-group:last-of-type { padding-bottom: 6px; }
+
+    .wf-group-head {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 14px;
+      row-gap: 2px;
+      align-items: baseline;
+    }
+
+    .wf-group-head .wf-group-marker {
+      grid-row: 1 / span 2;
+      align-self: center;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 18%, transparent);
+    }
+
+    .wf-group-head h3 {
+      margin: 0;
+      font-size: 1.18rem;
+      letter-spacing: -0.01em;
+      color: color-mix(in srgb, var(--accent) 78%, black);
+    }
+
+    .wf-group-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    /* Per-workflow card In/Out layout */
+    .wf-tags {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .kind {
+      font-size: 0.66rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 3px 8px;
+      border-radius: 6px;
+      color: var(--muted);
+      background: rgba(29, 36, 48, 0.05);
+      border: 1px solid rgba(29, 36, 48, 0.08);
+      white-space: nowrap;
+    }
+
+    .wf-io {
+      margin: 4px 0 0;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(29, 36, 48, 0.04);
+      border: 1px solid rgba(29, 36, 48, 0.06);
+      display: grid;
+      gap: 8px;
+      font-size: 0.84rem;
+      line-height: 1.45;
+    }
+
+    .wf-io > div {
+      display: grid;
+      grid-template-columns: 38px 1fr;
+      column-gap: 10px;
+      align-items: start;
+    }
+
+    .wf-io dt {
+      margin: 0;
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: color-mix(in srgb, var(--accent) 72%, black);
+      padding-top: 2px;
+    }
+
+    .wf-io dd {
+      margin: 0;
+      color: var(--ink);
+    }
+
+    .wf-io code {
+      font-size: 0.78rem;
+    }
 
     code {
       font-family: "Cascadia Code", Consolas, monospace;
@@ -546,10 +632,303 @@
       <aside class="summary">
         <h2>Reading guide</h2>
         <p>
-          The top strip is the dev lifecycle. The middle panel is the monitoring loop that runs alongside it.
-          The bottom grid lists every named workflow in the repo and what it owns.
+          Start with the workflow catalog right below — it lists every named workflow we built, grouped by
+          lifecycle phase, with the input each one consumes and the output it produces. The two visual maps that
+          follow show the same workflows arranged as the dev lifecycle strip and the monitoring loop.
         </p>
       </aside>
+    </section>
+
+    <section class="panel" aria-labelledby="catalog-title">
+      <h2 id="catalog-title">Workflow catalog</h2>
+      <p class="caption">
+        Every named workflow we built, grouped by lifecycle phase. Each card shows what it consumes
+        (<strong>In</strong>) and what it produces (<strong>Out</strong>). Agentic workflows are LLM-driven;
+        deterministic workflows are pure CI.
+      </p>
+
+      <div class="wf-catalog">
+
+        <section class="wf-group accent-product" aria-labelledby="group-discovery">
+          <header class="wf-group-head">
+            <span class="wf-group-marker" aria-hidden="true"></span>
+            <h3 id="group-discovery">Discovery</h3>
+            <p>Agents that find the next high-leverage work and file it as issues.</p>
+          </header>
+          <div class="wf-grid">
+            <article class="wf-card accent-product">
+              <div class="wf-head"><h3>Head of Product</h3><div class="wf-tags"><span class="pill">Daily</span><span class="kind">Agentic</span></div></div>
+              <p>Product strategy lead. Reviews repo, market, and adjacent AI workflows to file high-leverage product issues.</p>
+              <dl class="wf-io">
+                <div><dt>In</dt><dd>Repo activity, <code>product/</code>, market and adjacent-AI signals.</dd></div>
+                <div><dt>Out</dt><dd>One bounded product issue per run.</dd></div>
+              </dl>
+            </article>
+
+            <article class="wf-card accent-product">
+              <div class="wf-head"><h3>UX Review</h3><div class="wf-tags"><span class="pill">Twice weekly</span><span class="kind">Agentic</span></div></div>
+              <p>UX design lead. Audits editor-native fit, motion, and perceived speed. Files distinct UX issues only.</p>
+              <dl class="wf-io">
+                <div><dt>In</dt><dd><code>product/ux-principles.md</code>, user scenarios, recorded UI surfaces.</dd></div>
+                <div><dt>Out</dt><dd>UX issues with reproduction notes.</dd></div>
+              </dl>
+            </article>
+
+            <article class="wf-card accent-product">
+              <div class="wf-head"><h3>Spec Librarian</h3><div class="wf-tags"><span class="pill">Daily</span><span class="kind">Agentic</span></div></div>
+              <p>Audits drift across product, architecture, specs, monitoring, and shipped code. Opens at most one drift issue.</p>
+              <dl class="wf-io">
+                <div><dt>In</dt><dd><code>product/</code>, <code>architecture/</code>, <code>specs/</code>, <code>src/</code>, <code>monitoring/</code>.</dd></div>
+                <div><dt>Out</dt><dd>One drift issue with the specific divergence.</dd></div>
+              </dl>
+            </article>
+          </div>
+        </section>
+
+        <section class="wf-group accent-triage" aria-labelledby="group-intake">
+          <header class="wf-group-head">
+            <span class="wf-group-marker" aria-hidden="true"></span>
+            <h3 id="group-intake">Intake</h3>
+            <p>Bound and route each piece of work before any code is written.</p>
+          </header>
+          <div class="wf-grid">
+            <article class="wf-card accent-triage">
+              <div class="wf-head"><h3>Issue Triage</h3><div class="wf-tags"><span class="pill">On issue</span><span class="kind">Agentic</span></div></div>
+              <p>Classifies issues, applies routing labels, and assigns Copilot only when work is bounded and low-risk.</p>
+              <dl class="wf-io">
+                <div><dt>In</dt><dd>New or updated issue body and metadata.</dd></div>
+                <div><dt>Out</dt><dd>Routing labels and optional Copilot assignment.</dd></div>
+              </dl>
+            </article>
+
+            <article class="wf-card accent-triage">
+              <div class="wf-head"><h3>Copilot Setup Steps</h3><div class="wf-tags"><span class="pill">Setup</span><span class="kind">Deterministic</span></div></div>
+              <p>Provisions the Copilot agent environment with the gh-aw CLI so agentic workflows can run.</p>
+              <dl class="wf-io">
+                <div><dt>In</dt><dd><code>workflow_dispatch</code> trigger.</dd></div>
+                <div><dt>Out</dt><dd>Provisioned agent runtime with gh-aw installed.</dd></div>
+              </dl>
+            </article>
+          </div>
+        </section>
+
+        <section class="wf-group accent-build" aria-labelledby="group-build">
+          <header class="wf-group-head">
+            <span class="wf-group-marker" aria-hidden="true"></span>
+            <h3 id="group-build">Build</h3>
+            <p>Local-first spec, implement, and verify loop. Tests run before any PR opens.</p>
+          </header>
+          <div class="wf-grid">
+            <article class="wf-card accent-build">
+              <div class="wf-head"><h3>Spec Kit (specify, plan, tasks, implement)</h3><div class="wf-tags"><span class="pill">Per slice</span><span class="kind">Hybrid</span></div></div>
+              <p>Local-first authoring flow that turns approved scenarios into implementation-ready specs, plans, and ordered tasks.</p>
+              <dl class="wf-io">
+                <div><dt>In</dt><dd>Approved scenario, <code>product/</code>, <code>architecture/</code>.</dd></div>
+                <div><dt>Out</dt><dd><code>spec.md</code>, <code>plan.md</code>, <code>tasks.md</code>, source code.</dd></div>
+              </dl>
+            </article>
+
+            <article class="wf-card accent-build">
+              <div class="wf-head"><h3>Mocha unit tests</h3><div class="wf-tags"><span class="pill">Local + CI</span><span class="kind">Deterministic</span></div></div>
+              <p>Pure-Node unit suite under <code>tests/unit</code> driven by <code>@vscode/test-cli</code> through <code>tests/runTest.ts</code>. Runs via <code>npm run test:unit</code>.</p>
+              <dl class="wf-io">
+                <div><dt>In</dt><dd><code>src/</code> + <code>tests/unit</code>.</dd></div>
+                <div><dt>Out</dt><dd>Pass/fail report on logic and contracts.</dd></div>
+              </dl>
+            </article>
+
+            <article class="wf-card accent-build">
+              <div class="wf-head"><h3>Mocha integration tests</h3><div class="wf-tags"><span class="pill">Local + CI</span><span class="kind">Deterministic</span></div></div>
+              <p>Runs in a real VS Code Extension Host via <code>@vscode/test-electron</code>. Exercises commands, custom editors, and provider wiring under <code>tests/integration</code>.</p>
+              <dl class="wf-io">
+                <div><dt>In</dt><dd>Compiled extension + <code>tests/integration</code> in Extension Host.</dd></div>
+                <div><dt>Out</dt><dd>Pass/fail report on commands and providers.</dd></div>
+              </dl>
+            </article>
+
+            <article class="wf-card accent-build">
+              <div class="wf-head"><h3>Playwright webview tests</h3><div class="wf-tags"><span class="pill">Local + CI</span><span class="kind">Deterministic</span></div></div>
+              <p>Browser-based selection contract tests per ADR-007. Runs the Markdown viewer bundle in headless Chromium under <code>tests/webview</code> via <code>npm run test:webview</code>.</p>
+              <dl class="wf-io">
+                <div><dt>In</dt><dd><code>media/markdownViewer/</code> bundle + selection fixtures.</dd></div>
+                <div><dt>Out</dt><dd>Selection-geometry pass/fail + trace artifacts.</dd></div>
+              </dl>
+            </article>
+
+            <article class="wf-card accent-build">
+              <div class="wf-head"><h3>verify:release harness</h3><div class="wf-tags"><span class="pill">Pre-PR + release</span><span class="kind">Deterministic</span></div></div>
+              <p>One-shot gate that compiles, runs the full Mocha suite, and packages the VSIX. Mirrors what CI and the release workflow run.</p>
+              <dl class="wf-io">
+                <div><dt>In</dt><dd>Working tree.</dd></div>
+                <div><dt>Out</dt><dd>Packaged <code>.vsix</code> + test evidence.</dd></div>
+              </dl>
+            </article>
+          </div>
+        </section>
+
+        <section class="wf-group accent-review" aria-labelledby="group-pr">
+          <header class="wf-group-head">
+            <span class="wf-group-marker" aria-hidden="true"></span>
+            <h3 id="group-pr">PR gates</h3>
+            <p>Parallel agentic reviews plus CI decide whether auto-merge can fire.</p>
+          </header>
+          <div class="wf-grid">
+            <article class="wf-card accent-review">
+              <div class="wf-head"><h3>Practicality Review</h3><div class="wf-tags"><span class="pill">On PR</span><span class="kind">Agentic</span></div></div>
+              <p>Surfaces reality gaps, hidden assumptions, silent failures, and loops that are not actually closed.</p>
+              <dl class="wf-io">
+                <div><dt>In</dt><dd>PR diff, <code>product/user-scenarios.md</code>, scenario context.</dd></div>
+                <div><dt>Out</dt><dd>Review comments + clearance label.</dd></div>
+              </dl>
+            </article>
+
+            <article class="wf-card accent-review">
+              <div class="wf-head"><h3>PR Security Review</h3><div class="wf-tags"><span class="pill">On PR</span><span class="kind">Agentic</span></div></div>
+              <p>Checks XSS, prompt injection, telemetry leakage, workflow privilege drift, and protected paths.</p>
+              <dl class="wf-io">
+                <div><dt>In</dt><dd>PR diff, workflow files, <code>architecture/security-principles.md</code>.</dd></div>
+                <div><dt>Out</dt><dd>Review comments + clearance label.</dd></div>
+              </dl>
+            </article>
+
+            <article class="wf-card accent-review">
+              <div class="wf-head"><h3>PR Maintainability Review</h3><div class="wf-tags"><span class="pill">On PR</span><span class="kind">Agentic</span></div></div>
+              <p>Flags layer violations, duplicated rules, weak tests, and design drift that raises future change cost.</p>
+              <dl class="wf-io">
+                <div><dt>In</dt><dd>PR diff + <code>architecture/</code> principles and contracts.</dd></div>
+                <div><dt>Out</dt><dd>Review comments + clearance label.</dd></div>
+              </dl>
+            </article>
+
+            <article class="wf-card accent-review">
+              <div class="wf-head"><h3>CI</h3><div class="wf-tags"><span class="pill">On PR + main</span><span class="kind">Deterministic</span></div></div>
+              <p>Compiles, runs unit and integration suites, and packages the VSIX artifact for inspection.</p>
+              <dl class="wf-io">
+                <div><dt>In</dt><dd>PR commit.</dd></div>
+                <div><dt>Out</dt><dd>Build + test status, <code>.vsix</code> artifact.</dd></div>
+              </dl>
+            </article>
+
+            <article class="wf-card accent-review">
+              <div class="wf-head"><h3>PR Auto-merge Enabler</h3><div class="wf-tags"><span class="pill">On review run</span><span class="kind">Deterministic</span></div></div>
+              <p>Enables auto-merge only when all three review labels are cleared and no protected paths are touched.</p>
+              <dl class="wf-io">
+                <div><dt>In</dt><dd>Three review-clearance labels + <code>workflow_run</code>.</dd></div>
+                <div><dt>Out</dt><dd>Auto-merge enabled on the PR.</dd></div>
+              </dl>
+            </article>
+          </div>
+        </section>
+
+        <section class="wf-group accent-release" aria-labelledby="group-release">
+          <header class="wf-group-head">
+            <span class="wf-group-marker" aria-hidden="true"></span>
+            <h3 id="group-release">Release</h3>
+            <p>Multi-stage release: verify, package, deploy monitoring, publish to Marketplace.</p>
+          </header>
+          <div class="wf-grid">
+            <article class="wf-card accent-release">
+              <div class="wf-head"><h3>Release workflow</h3><div class="wf-tags"><span class="pill">Tag or dispatch</span><span class="kind">Deterministic</span></div></div>
+              <p>Verifies version, compiles, tests, packages, and orchestrates monitoring deploy plus Marketplace publish.</p>
+              <dl class="wf-io">
+                <div><dt>In</dt><dd>Version tag push or <code>workflow_dispatch</code>.</dd></div>
+                <div><dt>Out</dt><dd>Verified build, monitoring deploy, Marketplace publish.</dd></div>
+              </dl>
+            </article>
+
+            <article class="wf-card accent-release">
+              <div class="wf-head"><h3>Monitoring deploy + verify</h3><div class="wf-tags"><span class="pill">Release stage</span><span class="kind">Deterministic</span></div></div>
+              <p>Deploys generated Azure alert rules to prod, then verifies the expected scheduled query rule count.</p>
+              <dl class="wf-io">
+                <div><dt>In</dt><dd>Generated alert-policy artifacts from <code>infra/monitoring/</code>.</dd></div>
+                <div><dt>Out</dt><dd>Deployed Azure rules + verified rule count.</dd></div>
+              </dl>
+            </article>
+
+            <article class="wf-card accent-release">
+              <div class="wf-head"><h3>Marketplace publish</h3><div class="wf-tags"><span class="pill">Final stage</span><span class="kind">Deterministic</span></div></div>
+              <p>Validates the public README, then publishes the VSIX to the Visual Studio Marketplace.</p>
+              <dl class="wf-io">
+                <div><dt>In</dt><dd>Validated <code>.vsix</code> + public <code>README.md</code>.</dd></div>
+                <div><dt>Out</dt><dd>Published Marketplace listing.</dd></div>
+              </dl>
+            </article>
+          </div>
+        </section>
+
+        <section class="wf-group accent-monitoring" aria-labelledby="group-monitoring">
+          <header class="wf-group-head">
+            <span class="wf-group-marker" aria-hidden="true"></span>
+            <h3 id="group-monitoring">Monitoring loop</h3>
+            <p>Three agents and a deterministic pipeline keep scenarios, contract, telemetry, and alerts aligned.</p>
+          </header>
+          <div class="wf-grid">
+            <article class="wf-card accent-monitoring">
+              <div class="wf-head"><h3>Monitoring Scenarios</h3><div class="wf-tags"><span class="pill">Daily</span><span class="kind">Agentic</span></div></div>
+              <p>Maintains the readable scenario catalog at <code>monitoring/monitoring-scenarios.md</code> from current implementation and product context.</p>
+              <dl class="wf-io">
+                <div><dt>In</dt><dd><code>product/</code>, <code>architecture/</code>, <code>src/</code>.</dd></div>
+                <div><dt>Out</dt><dd>PR updating <code>monitoring/monitoring-scenarios.md</code>.</dd></div>
+              </dl>
+            </article>
+
+            <article class="wf-card accent-monitoring">
+              <div class="wf-head"><h3>Monitoring Contract</h3><div class="wf-tags"><span class="pill">Daily + on push</span><span class="kind">Agentic</span></div></div>
+              <p>Translates readable scenarios into <code>monitoring/scenario-contract.yaml</code>, the canonical machine-readable contract.</p>
+              <dl class="wf-io">
+                <div><dt>In</dt><dd><code>monitoring/monitoring-scenarios.md</code>.</dd></div>
+                <div><dt>Out</dt><dd>PR updating <code>monitoring/scenario-contract.yaml</code>.</dd></div>
+              </dl>
+            </article>
+
+            <article class="wf-card accent-monitoring">
+              <div class="wf-head"><h3>Monitoring Telemetry</h3><div class="wf-tags"><span class="pill">Daily + on push</span><span class="kind">Agentic</span></div></div>
+              <p>Updates runtime telemetry in <code>src/telemetry/**</code> and adjacent code so emission matches the contract and tests.</p>
+              <dl class="wf-io">
+                <div><dt>In</dt><dd><code>monitoring/scenario-contract.yaml</code> + existing telemetry code.</dd></div>
+                <div><dt>Out</dt><dd>PR updating <code>src/telemetry/**</code> and tests.</dd></div>
+              </dl>
+            </article>
+
+            <article class="wf-card accent-monitoring">
+              <div class="wf-head"><h3>Monitoring Alerts</h3><div class="wf-tags"><span class="pill">On PR + main</span><span class="kind">Deterministic</span></div></div>
+              <p>Validates contract and alert alignment, generates alert policies, and uploads them as deployable artifacts.</p>
+              <dl class="wf-io">
+                <div><dt>In</dt><dd><code>monitoring/scenario-contract.yaml</code> + <code>monitoring/alert-policies.yaml</code>.</dd></div>
+                <div><dt>Out</dt><dd>Validated alert-policy artifact for the release stage.</dd></div>
+              </dl>
+            </article>
+          </div>
+        </section>
+
+        <section class="wf-group accent-feedback" aria-labelledby="group-feedback">
+          <header class="wf-group-head">
+            <span class="wf-group-marker" aria-hidden="true"></span>
+            <h3 id="group-feedback">Feedback &amp; insight</h3>
+            <p>Periodic audits and metrics that feed back into discovery and engineering priorities.</p>
+          </header>
+          <div class="wf-grid">
+            <article class="wf-card accent-feedback">
+              <div class="wf-head"><h3>Repository Audit Analyzer</h3><div class="wf-tags"><span class="pill">On demand</span><span class="kind">Agentic</span></div></div>
+              <p>Five-phase audit of a target repo (discovery, code structure, workflows, issues/PRs, opportunities). Files one bounded improvement issue.</p>
+              <dl class="wf-io">
+                <div><dt>In</dt><dd>Target repository state + workflow + issue/PR history.</dd></div>
+                <div><dt>Out</dt><dd>One <code>[repo-audit]</code> improvement issue.</dd></div>
+              </dl>
+            </article>
+
+            <article class="wf-card accent-feedback">
+              <div class="wf-head"><h3>Daily Code Metrics</h3><div class="wf-tags"><span class="pill">Daily</span><span class="kind">Agentic</span></div></div>
+              <p>Tracks size, quality, churn, test coverage, docs, and AI-slop signals. Publishes a trend report as a GitHub Discussion with 6 charts.</p>
+              <dl class="wf-io">
+                <div><dt>In</dt><dd><code>src/</code>, <code>tests/</code>, git history, prior <code>history.jsonl</code>.</dd></div>
+                <div><dt>Out</dt><dd>GitHub Discussion with charts and 7/30-day trends.</dd></div>
+              </dl>
+            </article>
+          </div>
+        </section>
+
+      </div>
     </section>
 
     <section class="panel" aria-labelledby="lifecycle-title">
@@ -673,147 +1052,6 @@
       </div>
     </section>
 
-    <section class="panel" aria-labelledby="catalog-title">
-      <h2 id="catalog-title">Workflow catalog</h2>
-      <p class="caption">
-        Each named workflow we built, with how it triggers and what it owns. Agentic workflows are LLM-driven;
-        deterministic workflows are pure CI.
-      </p>
-
-      <div class="wf-grid">
-        <article class="wf-card accent-product">
-          <div class="wf-head"><h3>Head of Product</h3><span class="pill">Daily</span></div>
-          <p>Product strategy lead. Reviews repo, market, and adjacent AI workflows to file high-leverage product issues.</p>
-          <div class="wf-meta"><span>Schedule</span><span>Agentic</span><span>Creates issues</span></div>
-        </article>
-
-        <article class="wf-card accent-product">
-          <div class="wf-head"><h3>UX Review</h3><span class="pill">Twice weekly</span></div>
-          <p>UX design lead. Audits editor-native fit, motion, and perceived speed. Files distinct UX issues only.</p>
-          <div class="wf-meta"><span>Schedule</span><span>Agentic</span><span>Creates issues</span></div>
-        </article>
-
-        <article class="wf-card accent-product">
-          <div class="wf-head"><h3>Spec Librarian</h3><span class="pill">Daily</span></div>
-          <p>Audits drift across product, architecture, specs, monitoring, and shipped code. Opens at most one drift issue.</p>
-          <div class="wf-meta"><span>Schedule</span><span>Agentic</span><span>Creates issues</span></div>
-        </article>
-
-        <article class="wf-card accent-triage">
-          <div class="wf-head"><h3>Issue Triage</h3><span class="pill">On issue</span></div>
-          <p>Classifies issues, applies routing labels, and assigns Copilot only when work is bounded and low-risk.</p>
-          <div class="wf-meta"><span>Event</span><span>Agentic</span><span>Labels + assigns</span></div>
-        </article>
-
-        <article class="wf-card accent-triage">
-          <div class="wf-head"><h3>Copilot Setup Steps</h3><span class="pill">Setup</span></div>
-          <p>Provisions the Copilot agent environment with the gh-aw CLI so agentic workflows can run.</p>
-          <div class="wf-meta"><span>workflow_dispatch</span><span>Deterministic</span><span>Bootstraps agent</span></div>
-        </article>
-
-        <article class="wf-card accent-build">
-          <div class="wf-head"><h3>Spec Kit (specify, plan, tasks, implement)</h3><span class="pill">Per slice</span></div>
-          <p>Local-first authoring flow that turns approved scenarios into implementation-ready specs, plans, and ordered tasks.</p>
-          <div class="wf-meta"><span>Author-driven</span><span>Hybrid</span><span>Produces docs + code</span></div>
-        </article>
-
-        <article class="wf-card accent-build">
-          <div class="wf-head"><h3>Mocha unit tests</h3><span class="pill">Local + CI</span></div>
-          <p>Pure-Node unit suite under <code>tests/unit</code> driven by <code>@vscode/test-cli</code> through <code>tests/runTest.ts</code>. Runs via <code>npm run test:unit</code>.</p>
-          <div class="wf-meta"><span>Mocha</span><span>Deterministic</span><span>Logic + contracts</span></div>
-        </article>
-
-        <article class="wf-card accent-build">
-          <div class="wf-head"><h3>Mocha integration tests</h3><span class="pill">Local + CI</span></div>
-          <p>Runs in a real VS Code Extension Host via <code>@vscode/test-electron</code>. Exercises commands, custom editors, and provider wiring under <code>tests/integration</code>.</p>
-          <div class="wf-meta"><span>Mocha + Electron</span><span>Deterministic</span><span>End-to-end host</span></div>
-        </article>
-
-        <article class="wf-card accent-build">
-          <div class="wf-head"><h3>Playwright webview tests</h3><span class="pill">Local + CI</span></div>
-          <p>Browser-based selection contract tests per ADR-007. Runs the Markdown viewer bundle in headless Chromium under <code>tests/webview</code> via <code>npm run test:webview</code>.</p>
-          <div class="wf-meta"><span>Playwright</span><span>Deterministic</span><span>Selection geometry</span></div>
-        </article>
-
-        <article class="wf-card accent-build">
-          <div class="wf-head"><h3>verify:release harness</h3><span class="pill">Pre-PR + release</span></div>
-          <p>One-shot gate that compiles, runs the full Mocha suite, and packages the VSIX. Mirrors what CI and the release workflow run.</p>
-          <div class="wf-meta"><span>npm script</span><span>Deterministic</span><span>Compile + test + package</span></div>
-        </article>
-
-        <article class="wf-card accent-review">
-          <div class="wf-head"><h3>Practicality Review</h3><span class="pill">On PR</span></div>
-          <p>Surfaces reality gaps, hidden assumptions, silent failures, and loops that are not actually closed.</p>
-          <div class="wf-meta"><span>Event</span><span>Agentic</span><span>Approve, comment, or block</span></div>
-        </article>
-
-        <article class="wf-card accent-review">
-          <div class="wf-head"><h3>PR Security Review</h3><span class="pill">On PR</span></div>
-          <p>Checks XSS, prompt injection, telemetry leakage, workflow privilege drift, and protected paths.</p>
-          <div class="wf-meta"><span>Event</span><span>Agentic</span><span>Approve, comment, or block</span></div>
-        </article>
-
-        <article class="wf-card accent-review">
-          <div class="wf-head"><h3>PR Maintainability Review</h3><span class="pill">On PR</span></div>
-          <p>Flags layer violations, duplicated rules, weak tests, and design drift that raises future change cost.</p>
-          <div class="wf-meta"><span>Event</span><span>Agentic</span><span>Approve, comment, or block</span></div>
-        </article>
-
-        <article class="wf-card accent-review">
-          <div class="wf-head"><h3>CI</h3><span class="pill">On PR + main</span></div>
-          <p>Compiles, runs unit and integration suites, and packages the VSIX artifact for inspection.</p>
-          <div class="wf-meta"><span>Event</span><span>Deterministic</span><span>Build + test evidence</span></div>
-        </article>
-
-        <article class="wf-card accent-review">
-          <div class="wf-head"><h3>PR Auto-merge Enabler</h3><span class="pill">On review run</span></div>
-          <p>Enables auto-merge only when all three review labels are cleared and no protected paths are touched.</p>
-          <div class="wf-meta"><span>workflow_run</span><span>Deterministic</span><span>Merge policy</span></div>
-        </article>
-
-        <article class="wf-card accent-monitoring">
-          <div class="wf-head"><h3>Monitoring Scenarios</h3><span class="pill">Daily</span></div>
-          <p>Maintains the readable scenario catalog at <code>monitoring/monitoring-scenarios.md</code> from current implementation and product context.</p>
-          <div class="wf-meta"><span>Schedule</span><span>Agentic</span><span>Opens PRs to docs</span></div>
-        </article>
-
-        <article class="wf-card accent-monitoring">
-          <div class="wf-head"><h3>Monitoring Contract</h3><span class="pill">Daily + on push</span></div>
-          <p>Translates readable scenarios into <code>monitoring/scenario-contract.yaml</code>, the canonical machine-readable contract.</p>
-          <div class="wf-meta"><span>Schedule + push</span><span>Agentic</span><span>Opens PRs to YAML contract</span></div>
-        </article>
-
-        <article class="wf-card accent-monitoring">
-          <div class="wf-head"><h3>Monitoring Telemetry</h3><span class="pill">Daily + on push</span></div>
-          <p>Updates runtime telemetry in <code>src/telemetry/**</code> and adjacent code so emission matches the contract and tests.</p>
-          <div class="wf-meta"><span>Schedule + push</span><span>Agentic</span><span>Opens PRs to runtime code</span></div>
-        </article>
-
-        <article class="wf-card accent-monitoring">
-          <div class="wf-head"><h3>Monitoring Alerts</h3><span class="pill">On PR + main</span></div>
-          <p>Validates contract and alert alignment, generates alert policies, and uploads them as deployable artifacts.</p>
-          <div class="wf-meta"><span>Event</span><span>Deterministic</span><span>Validate + generate</span></div>
-        </article>
-
-        <article class="wf-card accent-release">
-          <div class="wf-head"><h3>Release workflow</h3><span class="pill">Tag or dispatch</span></div>
-          <p>Verifies version, compiles, tests, packages, and orchestrates monitoring deploy plus Marketplace publish.</p>
-          <div class="wf-meta"><span>Tag push</span><span>Deterministic</span><span>Multi-stage</span></div>
-        </article>
-
-        <article class="wf-card accent-release">
-          <div class="wf-head"><h3>Monitoring deploy + verify (release stage)</h3><span class="pill">Release stage</span></div>
-          <p>Deploys generated Azure alert rules to prod, then verifies the expected scheduled query rule count.</p>
-          <div class="wf-meta"><span>Release stage</span><span>Deterministic</span><span>Azure-backed</span></div>
-        </article>
-
-        <article class="wf-card accent-release">
-          <div class="wf-head"><h3>Marketplace publish</h3><span class="pill">Final stage</span></div>
-          <p>Validates the public README, then publishes the VSIX to the Visual Studio Marketplace.</p>
-          <div class="wf-meta"><span>Release stage</span><span>Deterministic</span><span>Public surface</span></div>
-        </article>
-      </div>
-    </section>
   </main>
 </body>
 </html>
