@@ -587,6 +587,73 @@
       .wf-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
 
+    /* Repository structure */
+    .repo-groups { display: grid; gap: 0; }
+
+    .repo-group { padding: 22px 0; }
+    .repo-group + .repo-group { border-top: 1px dashed var(--line); }
+    .repo-group:first-of-type { padding-top: 6px; }
+    .repo-group:last-of-type { padding-bottom: 6px; }
+
+    .repo-group-head {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 14px;
+      row-gap: 2px;
+      align-items: baseline;
+      margin-bottom: 12px;
+    }
+
+    .repo-group-head .repo-group-marker {
+      grid-row: 1 / span 2;
+      align-self: center;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 18%, transparent);
+    }
+
+    .repo-group-head h3 {
+      margin: 0;
+      font-size: 1.18rem;
+      letter-spacing: -0.01em;
+      color: color-mix(in srgb, var(--accent) 78%, black);
+    }
+
+    .repo-group-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .repo-list { margin: 0; padding: 0; display: grid; gap: 8px; }
+
+    .repo-row {
+      display: grid;
+      grid-template-columns: minmax(180px, 0.28fr) minmax(0, 1fr);
+      column-gap: 16px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: rgba(29, 36, 48, 0.04);
+      border: 1px solid rgba(29, 36, 48, 0.06);
+      align-items: start;
+    }
+
+    .repo-row code {
+      font-size: 0.88rem;
+      color: color-mix(in srgb, var(--accent) 80%, black);
+      font-weight: 600;
+    }
+
+    .repo-row p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.5;
+    }
+
     @media (max-width: 720px) {
       main {
         width: min(100% - 20px, 1380px);
@@ -604,6 +671,8 @@
       .track { min-width: 1020px; }
       .mon-track { min-width: 920px; }
       .wf-grid { grid-template-columns: 1fr; }
+
+      .repo-row { grid-template-columns: 1fr; gap: 4px; }
     }
   </style>
 </head>
@@ -1040,6 +1109,120 @@
             <p>Release stage deploys generated alerts to prod and verifies the rule count.</p>
           </section>
         </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="repo-title">
+      <h2 id="repo-title">Repository structure</h2>
+      <p class="caption">
+        The harness only works when each workflow knows where to read intent from and where to write evidence to.
+        These are the top-level folders the lifecycle relies on, grouped by the role they play. Source-of-truth
+        folders are written by humans (or by agents that maintain a canonical artifact); implementation and
+        operations folders are where code, tests, and pipelines apply that intent.
+      </p>
+
+      <div class="repo-groups">
+
+        <section class="repo-group accent-product">
+          <header class="repo-group-head">
+            <span class="repo-group-marker" aria-hidden="true"></span>
+            <h3>Source of truth</h3>
+            <p>Human-authored intent. Agents read these to decide what to build, review, monitor, and ship.</p>
+          </header>
+          <div class="repo-list">
+            <div class="repo-row">
+              <code>product/</code>
+              <p>Product outline, user scenarios, non-goals, UX principles, glossary, and development workflow. Read first by every planning and review agent.</p>
+            </div>
+            <div class="repo-row">
+              <code>architecture/</code>
+              <p>High-level architecture, engineering principles, security principles, data-contract rules, and ADRs (<code>adr-001</code>&hellip;<code>adr-007</code>). Source for technical decisions.</p>
+            </div>
+            <div class="repo-row">
+              <code>specs/</code>
+              <p>SpecKit feature specs: <code>spec.md</code>, <code>plan.md</code>, <code>tasks.md</code>, <code>data-model.md</code>, contracts, and checklists per feature. Drives the build phase.</p>
+            </div>
+            <div class="repo-row">
+              <code>monitoring/</code>
+              <p>Readable scenario catalog, canonical machine contract (<code>scenario-contract.yaml</code>), alert policies, and telemetry guidelines. Drives the monitoring loop.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="repo-group accent-build">
+          <header class="repo-group-head">
+            <span class="repo-group-marker" aria-hidden="true"></span>
+            <h3>Implementation</h3>
+            <p>Where intent becomes runnable code and where tests prove it still matches intent.</p>
+          </header>
+          <div class="repo-list">
+            <div class="repo-row">
+              <code>src/</code>
+              <p>VS Code extension TypeScript: <code>commands/</code>, <code>editors/</code>, <code>presentation/</code>, <code>rendering/</code>, <code>requests/</code>, <code>sessions/</code>, <code>telemetry/</code>, <code>webview/</code>, plus <code>extension.ts</code>.</p>
+            </div>
+            <div class="repo-row">
+              <code>media/</code>
+              <p>Webview assets shipped with the extension (Markdown viewer scripts and styles).</p>
+            </div>
+            <div class="repo-row">
+              <code>tests/</code>
+              <p>Mocha <code>unit/</code> and <code>integration/</code> suites plus Playwright <code>webview/</code> contract tests. Required evidence on every PR that touches the matching surface.</p>
+            </div>
+            <div class="repo-row">
+              <code>prompts/</code>
+              <p>Curated model prompts used at runtime (for example <code>selection-scoped-edit.md</code>).</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="repo-group accent-release">
+          <header class="repo-group-head">
+            <span class="repo-group-marker" aria-hidden="true"></span>
+            <h3>Operations</h3>
+            <p>Workflows, infrastructure, and helpers that automate the lifecycle and ship the product.</p>
+          </header>
+          <div class="repo-list">
+            <div class="repo-row">
+              <code>.github/</code>
+              <p>Agentic and deterministic GitHub workflows, shared workflow fragments, PR and issue templates, and Copilot instructions.</p>
+            </div>
+            <div class="repo-row">
+              <code>infra/</code>
+              <p>Azure Bicep for monitoring infrastructure and generated alert templates under <code>infra/monitoring/generated/</code>. Deployed by the release stage.</p>
+            </div>
+            <div class="repo-row">
+              <code>scripts/</code>
+              <p>Build helpers: <code>bundle.mjs</code> for the extension bundle, <code>launch-devhost.mjs</code> for the dev host.</p>
+            </div>
+            <div class="repo-row">
+              <code>tools/</code>
+              <p>Deterministic tooling for the monitoring pipeline and the release verifier.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="repo-group accent-feedback">
+          <header class="repo-group-head">
+            <span class="repo-group-marker" aria-hidden="true"></span>
+            <h3>Documentation surfaces</h3>
+            <p>Where the harness publishes outward-facing context for users, contributors, and reviewers.</p>
+          </header>
+          <div class="repo-list">
+            <div class="repo-row">
+              <code>docs/external/</code>
+              <p>Public GitHub Pages content, including this engineering-lifecycle page.</p>
+            </div>
+            <div class="repo-row">
+              <code>docs/internal/</code>
+              <p>Contributor-only notes that must stay out of the Marketplace README.</p>
+            </div>
+            <div class="repo-row">
+              <code>README.md</code> &middot; <code>CHANGELOG.md</code>
+              <p>Marketplace-public surfaces. Treated as user-facing copy, not contributor docs.</p>
+            </div>
+          </div>
+        </section>
+
       </div>
     </section>
 
