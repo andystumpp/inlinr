@@ -489,6 +489,44 @@ scenarios:
           - template_id: checkpoint_spike
             checkpoint_id: current_state_reused
 
+  - scenario_id: discover_first_action_through_guidance
+    title: Discover the first action through empty state guidance
+    criticality: important
+    journey:
+      start_condition: A new user opens a Markdown file in Inlinr and has not yet completed or dismissed first-action guidance.
+      success_condition: The guidance appears, teaches the selection-based editing workflow without blocking document content, and dismisses after the first qualifying selection or explicit dismissal.
+      safe_block_condition: The guidance fails to appear but the document remains readable and editable.
+    runtime:
+      readiness: not_instrumented
+      scenario_version: '1'
+      owner_surface: custom_editor
+      owner_component: onboarding
+      checkpoints:
+        - checkpoint_id: guidance_appears
+          order: 1
+          description: The guidance appears for eligible first-time users when opening a Markdown file.
+          component: onboarding
+        - checkpoint_id: guidance_visible_non_blocking
+          order: 2
+          description: The guidance is visible but does not block document reading or selection.
+          component: onboarding
+        - checkpoint_id: guidance_dismissed
+          order: 3
+          description: The guidance is dismissed after the first qualifying selection or explicit dismissal.
+          component: onboarding
+    telemetry:
+      result_event: scenario_result
+      safe_block_status: blocked_safe
+      allowed_supporting_signals:
+        - checkpoint
+        - exception
+    alerting:
+      profile: important_session_continuity
+      overrides:
+        supporting_alerts:
+          - template_id: checkpoint_spike
+            checkpoint_id: guidance_dismissed
+
   - scenario_id: stable_viewer_on_render_failure
     title: Keep the viewer stable when preview rendering fails
     criticality: important
