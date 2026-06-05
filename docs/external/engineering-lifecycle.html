@@ -587,6 +587,264 @@
       .wf-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
 
+    /* Repository structure */
+    .repo-groups { display: grid; gap: 0; }
+
+    .repo-group { padding: 22px 0; }
+    .repo-group + .repo-group { border-top: 1px dashed var(--line); }
+    .repo-group:first-of-type { padding-top: 6px; }
+    .repo-group:last-of-type { padding-bottom: 6px; }
+
+    .repo-group-head {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 14px;
+      row-gap: 2px;
+      align-items: baseline;
+      margin-bottom: 12px;
+    }
+
+    .repo-group-head .repo-group-marker {
+      grid-row: 1 / span 2;
+      align-self: center;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 18%, transparent);
+    }
+
+    .repo-group-head h3 {
+      margin: 0;
+      font-size: 1.18rem;
+      letter-spacing: -0.01em;
+      color: color-mix(in srgb, var(--accent) 78%, black);
+    }
+
+    .repo-group-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .repo-list { margin: 0; padding: 0; display: grid; gap: 8px; }
+
+    .repo-row {
+      display: grid;
+      grid-template-columns: minmax(180px, 0.28fr) minmax(0, 1fr);
+      column-gap: 16px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: rgba(29, 36, 48, 0.04);
+      border: 1px solid rgba(29, 36, 48, 0.06);
+      align-items: start;
+    }
+
+    .repo-row code {
+      font-size: 0.88rem;
+      color: color-mix(in srgb, var(--accent) 80%, black);
+      font-weight: 600;
+    }
+
+    .repo-row p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.5;
+    }
+
+    .repo-row ul {
+      margin: 6px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.5;
+      display: grid;
+      gap: 2px;
+    }
+
+    .repo-row ul li::marker { color: color-mix(in srgb, var(--accent) 60%, transparent); }
+
+    /* Monitoring traceability example */
+    .mon-trace {
+      margin-top: 24px;
+      padding-top: 22px;
+      border-top: 1px dashed var(--line);
+    }
+
+    .mon-trace-head {
+      display: grid;
+      gap: 4px;
+      margin-bottom: 14px;
+    }
+
+    .mon-trace-head h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      letter-spacing: -0.01em;
+      color: color-mix(in srgb, var(--monitoring) 78%, black);
+    }
+
+    .mon-trace-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    .mon-trace-rows { display: grid; gap: 10px; }
+
+    .mon-trace-row {
+      display: grid;
+      grid-template-columns: minmax(170px, 0.22fr) minmax(0, 1fr);
+      column-gap: 16px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(29, 36, 48, 0.04);
+      border: 1px solid rgba(29, 36, 48, 0.06);
+      align-items: start;
+    }
+
+    .mon-trace-label {
+      display: grid;
+      gap: 2px;
+    }
+
+    .mon-trace-label .step {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent, var(--monitoring));
+    }
+
+    .mon-trace-label .file {
+      font-family: "Cascadia Mono", "Consolas", monospace;
+      font-size: 0.78rem;
+      color: var(--muted);
+      word-break: break-all;
+    }
+
+    .mon-trace-body p {
+      margin: 0 0 6px;
+      color: var(--ink);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .mon-trace-body pre {
+      margin: 0;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(29, 36, 48, 0.85);
+      color: #f4ead7;
+      font-family: "Cascadia Mono", "Consolas", monospace;
+      font-size: 0.78rem;
+      line-height: 1.5;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .mon-trace-checkpoints {
+      margin: 0 0 6px;
+      padding-left: 22px;
+      color: var(--ink);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      display: grid;
+      gap: 3px;
+    }
+
+    .mon-trace-checkpoints li::marker {
+      color: color-mix(in srgb, var(--accent, var(--monitoring)) 65%, transparent);
+      font-weight: 600;
+    }
+
+    .mon-trace-row.accent-product { --accent: var(--product); }
+    .mon-trace-row.accent-monitoring { --accent: var(--monitoring); }
+    .mon-trace-row.accent-build { --accent: var(--build); }
+    .mon-trace-row.accent-release { --accent: var(--release); }
+
+    @media (max-width: 720px) {
+      .mon-trace-row { grid-template-columns: 1fr; gap: 6px; }
+    }
+
+    /* Example outputs */
+    .ex-groups { display: grid; gap: 0; }
+
+    .ex-group { padding: 22px 0; }
+    .ex-group + .ex-group { border-top: 1px dashed var(--line); }
+    .ex-group:first-of-type { padding-top: 6px; }
+    .ex-group:last-of-type { padding-bottom: 6px; }
+
+    .ex-group-head {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 14px;
+      row-gap: 2px;
+      align-items: baseline;
+      margin-bottom: 12px;
+    }
+
+    .ex-group-head .ex-group-marker {
+      grid-row: 1 / span 2;
+      align-self: center;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 18%, transparent);
+    }
+
+    .ex-group-head h3 {
+      margin: 0;
+      font-size: 1.18rem;
+      letter-spacing: -0.01em;
+      color: color-mix(in srgb, var(--accent) 78%, black);
+    }
+
+    .ex-group-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .ex-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+
+    .ex-list li {
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: rgba(29, 36, 48, 0.04);
+      border: 1px solid rgba(29, 36, 48, 0.06);
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 12px;
+      align-items: baseline;
+    }
+
+    .ex-list .ex-num {
+      font-family: "Cascadia Mono", "Consolas", monospace;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: color-mix(in srgb, var(--accent) 80%, black);
+    }
+
+    .ex-list a {
+      color: var(--ink);
+      text-decoration: none;
+      font-size: 0.92rem;
+      line-height: 1.45;
+      border-bottom: 1px dashed color-mix(in srgb, var(--accent) 40%, transparent);
+    }
+
+    .ex-list a:hover { border-bottom-style: solid; }
+
+    @media (max-width: 720px) {
+      .ex-list li { grid-template-columns: 1fr; gap: 4px; }
+    }
+
     @media (max-width: 720px) {
       main {
         width: min(100% - 20px, 1380px);
@@ -604,6 +862,8 @@
       .track { min-width: 1020px; }
       .mon-track { min-width: 920px; }
       .wf-grid { grid-template-columns: 1fr; }
+
+      .repo-row { grid-template-columns: 1fr; gap: 4px; }
     }
   </style>
 </head>
@@ -632,11 +892,227 @@
       <aside class="summary">
         <h2>Reading guide</h2>
         <p>
-          Start with the workflow catalog right below — it lists every named workflow we built, grouped by
-          lifecycle phase, with the input each one consumes and the output it produces. The two visual maps that
-          follow show the same workflows arranged as the dev lifecycle strip and the monitoring loop.
+          Start with the high-level lifecycle strip right below — it shows how work moves from discovery to
+          release. The monitoring strategy panel then covers the parallel loop that keeps scenarios, contract,
+          telemetry, and alerts aligned. The workflow catalog lists every named workflow grouped by phase,
+          with the input each one consumes and the output it produces.
         </p>
       </aside>
+    </section>
+
+    <section class="panel" aria-labelledby="lifecycle-title">
+      <h2 id="lifecycle-title">High-level lifecycle</h2>
+      <p class="caption">
+        Discovery agents file issues. Issue Triage routes them. Implementation produces a reviewable pull request.
+        Three specialized review agents plus CI decide merge readiness. Release packages, deploys monitoring, and
+        publishes to the Marketplace.
+      </p>
+
+      <div class="track-shell">
+        <div class="track">
+          <section class="phase">
+            <div class="node node-product">1</div>
+            <div class="phase-tag">Discovery</div>
+            <h3>Find the work</h3>
+            <ul class="phase-list">
+              <li>Head of Product</li>
+              <li>UX Review</li>
+              <li>Spec Librarian</li>
+            </ul>
+          </section>
+
+          <section class="phase">
+            <div class="node node-triage">2</div>
+            <div class="phase-tag">Intake</div>
+            <h3>Bound the work</h3>
+            <ul class="phase-list">
+              <li>Issue Triage</li>
+            </ul>
+          </section>
+
+          <section class="phase">
+            <div class="node node-build">3</div>
+            <div class="phase-tag">Build</div>
+            <h3>Spec, implement, and verify locally</h3>
+            <ul class="phase-list">
+              <li>Spec Kit (specify, plan, tasks, implement)</li>
+              <li>Mocha unit tests (<code>tests/unit</code>)</li>
+              <li>Mocha integration tests on VS Code host (<code>tests/integration</code>)</li>
+              <li>Playwright webview selection tests (<code>tests/webview</code>)</li>
+              <li><code>npm run verify:release</code> before PR</li>
+            </ul>
+          </section>
+
+          <section class="phase">
+            <div class="node node-review">4</div>
+            <div class="phase-tag">PR gates</div>
+            <h3>Review in parallel</h3>
+            <ul class="phase-list">
+              <li>Practicality Review</li>
+              <li>PR Security Review</li>
+              <li>PR Maintainability Review</li>
+              <li>CI</li>
+              <li>PR Auto-merge enabler</li>
+            </ul>
+          </section>
+
+          <section class="phase">
+            <div class="node node-release">5</div>
+            <div class="phase-tag">Release</div>
+            <h3>Ship the build</h3>
+            <ul class="phase-list">
+              <li>Release workflow</li>
+              <li>Monitoring deploy + verify</li>
+              <li>Marketplace publish</li>
+            </ul>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="monitoring-title">
+      <h2 id="monitoring-title">Monitoring strategy</h2>
+      <p class="caption">
+        Inlinr's monitoring is layered intentionally. Three agentic workflows maintain the readable scenario catalog,
+        the canonical machine contract, and the runtime telemetry implementation. A separate deterministic pipeline
+        validates that contract and generates alert policies, and the release workflow deploys them to Azure.
+        Each layer has a single source of truth and a clear writer.
+      </p>
+
+      <div class="mon-track-shell">
+        <div class="mon-track">
+          <section class="mon-step mon-step-input">
+            <div class="mon-node mon-node-input">Input</div>
+            <h4>Requirements</h4>
+            <p>Product scenarios, ADRs, and reliability goals from <code>product/</code> and <code>architecture/</code>.</p>
+          </section>
+
+          <section class="mon-step">
+            <div class="mon-node">Scenarios<br>Agent</div>
+            <h4>Monitoring Scenarios</h4>
+            <p>Maintains <code>monitoring/monitoring-scenarios.md</code>, the readable scenario catalog.</p>
+          </section>
+
+          <section class="mon-step">
+            <div class="mon-node">Contract<br>Agent</div>
+            <h4>Monitoring Contract</h4>
+            <p>Translates intent into <code>monitoring/scenario-contract.yaml</code>, the canonical machine contract.</p>
+          </section>
+
+          <section class="mon-step">
+            <div class="mon-node">Telemetry<br>Agent</div>
+            <h4>Monitoring Telemetry</h4>
+            <p>Keeps runtime emission in <code>src/telemetry/**</code> aligned with the contract.</p>
+          </section>
+
+          <section class="mon-step">
+            <div class="mon-node">Alerts<br>Pipeline</div>
+            <h4>Monitoring Alerts</h4>
+            <p>Validates the contract and generates alert policies on PR and main.</p>
+          </section>
+
+          <section class="mon-step">
+            <div class="mon-node">Azure<br>Deploy</div>
+            <h4>Release deploy + verify</h4>
+            <p>Release stage deploys generated alerts to prod and verifies the rule count.</p>
+          </section>
+        </div>
+      </div>
+
+      <div class="mon-trace">
+        <header class="mon-trace-head">
+          <h3>Trace one requirement end to end</h3>
+          <p>
+            A single non-functional requirement, traced through each layer it touches. Same intent, four
+            representations, one writer per layer.
+          </p>
+        </header>
+
+        <div class="mon-trace-rows">
+
+          <div class="mon-trace-row accent-product">
+            <div class="mon-trace-label">
+              <span class="step">Product requirement</span>
+              <span class="file">product/user-scenarios.md</span>
+            </div>
+            <div class="mon-trace-body">
+              <p>For the inline request flow, a user should see a reviewable suggested change within 2 seconds of submitting a request from the popup.</p>
+            </div>
+          </div>
+
+          <div class="mon-trace-row accent-monitoring">
+            <div class="mon-trace-label">
+              <span class="step">Monitoring scenario</span>
+              <span class="file">monitoring/monitoring-scenarios.md</span>
+            </div>
+            <div class="mon-trace-body">
+              <p><strong>Submit a request and receive inline review state</strong></p>
+              <p><strong>Criticality:</strong> Core</p>
+              <p><strong>Journey:</strong> A user enters a request, submits it from the inline popup, and sees pending feedback followed by a reviewable suggested change rendered in the document flow at the targeted location within 2 seconds of submit.</p>
+              <p><strong>Key checkpoints:</strong></p>
+              <ol class="mon-trace-checkpoints">
+                <li>The request input accepts text and submits successfully.</li>
+                <li>The system shows a visible pending state while work is in progress.</li>
+                <li>A reviewable inline suggestion appears at the targeted document location within 2 seconds.</li>
+              </ol>
+              <p><strong>Monitoring intent:</strong> Catch failures where request submission stalls, suggestion generation exceeds the expected latency budget, the user never reaches review, or the returned suggestion is detached from the intended document context.</p>
+            </div>
+          </div>
+
+          <div class="mon-trace-row accent-build">
+            <div class="mon-trace-label">
+              <span class="step">Monitoring contract</span>
+              <span class="file">monitoring/scenario-contract.yaml</span>
+            </div>
+            <div class="mon-trace-body">
+<pre>- scenario_id: submit_request_receive_review
+  title: Submit a request and receive inline review state
+  criticality: core
+  journey:
+    success_condition: Pending feedback appears and a reviewable
+      inline suggestion is rendered at the targeted document
+      location within 2 seconds of submit.
+  runtime:
+    owner_component: request_execution
+    checkpoints:
+      - { checkpoint_id: request_submitted,     order: 1 }
+      - { checkpoint_id: pending_visible,       order: 2 }
+      - { checkpoint_id: review_rendered_inline, order: 3,
+          latency_sensitive: true }
+  alerting:
+    profile: core_request_execution</pre>
+            </div>
+          </div>
+
+          <div class="mon-trace-row accent-release">
+            <div class="mon-trace-label">
+              <span class="step">Telemetry code</span>
+              <span class="file">src/editors/markdownCustomEditorProvider.ts</span>
+            </div>
+            <div class="mon-trace-body">
+<pre>const submitAttempt = this.startScenarioAttempt(
+  document, 'submit_request_receive_review', { sessionId }
+);
+const submitStartedAt = Date.now();
+
+// ...accept input, validate draft...
+this.emitScenarioCheckpoint(submitAttempt, 'request_submitted', 'pass');
+
+// ...resolve anchor, dispatch to provider...
+this.emitScenarioCheckpoint(submitAttempt, 'pending_visible', 'pass');
+
+const executionResult = await this.executionService.execute(payload);
+
+// ...render suggestion into the document...
+this.emitScenarioCheckpoint(submitAttempt, 'review_rendered_inline', 'pass', {
+  durationMs: Math.max(0, Date.now() - submitStartedAt) // 2 s budget
+});
+this.completeScenarioAttempt(submitAttempt, 'success');</pre>
+            </div>
+          </div>
+
+        </div>
+      </div>
     </section>
 
     <section class="panel" aria-labelledby="catalog-title">
@@ -669,7 +1145,7 @@
               <div class="wf-head"><h3>UX Review</h3><div class="wf-tags"><span class="pill">Twice weekly</span><span class="kind">Agentic</span></div></div>
               <p>UX design lead. Audits editor-native fit, motion, and perceived speed. Files distinct UX issues only.</p>
               <dl class="wf-io">
-                <div><dt>In</dt><dd><code>product/ux-principles.md</code>, user scenarios, recorded UI surfaces.</dd></div>
+                <div><dt>In</dt><dd><code>product/</code>, <code>architecture/</code>, <code>specs/</code>, <code>src/</code>, <code>media/</code>, <code>package.json</code>, plus VS Code UX docs and Marketplace references.</dd></div>
                 <div><dt>Out</dt><dd>UX issues with reproduction notes.</dd></div>
               </dl>
             </article>
@@ -694,19 +1170,10 @@
           <div class="wf-grid">
             <article class="wf-card accent-triage">
               <div class="wf-head"><h3>Issue Triage</h3><div class="wf-tags"><span class="pill">On issue</span><span class="kind">Agentic</span></div></div>
-              <p>Classifies issues, applies routing labels, and assigns Copilot only when work is bounded and low-risk.</p>
+              <p>Classifies issues, applies routing labels, posts a single triage comment, and assigns Copilot only when work is bounded and low-risk.</p>
               <dl class="wf-io">
                 <div><dt>In</dt><dd>New or updated issue body and metadata.</dd></div>
-                <div><dt>Out</dt><dd>Routing labels and optional Copilot assignment.</dd></div>
-              </dl>
-            </article>
-
-            <article class="wf-card accent-triage">
-              <div class="wf-head"><h3>Copilot Setup Steps</h3><div class="wf-tags"><span class="pill">Setup</span><span class="kind">Deterministic</span></div></div>
-              <p>Provisions the Copilot agent environment with the gh-aw CLI so agentic workflows can run.</p>
-              <dl class="wf-io">
-                <div><dt>In</dt><dd><code>workflow_dispatch</code> trigger.</dd></div>
-                <div><dt>Out</dt><dd>Provisioned agent runtime with gh-aw installed.</dd></div>
+                <div><dt>Out</dt><dd>Routing labels, one triage comment, and optional Copilot assignment.</dd></div>
               </dl>
             </article>
           </div>
@@ -931,124 +1398,249 @@
       </div>
     </section>
 
-    <section class="panel" aria-labelledby="lifecycle-title">
-      <h2 id="lifecycle-title">High-level lifecycle</h2>
+    <section class="panel" aria-labelledby="repo-title">
+      <h2 id="repo-title">Repository structure</h2>
       <p class="caption">
-        Discovery agents file issues. Issue Triage routes them. Implementation produces a reviewable pull request.
-        Three specialized review agents plus CI decide merge readiness. Release packages, deploys monitoring, and
-        publishes to the Marketplace.
+        The harness only works when each workflow knows where to read intent from and where to write evidence to.
+        These are the top-level folders the lifecycle relies on, grouped by the role they play. Source-of-truth
+        folders are written by humans (or by agents that maintain a canonical artifact); implementation and
+        operations folders are where code, tests, and pipelines apply that intent.
       </p>
 
-      <div class="track-shell">
-        <div class="track">
-          <section class="phase">
-            <div class="node node-product">1</div>
-            <div class="phase-tag">Discovery</div>
-            <h3>Find the work</h3>
-            <ul class="phase-list">
-              <li>Head of Product</li>
-              <li>UX Review</li>
-              <li>Spec Librarian</li>
-            </ul>
-          </section>
+      <div class="repo-groups">
 
-          <section class="phase">
-            <div class="node node-triage">2</div>
-            <div class="phase-tag">Intake</div>
-            <h3>Bound the work</h3>
-            <ul class="phase-list">
-              <li>Issue Triage</li>
-              <li>Copilot Setup Steps</li>
-            </ul>
-          </section>
+        <section class="repo-group accent-product">
+          <header class="repo-group-head">
+            <span class="repo-group-marker" aria-hidden="true"></span>
+            <h3>Source of truth</h3>
+            <p>Human-authored intent. Agents read these to decide what to build, review, monitor, and ship.</p>
+          </header>
+          <div class="repo-list">
+            <div class="repo-row">
+              <code>product/</code>
+              <p>Human-authored product intent. Read first by every planning and review agent.</p>
+              <ul>
+                <li>Product outline</li>
+                <li>User scenarios</li>
+                <li>Non-goals</li>
+                <li>UX principles</li>
+                <li>Glossary</li>
+                <li>Development workflow</li>
+                <li>Markdown presentation roadmap</li>
+              </ul>
+            </div>
+            <div class="repo-row">
+              <code>architecture/</code>
+              <p>Technical source of truth for system shape and decisions.</p>
+              <ul>
+                <li>High-level architecture</li>
+                <li>Engineering principles</li>
+                <li>Security principles</li>
+                <li>Data-contract rules</li>
+                <li>ADRs</li>
+              </ul>
+            </div>
+            <div class="repo-row">
+              <code>specs/</code>
+              <p>SpecKit feature specs that drive the build phase.</p>
+              <ul>
+                <li>Spec (<code>spec.md</code>)</li>
+                <li>Plan (<code>plan.md</code>)</li>
+                <li>Tasks (<code>tasks.md</code>)</li>
+                <li>Data model</li>
+                <li>Contracts</li>
+                <li>Checklists</li>
+                <li>Quickstart</li>
+              </ul>
+            </div>
+            <div class="repo-row">
+              <code>monitoring/</code>
+              <p>Scenario and telemetry source of truth that drives the monitoring loop.</p>
+              <ul>
+                <li>Monitoring scenarios catalog</li>
+                <li>Scenario contract (canonical YAML)</li>
+                <li>Alert policies</li>
+                <li>Telemetry guidelines</li>
+              </ul>
+            </div>
+          </div>
+        </section>
 
-          <section class="phase">
-            <div class="node node-build">3</div>
-            <div class="phase-tag">Build</div>
-            <h3>Spec, implement, and verify locally</h3>
-            <ul class="phase-list">
-              <li>Spec Kit (specify, plan, tasks, implement)</li>
-              <li>Mocha unit tests (<code>tests/unit</code>)</li>
-              <li>Mocha integration tests on VS Code host (<code>tests/integration</code>)</li>
-              <li>Playwright webview selection tests (<code>tests/webview</code>)</li>
-              <li><code>npm run verify:release</code> before PR</li>
-            </ul>
-          </section>
+        <section class="repo-group accent-build">
+          <header class="repo-group-head">
+            <span class="repo-group-marker" aria-hidden="true"></span>
+            <h3>Implementation</h3>
+            <p>Where intent becomes runnable code and where tests prove it still matches intent.</p>
+          </header>
+          <div class="repo-list">
+            <div class="repo-row">
+              <code>src/</code>
+              <p>VS Code extension TypeScript, organized by surface.</p>
+              <ul>
+                <li>Commands</li>
+                <li>Editors</li>
+                <li>Presentation</li>
+                <li>Rendering</li>
+                <li>Requests</li>
+                <li>Sessions</li>
+                <li>Telemetry</li>
+                <li>Webview</li>
+                <li>Onboarding</li>
+                <li>Extension entry point</li>
+              </ul>
+            </div>
+            <div class="repo-row">
+              <code>media/</code>
+              <p>Webview assets shipped with the extension.</p>
+              <ul>
+                <li>Markdown viewer scripts</li>
+                <li>Markdown viewer styles</li>
+              </ul>
+            </div>
+            <div class="repo-row">
+              <code>tests/</code>
+              <p>Test suites. Required evidence on every PR that touches the matching surface.</p>
+              <ul>
+                <li>Unit (Mocha)</li>
+                <li>Integration (Mocha)</li>
+                <li>Webview contract (Playwright)</li>
+                <li>Fixtures</li>
+              </ul>
+            </div>
+            <div class="repo-row">
+              <code>prompts/</code>
+              <p>Curated model prompts used at runtime.</p>
+              <ul>
+                <li>Selection-scoped edit prompt</li>
+              </ul>
+            </div>
+          </div>
+        </section>
 
-          <section class="phase">
-            <div class="node node-review">4</div>
-            <div class="phase-tag">PR gates</div>
-            <h3>Review in parallel</h3>
-            <ul class="phase-list">
-              <li>Practicality Review</li>
-              <li>PR Security Review</li>
-              <li>PR Maintainability Review</li>
-              <li>CI</li>
-              <li>PR Auto-merge enabler</li>
-            </ul>
-          </section>
+        <section class="repo-group accent-release">
+          <header class="repo-group-head">
+            <span class="repo-group-marker" aria-hidden="true"></span>
+            <h3>Operations</h3>
+            <p>Workflows, infrastructure, and helpers that automate the lifecycle and ship the product.</p>
+          </header>
+          <div class="repo-list">
+            <div class="repo-row">
+              <code>.github/</code>
+              <p>Lifecycle automation and contributor guardrails.</p>
+              <ul>
+                <li>Agentic workflows</li>
+                <li>Deterministic workflows</li>
+                <li>Shared workflow fragments</li>
+                <li>PR and issue templates</li>
+                <li>Copilot instructions</li>
+              </ul>
+            </div>
+            <div class="repo-row">
+              <code>infra/</code>
+              <p>Azure infrastructure for monitoring. Deployed by the release stage.</p>
+              <ul>
+                <li>Monitoring Bicep</li>
+                <li>Generated alert templates</li>
+                <li>Action group definitions</li>
+              </ul>
+            </div>
+            <div class="repo-row">
+              <code>scripts/</code>
+              <p>Build and dev-loop helpers.</p>
+              <ul>
+                <li>Extension bundler</li>
+                <li>Dev host launcher</li>
+              </ul>
+            </div>
+            <div class="repo-row">
+              <code>tools/</code>
+              <p>Deterministic tooling that backs lifecycle pipelines.</p>
+              <ul>
+                <li>Monitoring pipeline tools</li>
+                <li>Release verifier</li>
+              </ul>
+            </div>
+          </div>
+        </section>
 
-          <section class="phase">
-            <div class="node node-release">5</div>
-            <div class="phase-tag">Release</div>
-            <h3>Ship the build</h3>
-            <ul class="phase-list">
-              <li>Release workflow</li>
-              <li>Monitoring deploy + verify</li>
-              <li>Marketplace publish</li>
-            </ul>
-          </section>
-        </div>
+        <section class="repo-group accent-feedback">
+          <header class="repo-group-head">
+            <span class="repo-group-marker" aria-hidden="true"></span>
+            <h3>Documentation surfaces</h3>
+            <p>Where the harness publishes outward-facing context for users, contributors, and reviewers.</p>
+          </header>
+          <div class="repo-list">
+            <div class="repo-row">
+              <code>docs/external/</code>
+              <p>Public GitHub Pages content.</p>
+              <ul>
+                <li>Engineering lifecycle page (this doc)</li>
+                <li>Scenario traceability matrix</li>
+              </ul>
+            </div>
+            <div class="repo-row">
+              <code>docs/internal/</code>
+              <p>Contributor-only notes that must stay out of the Marketplace README.</p>
+              <ul>
+                <li>Contributor setup and workflow notes</li>
+              </ul>
+            </div>
+            <div class="repo-row">
+              <code>Root</code>
+              <p>Marketplace-public surfaces. Treated as user-facing copy, not contributor docs.</p>
+              <ul>
+                <li><code>README.md</code></li>
+                <li><code>CHANGELOG.md</code></li>
+                <li><code>LICENSE</code></li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
       </div>
     </section>
 
-    <section class="panel" aria-labelledby="monitoring-title">
-      <h2 id="monitoring-title">Monitoring strategy</h2>
+    <section class="panel" aria-labelledby="examples-title">
+      <h2 id="examples-title">Example outputs</h2>
       <p class="caption">
-        Inlinr's monitoring is layered intentionally. Three agentic workflows maintain the readable scenario catalog,
-        the canonical machine contract, and the runtime telemetry implementation. A separate deterministic pipeline
-        validates that contract and generates alert policies, and the release workflow deploys them to Azure.
-        Each layer has a single source of truth and a clear writer.
+        Real issues filed by these workflows in this repository. Each link is an actual artifact produced by the
+        agent named in its title prefix &mdash; not a mockup.
       </p>
 
-      <div class="mon-track-shell">
-        <div class="mon-track">
-          <section class="mon-step mon-step-input">
-            <div class="mon-node mon-node-input">Input</div>
-            <h4>Requirements</h4>
-            <p>Product scenarios, ADRs, and reliability goals from <code>product/</code> and <code>architecture/</code>.</p>
-          </section>
+      <div class="ex-groups">
 
-          <section class="mon-step">
-            <div class="mon-node">Scenarios<br>Agent</div>
-            <h4>Monitoring Scenarios</h4>
-            <p>Maintains <code>monitoring/monitoring-scenarios.md</code>, the readable scenario catalog.</p>
-          </section>
+        <section class="ex-group accent-product">
+          <header class="ex-group-head">
+            <span class="ex-group-marker" aria-hidden="true"></span>
+            <h3>Head of Product</h3>
+            <p>Discovery agent that turns scenarios and gaps into bounded, criticality-tagged work items.</p>
+          </header>
+          <ul class="ex-list">
+            <li>
+              <span class="ex-num">#6</span>
+              <a href="https://github.com/andystumpp/inlinr/issues/6" target="_blank" rel="noopener">[head-of-product] Add first-run guidance that gets users to their first successful edit within 60 seconds</a>
+            </li>
+            <li>
+              <span class="ex-num">#218</span>
+              <a href="https://github.com/andystumpp/inlinr/issues/218" target="_blank" rel="noopener">[head-of-product] Add bulk operations for multi-section document refinement</a>
+            </li>
+          </ul>
+        </section>
 
-          <section class="mon-step">
-            <div class="mon-node">Contract<br>Agent</div>
-            <h4>Monitoring Contract</h4>
-            <p>Translates intent into <code>monitoring/scenario-contract.yaml</code>, the canonical machine contract.</p>
-          </section>
+        <section class="ex-group accent-review">
+          <header class="ex-group-head">
+            <span class="ex-group-marker" aria-hidden="true"></span>
+            <h3>UX Review</h3>
+            <p>Review agent that flags UX-risk gaps and proposes concrete affordances.</p>
+          </header>
+          <ul class="ex-list">
+            <li>
+              <span class="ex-num">#214</span>
+              <a href="https://github.com/andystumpp/inlinr/issues/214" target="_blank" rel="noopener">UX: Add animated progress feedback during AI processing wait state</a>
+            </li>
+          </ul>
+        </section>
 
-          <section class="mon-step">
-            <div class="mon-node">Telemetry<br>Agent</div>
-            <h4>Monitoring Telemetry</h4>
-            <p>Keeps runtime emission in <code>src/telemetry/**</code> aligned with the contract.</p>
-          </section>
-
-          <section class="mon-step">
-            <div class="mon-node">Alerts<br>Pipeline</div>
-            <h4>Monitoring Alerts</h4>
-            <p>Validates the contract and generates alert policies on PR and main.</p>
-          </section>
-
-          <section class="mon-step">
-            <div class="mon-node">Azure<br>Deploy</div>
-            <h4>Release deploy + verify</h4>
-            <p>Release stage deploys generated alerts to prod and verifies the rule count.</p>
-          </section>
-        </div>
       </div>
     </section>
 
