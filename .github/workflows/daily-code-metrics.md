@@ -20,6 +20,18 @@ tools:
   bash: true
 timeout-minutes: 30
 strict: true
+safe-outputs:
+  # Suppress install-note footer to work around gh-aw runtime path bug:
+  # messages_footer.cjs:getFooterInstallMessage looks up
+  # `${RUNNER_TEMP}/gh-aw/md/workflow_install_note.md`, but setup.sh copies the
+  # template to `${RUNNER_TEMP}/gh-aw/prompts/`. The mismatch causes ENOENT in
+  # safe_outputs/Process Safe Outputs (e.g. run 27027653380, 2026-06-05).
+  # `messages?.footerInstall` is a truthy check in messages_footer.cjs, so the
+  # value must be non-empty to short-circuit the broken file read. We use an
+  # invisible HTML comment marker so the rendered discussion is unaffected.
+  # Remove this override once gh-aw is fixed upstream.
+  messages:
+    footer-install: "<!-- gh-aw install-note suppressed: runtime path workaround -->"
 imports:
   - uses: shared/daily-audit-discussion.md
     with:
