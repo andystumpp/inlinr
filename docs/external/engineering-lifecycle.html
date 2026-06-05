@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inlinr Engineering Lifecycle</title>
+  <style>
+    :root {
+      --bg: #f6f1e7;
+      --bg-deep: #e8ddca;
+      --panel: rgba(255, 252, 246, 0.9);
+      --panel-strong: rgba(255, 255, 255, 0.95);
+      --ink: #1d2430;
+      --muted: #5d6772;
+      --line: rgba(29, 36, 48, 0.12);
+      --product: #cf6b2f;
+      --triage: #18796f;
+      --build: #285ea9;
+      --review: #a24534;
+      --release: #6150b7;
+      --monitoring: #356d44;
+      --feedback: #9c861f;
+      --shadow: 0 20px 54px rgba(46, 33, 16, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { color-scheme: light; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Aptos", "Segoe UI Variable Text", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(207, 107, 47, 0.14), transparent 28%),
+        radial-gradient(circle at top right, rgba(40, 94, 169, 0.1), transparent 24%),
+        linear-gradient(180deg, var(--bg) 0%, #fbf8f1 38%, var(--bg-deep) 100%);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(29, 36, 48, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(29, 36, 48, 0.03) 1px, transparent 1px);
+      background-size: 32px 32px;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.5), transparent 92%);
+    }
+
+    main {
+      width: min(1380px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 40px 0 72px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      border-radius: 30px;
+      padding: 28px;
+    }
+
+    .panel + .panel { margin-top: 22px; }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+      gap: 26px;
+      align-items: end;
+      padding: 34px;
+      border-radius: 34px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -90px;
+      top: -50px;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(97, 80, 183, 0.12), transparent 70%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(29, 36, 48, 0.06);
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--product), var(--release));
+      box-shadow: 0 0 0 4px rgba(97, 80, 183, 0.12);
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-family: "Cambria", "Georgia", serif;
+      letter-spacing: -0.03em;
+    }
+
+    h1 {
+      margin-top: 18px;
+      max-width: 12ch;
+      font-size: clamp(2.7rem, 5.2vw, 4.8rem);
+      line-height: 0.95;
+    }
+
+    .hero p {
+      margin: 16px 0 0;
+      max-width: 64ch;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 1.03rem;
+    }
+
+    .summary {
+      padding: 22px 24px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.68);
+      border: 1px solid rgba(29, 36, 48, 0.08);
+    }
+
+    .summary h2,
+    .panel > h2 {
+      font-size: 0.92rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .panel > p.caption {
+      margin: 0 0 18px;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 70ch;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.76);
+      border: 1px solid rgba(29, 36, 48, 0.08);
+      font-size: 0.86rem;
+    }
+
+    .legend span::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--swatch);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--swatch) 16%, white);
+    }
+
+    /* Top lifecycle strip */
+    .track-shell {
+      overflow-x: auto;
+      padding: 6px 0 8px;
+      scrollbar-width: thin;
+    }
+
+    .track {
+      min-width: 1180px;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(200px, 1fr));
+      gap: 18px;
+      position: relative;
+      padding: 26px 0 8px;
+    }
+
+    .track::before {
+      content: "";
+      position: absolute;
+      left: 96px;
+      right: 96px;
+      top: 70px;
+      height: 3px;
+      border-radius: 999px;
+      background: linear-gradient(
+        90deg,
+        rgba(207, 107, 47, 0.42),
+        rgba(24, 121, 111, 0.42),
+        rgba(40, 94, 169, 0.42),
+        rgba(162, 69, 52, 0.42),
+        rgba(97, 80, 183, 0.42)
+      );
+    }
+
+    .phase {
+      position: relative;
+      display: grid;
+      justify-items: center;
+      gap: 12px;
+      text-align: center;
+    }
+
+    .phase:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      top: 60px;
+      right: -10px;
+      width: 14px;
+      height: 14px;
+      border-top: 3px solid rgba(29, 36, 48, 0.32);
+      border-right: 3px solid rgba(29, 36, 48, 0.32);
+      transform: rotate(45deg);
+      z-index: 2;
+    }
+
+    .node {
+      width: 124px;
+      height: 124px;
+      border-radius: 34px;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      color: white;
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+      box-shadow: 0 18px 34px rgba(29, 36, 48, 0.18);
+      position: relative;
+      z-index: 2;
+    }
+
+    .node::before {
+      content: "";
+      position: absolute;
+      inset: -10px;
+      border-radius: 42px;
+      background: color-mix(in srgb, var(--node-color) 16%, transparent);
+      z-index: -1;
+    }
+
+    .node-product { --node-color: var(--product); background: linear-gradient(135deg, #d77c37, var(--product)); }
+    .node-triage { --node-color: var(--triage); background: linear-gradient(135deg, #2d9486, var(--triage)); }
+    .node-build { --node-color: var(--build); background: linear-gradient(135deg, #4a7cc0, var(--build)); }
+    .node-review { --node-color: var(--review); background: linear-gradient(135deg, #c2624b, var(--review)); }
+    .node-release { --node-color: var(--release); background: linear-gradient(135deg, #7a68d5, var(--release)); }
+
+    .phase-tag {
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(29, 36, 48, 0.08);
+      font-size: 0.74rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .phase h3 {
+      font-size: 1.18rem;
+      line-height: 1.05;
+    }
+
+    .phase-list {
+      list-style: none;
+      padding: 0;
+      margin: 4px 0 0;
+      display: grid;
+      gap: 4px;
+      font-size: 0.86rem;
+      color: var(--ink);
+    }
+
+    .phase-list li {
+      padding: 6px 10px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(29, 36, 48, 0.07);
+    }
+
+    /* Monitoring sub-diagram */
+    .mon-track-shell {
+      overflow-x: auto;
+      padding: 6px 0 8px;
+      scrollbar-width: thin;
+    }
+
+    .mon-track {
+      min-width: 1240px;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(170px, 1fr));
+      gap: 16px;
+      position: relative;
+      padding: 22px 0 8px;
+    }
+
+    .mon-track::before {
+      content: "";
+      position: absolute;
+      left: 90px;
+      right: 90px;
+      top: 60px;
+      height: 3px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(156, 134, 31, 0.45), rgba(53, 109, 68, 0.5), rgba(53, 109, 68, 0.2));
+    }
+
+    .mon-step {
+      position: relative;
+      display: grid;
+      gap: 10px;
+      justify-items: center;
+      text-align: center;
+    }
+
+    .mon-step:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      top: 50px;
+      right: -10px;
+      width: 12px;
+      height: 12px;
+      border-top: 3px solid rgba(53, 109, 68, 0.5);
+      border-right: 3px solid rgba(53, 109, 68, 0.5);
+      transform: rotate(45deg);
+      z-index: 2;
+    }
+
+    .mon-node {
+      width: 96px;
+      height: 96px;
+      border-radius: 24px;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      text-align: center;
+      padding: 12px;
+      line-height: 1.1;
+      background: linear-gradient(135deg, #4f8c5e, var(--monitoring));
+      box-shadow: 0 14px 26px rgba(29, 36, 48, 0.16);
+      position: relative;
+      z-index: 2;
+    }
+
+    .mon-node-input {
+      background: rgba(255, 252, 246, 0.95);
+      color: var(--feedback);
+      border: 2px dashed color-mix(in srgb, var(--feedback) 65%, transparent);
+      box-shadow: 0 10px 22px rgba(156, 134, 31, 0.14);
+    }
+
+    .mon-step-input::after {
+      border-color: rgba(156, 134, 31, 0.5) !important;
+    }
+
+    .mon-step h4 {
+      margin: 0;
+      font-family: "Cambria", "Georgia", serif;
+      font-size: 1.04rem;
+    }
+
+    .mon-step p {
+      margin: 0;
+      max-width: 22ch;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 0.86rem;
+    }
+
+    .mon-step code {
+      background: rgba(53, 109, 68, 0.1);
+      color: #2c5839;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+    }
+
+    /* Per-workflow detail grid */
+    .wf-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .wf-card {
+      position: relative;
+      overflow: hidden;
+      padding: 18px;
+      border-radius: 20px;
+      border: 1px solid rgba(29, 36, 48, 0.08);
+      background: var(--panel-strong);
+      box-shadow: 0 12px 26px rgba(29, 36, 48, 0.08);
+      display: grid;
+      gap: 10px;
+    }
+
+    .wf-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 6px;
+      background: var(--accent);
+    }
+
+    .wf-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .wf-head h3 {
+      font-size: 1.06rem;
+      letter-spacing: -0.02em;
+    }
+
+    .pill {
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: color-mix(in srgb, var(--accent) 14%, white);
+      color: color-mix(in srgb, var(--accent) 75%, black);
+      white-space: nowrap;
+    }
+
+    .wf-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.92rem;
+    }
+
+    .wf-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 0.74rem;
+      color: var(--muted);
+    }
+
+    .wf-meta span {
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(29, 36, 48, 0.05);
+      border: 1px solid rgba(29, 36, 48, 0.06);
+    }
+
+    .accent-product { --accent: var(--product); }
+    .accent-triage { --accent: var(--triage); }
+    .accent-build { --accent: var(--build); }
+    .accent-review { --accent: var(--review); }
+    .accent-release { --accent: var(--release); }
+    .accent-monitoring { --accent: var(--monitoring); }
+    .accent-feedback { --accent: var(--feedback); }
+
+    code {
+      font-family: "Cascadia Code", Consolas, monospace;
+      font-size: 0.88em;
+      padding: 0.1em 0.32em;
+      border-radius: 6px;
+      background: rgba(29, 36, 48, 0.06);
+    }
+
+    @media (max-width: 1180px) {
+      .hero { grid-template-columns: 1fr; }
+      .wf-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 720px) {
+      main {
+        width: min(100% - 20px, 1380px);
+        padding: 20px 0 44px;
+      }
+
+      .panel,
+      .hero { padding: 20px; }
+
+      h1 {
+        max-width: none;
+        font-size: clamp(2.3rem, 12vw, 3.4rem);
+      }
+
+      .track { min-width: 1020px; }
+      .mon-track { min-width: 920px; }
+      .wf-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="panel hero">
+      <div>
+        <div class="eyebrow">Internal artifact</div>
+        <h1>Inlinr engineering lifecycle</h1>
+        <p>
+          A specific map of the workflows we built into this repository. Discovery, intake, build, PR gates, and
+          release sit on the top strip. The monitoring strategy gets its own loop because it is unusual: three
+          dedicated agents maintain the readable monitoring scenarios, the machine-readable contract, and the
+          runtime telemetry, and a deterministic pipeline turns that contract into validated Azure alerts.
+        </p>
+        <div class="legend" aria-label="Legend">
+          <span style="--swatch: var(--product);">Discovery</span>
+          <span style="--swatch: var(--triage);">Intake</span>
+          <span style="--swatch: var(--build);">Build</span>
+          <span style="--swatch: var(--review);">PR gates</span>
+          <span style="--swatch: var(--release);">Release</span>
+          <span style="--swatch: var(--monitoring);">Monitoring loop</span>
+        </div>
+      </div>
+
+      <aside class="summary">
+        <h2>Reading guide</h2>
+        <p>
+          The top strip is the dev lifecycle. The middle panel is the monitoring loop that runs alongside it.
+          The bottom grid lists every named workflow in the repo and what it owns.
+        </p>
+      </aside>
+    </section>
+
+    <section class="panel" aria-labelledby="lifecycle-title">
+      <h2 id="lifecycle-title">High-level lifecycle</h2>
+      <p class="caption">
+        Discovery agents file issues. Issue Triage routes them. Implementation produces a reviewable pull request.
+        Three specialized review agents plus CI decide merge readiness. Release packages, deploys monitoring, and
+        publishes to the Marketplace.
+      </p>
+
+      <div class="track-shell">
+        <div class="track">
+          <section class="phase">
+            <div class="node node-product">1</div>
+            <div class="phase-tag">Discovery</div>
+            <h3>Find the work</h3>
+            <ul class="phase-list">
+              <li>Head of Product</li>
+              <li>UX Review</li>
+              <li>Spec Librarian</li>
+            </ul>
+          </section>
+
+          <section class="phase">
+            <div class="node node-triage">2</div>
+            <div class="phase-tag">Intake</div>
+            <h3>Bound the work</h3>
+            <ul class="phase-list">
+              <li>Issue Triage</li>
+              <li>Copilot Setup Steps</li>
+            </ul>
+          </section>
+
+          <section class="phase">
+            <div class="node node-build">3</div>
+            <div class="phase-tag">Build</div>
+            <h3>Spec, implement, and verify locally</h3>
+            <ul class="phase-list">
+              <li>Spec Kit (specify, plan, tasks, implement)</li>
+              <li>Mocha unit tests (<code>tests/unit</code>)</li>
+              <li>Mocha integration tests on VS Code host (<code>tests/integration</code>)</li>
+              <li>Playwright webview selection tests (<code>tests/webview</code>)</li>
+              <li><code>npm run verify:release</code> before PR</li>
+            </ul>
+          </section>
+
+          <section class="phase">
+            <div class="node node-review">4</div>
+            <div class="phase-tag">PR gates</div>
+            <h3>Review in parallel</h3>
+            <ul class="phase-list">
+              <li>Practicality Review</li>
+              <li>PR Security Review</li>
+              <li>PR Maintainability Review</li>
+              <li>CI</li>
+              <li>PR Auto-merge enabler</li>
+            </ul>
+          </section>
+
+          <section class="phase">
+            <div class="node node-release">5</div>
+            <div class="phase-tag">Release</div>
+            <h3>Ship the build</h3>
+            <ul class="phase-list">
+              <li>Release workflow</li>
+              <li>Monitoring deploy + verify</li>
+              <li>Marketplace publish</li>
+            </ul>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="monitoring-title">
+      <h2 id="monitoring-title">Monitoring strategy</h2>
+      <p class="caption">
+        Inlinr's monitoring is layered intentionally. Three agentic workflows maintain the readable scenario catalog,
+        the canonical machine contract, and the runtime telemetry implementation. A separate deterministic pipeline
+        validates that contract and generates alert policies, and the release workflow deploys them to Azure.
+        Each layer has a single source of truth and a clear writer.
+      </p>
+
+      <div class="mon-track-shell">
+        <div class="mon-track">
+          <section class="mon-step mon-step-input">
+            <div class="mon-node mon-node-input">Input</div>
+            <h4>Requirements</h4>
+            <p>Product scenarios, ADRs, and reliability goals from <code>product/</code> and <code>architecture/</code>.</p>
+          </section>
+
+          <section class="mon-step">
+            <div class="mon-node">Scenarios<br>Agent</div>
+            <h4>Monitoring Scenarios</h4>
+            <p>Maintains <code>monitoring/monitoring-scenarios.md</code>, the readable scenario catalog.</p>
+          </section>
+
+          <section class="mon-step">
+            <div class="mon-node">Contract<br>Agent</div>
+            <h4>Monitoring Contract</h4>
+            <p>Translates intent into <code>monitoring/scenario-contract.yaml</code>, the canonical machine contract.</p>
+          </section>
+
+          <section class="mon-step">
+            <div class="mon-node">Telemetry<br>Agent</div>
+            <h4>Monitoring Telemetry</h4>
+            <p>Keeps runtime emission in <code>src/telemetry/**</code> aligned with the contract.</p>
+          </section>
+
+          <section class="mon-step">
+            <div class="mon-node">Alerts<br>Pipeline</div>
+            <h4>Monitoring Alerts</h4>
+            <p>Validates the contract and generates alert policies on PR and main.</p>
+          </section>
+
+          <section class="mon-step">
+            <div class="mon-node">Azure<br>Deploy</div>
+            <h4>Release deploy + verify</h4>
+            <p>Release stage deploys generated alerts to prod and verifies the rule count.</p>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="catalog-title">
+      <h2 id="catalog-title">Workflow catalog</h2>
+      <p class="caption">
+        Each named workflow we built, with how it triggers and what it owns. Agentic workflows are LLM-driven;
+        deterministic workflows are pure CI.
+      </p>
+
+      <div class="wf-grid">
+        <article class="wf-card accent-product">
+          <div class="wf-head"><h3>Head of Product</h3><span class="pill">Daily</span></div>
+          <p>Product strategy lead. Reviews repo, market, and adjacent AI workflows to file high-leverage product issues.</p>
+          <div class="wf-meta"><span>Schedule</span><span>Agentic</span><span>Creates issues</span></div>
+        </article>
+
+        <article class="wf-card accent-product">
+          <div class="wf-head"><h3>UX Review</h3><span class="pill">Twice weekly</span></div>
+          <p>UX design lead. Audits editor-native fit, motion, and perceived speed. Files distinct UX issues only.</p>
+          <div class="wf-meta"><span>Schedule</span><span>Agentic</span><span>Creates issues</span></div>
+        </article>
+
+        <article class="wf-card accent-product">
+          <div class="wf-head"><h3>Spec Librarian</h3><span class="pill">Daily</span></div>
+          <p>Audits drift across product, architecture, specs, monitoring, and shipped code. Opens at most one drift issue.</p>
+          <div class="wf-meta"><span>Schedule</span><span>Agentic</span><span>Creates issues</span></div>
+        </article>
+
+        <article class="wf-card accent-triage">
+          <div class="wf-head"><h3>Issue Triage</h3><span class="pill">On issue</span></div>
+          <p>Classifies issues, applies routing labels, and assigns Copilot only when work is bounded and low-risk.</p>
+          <div class="wf-meta"><span>Event</span><span>Agentic</span><span>Labels + assigns</span></div>
+        </article>
+
+        <article class="wf-card accent-triage">
+          <div class="wf-head"><h3>Copilot Setup Steps</h3><span class="pill">Setup</span></div>
+          <p>Provisions the Copilot agent environment with the gh-aw CLI so agentic workflows can run.</p>
+          <div class="wf-meta"><span>workflow_dispatch</span><span>Deterministic</span><span>Bootstraps agent</span></div>
+        </article>
+
+        <article class="wf-card accent-build">
+          <div class="wf-head"><h3>Spec Kit (specify, plan, tasks, implement)</h3><span class="pill">Per slice</span></div>
+          <p>Local-first authoring flow that turns approved scenarios into implementation-ready specs, plans, and ordered tasks.</p>
+          <div class="wf-meta"><span>Author-driven</span><span>Hybrid</span><span>Produces docs + code</span></div>
+        </article>
+
+        <article class="wf-card accent-build">
+          <div class="wf-head"><h3>Mocha unit tests</h3><span class="pill">Local + CI</span></div>
+          <p>Pure-Node unit suite under <code>tests/unit</code> driven by <code>@vscode/test-cli</code> through <code>tests/runTest.ts</code>. Runs via <code>npm run test:unit</code>.</p>
+          <div class="wf-meta"><span>Mocha</span><span>Deterministic</span><span>Logic + contracts</span></div>
+        </article>
+
+        <article class="wf-card accent-build">
+          <div class="wf-head"><h3>Mocha integration tests</h3><span class="pill">Local + CI</span></div>
+          <p>Runs in a real VS Code Extension Host via <code>@vscode/test-electron</code>. Exercises commands, custom editors, and provider wiring under <code>tests/integration</code>.</p>
+          <div class="wf-meta"><span>Mocha + Electron</span><span>Deterministic</span><span>End-to-end host</span></div>
+        </article>
+
+        <article class="wf-card accent-build">
+          <div class="wf-head"><h3>Playwright webview tests</h3><span class="pill">Local + CI</span></div>
+          <p>Browser-based selection contract tests per ADR-007. Runs the Markdown viewer bundle in headless Chromium under <code>tests/webview</code> via <code>npm run test:webview</code>.</p>
+          <div class="wf-meta"><span>Playwright</span><span>Deterministic</span><span>Selection geometry</span></div>
+        </article>
+
+        <article class="wf-card accent-build">
+          <div class="wf-head"><h3>verify:release harness</h3><span class="pill">Pre-PR + release</span></div>
+          <p>One-shot gate that compiles, runs the full Mocha suite, and packages the VSIX. Mirrors what CI and the release workflow run.</p>
+          <div class="wf-meta"><span>npm script</span><span>Deterministic</span><span>Compile + test + package</span></div>
+        </article>
+
+        <article class="wf-card accent-review">
+          <div class="wf-head"><h3>Practicality Review</h3><span class="pill">On PR</span></div>
+          <p>Surfaces reality gaps, hidden assumptions, silent failures, and loops that are not actually closed.</p>
+          <div class="wf-meta"><span>Event</span><span>Agentic</span><span>Approve, comment, or block</span></div>
+        </article>
+
+        <article class="wf-card accent-review">
+          <div class="wf-head"><h3>PR Security Review</h3><span class="pill">On PR</span></div>
+          <p>Checks XSS, prompt injection, telemetry leakage, workflow privilege drift, and protected paths.</p>
+          <div class="wf-meta"><span>Event</span><span>Agentic</span><span>Approve, comment, or block</span></div>
+        </article>
+
+        <article class="wf-card accent-review">
+          <div class="wf-head"><h3>PR Maintainability Review</h3><span class="pill">On PR</span></div>
+          <p>Flags layer violations, duplicated rules, weak tests, and design drift that raises future change cost.</p>
+          <div class="wf-meta"><span>Event</span><span>Agentic</span><span>Approve, comment, or block</span></div>
+        </article>
+
+        <article class="wf-card accent-review">
+          <div class="wf-head"><h3>CI</h3><span class="pill">On PR + main</span></div>
+          <p>Compiles, runs unit and integration suites, and packages the VSIX artifact for inspection.</p>
+          <div class="wf-meta"><span>Event</span><span>Deterministic</span><span>Build + test evidence</span></div>
+        </article>
+
+        <article class="wf-card accent-review">
+          <div class="wf-head"><h3>PR Auto-merge Enabler</h3><span class="pill">On review run</span></div>
+          <p>Enables auto-merge only when all three review labels are cleared and no protected paths are touched.</p>
+          <div class="wf-meta"><span>workflow_run</span><span>Deterministic</span><span>Merge policy</span></div>
+        </article>
+
+        <article class="wf-card accent-monitoring">
+          <div class="wf-head"><h3>Monitoring Scenarios</h3><span class="pill">Daily</span></div>
+          <p>Maintains the readable scenario catalog at <code>monitoring/monitoring-scenarios.md</code> from current implementation and product context.</p>
+          <div class="wf-meta"><span>Schedule</span><span>Agentic</span><span>Opens PRs to docs</span></div>
+        </article>
+
+        <article class="wf-card accent-monitoring">
+          <div class="wf-head"><h3>Monitoring Contract</h3><span class="pill">Daily + on push</span></div>
+          <p>Translates readable scenarios into <code>monitoring/scenario-contract.yaml</code>, the canonical machine-readable contract.</p>
+          <div class="wf-meta"><span>Schedule + push</span><span>Agentic</span><span>Opens PRs to YAML contract</span></div>
+        </article>
+
+        <article class="wf-card accent-monitoring">
+          <div class="wf-head"><h3>Monitoring Telemetry</h3><span class="pill">Daily + on push</span></div>
+          <p>Updates runtime telemetry in <code>src/telemetry/**</code> and adjacent code so emission matches the contract and tests.</p>
+          <div class="wf-meta"><span>Schedule + push</span><span>Agentic</span><span>Opens PRs to runtime code</span></div>
+        </article>
+
+        <article class="wf-card accent-monitoring">
+          <div class="wf-head"><h3>Monitoring Alerts</h3><span class="pill">On PR + main</span></div>
+          <p>Validates contract and alert alignment, generates alert policies, and uploads them as deployable artifacts.</p>
+          <div class="wf-meta"><span>Event</span><span>Deterministic</span><span>Validate + generate</span></div>
+        </article>
+
+        <article class="wf-card accent-release">
+          <div class="wf-head"><h3>Release workflow</h3><span class="pill">Tag or dispatch</span></div>
+          <p>Verifies version, compiles, tests, packages, and orchestrates monitoring deploy plus Marketplace publish.</p>
+          <div class="wf-meta"><span>Tag push</span><span>Deterministic</span><span>Multi-stage</span></div>
+        </article>
+
+        <article class="wf-card accent-release">
+          <div class="wf-head"><h3>Monitoring deploy + verify (release stage)</h3><span class="pill">Release stage</span></div>
+          <p>Deploys generated Azure alert rules to prod, then verifies the expected scheduled query rule count.</p>
+          <div class="wf-meta"><span>Release stage</span><span>Deterministic</span><span>Azure-backed</span></div>
+        </article>
+
+        <article class="wf-card accent-release">
+          <div class="wf-head"><h3>Marketplace publish</h3><span class="pill">Final stage</span></div>
+          <p>Validates the public README, then publishes the VSIX to the Visual Studio Marketplace.</p>
+          <div class="wf-meta"><span>Release stage</span><span>Deterministic</span><span>Public surface</span></div>
+        </article>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
