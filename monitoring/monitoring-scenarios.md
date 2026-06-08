@@ -71,6 +71,15 @@ Each scenario stays crisp and monitoring-oriented: a real user journey, the key 
 3. The guidance is dismissed after the first qualifying selection or explicit dismissal.
 **Monitoring intent:** Catch regressions where first-run guidance fails to appear, blocks the editing workflow, or persists incorrectly after dismissal.
 
+### Switch presentation preset without losing workflow state
+**Criticality:** Watch
+**Journey:** A user switches between presentation presets to adjust rendering density and reading comfort while continuing to work in the same document session without losing their current selection, editing state, or workflow position.
+**Key checkpoints:**
+1. The presentation preset switch command is available and responsive.
+2. The rendered view updates to reflect the chosen preset.
+3. The current document session, selection affordances, and editing workflow remain usable after the preset change.
+**Monitoring intent:** Catch regressions where preset switching breaks the rendered view, loses session state, or disrupts the ongoing editing workflow.
+
 ## Recovery scenarios
 
 ### Keep the viewer stable when preview rendering fails
