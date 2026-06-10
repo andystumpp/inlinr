@@ -71,6 +71,15 @@ Each scenario stays crisp and monitoring-oriented: a real user journey, the key 
 3. The guidance is dismissed after the first qualifying selection or explicit dismissal.
 **Monitoring intent:** Catch regressions where first-run guidance fails to appear, blocks the editing workflow, or persists incorrectly after dismissal.
 
+### Switch presentation presets
+**Criticality:** Important
+**Journey:** A user switches between rendering presets to adjust the Markdown viewer for different reading contexts—dense specs, comfortable reading, or review focus—without changing the underlying document or losing editing affordances.
+**Key checkpoints:**
+1. The switch command invokes and shows the preset picker with available options.
+2. The user selects a preset and the selection is accepted.
+3. The viewer refreshes to apply the new preset while preserving document content and active session state.
+**Monitoring intent:** Catch regressions where preset switching fails to invoke, shows incorrect options, or leaves the viewer in an inconsistent or broken state after switching.
+
 ## Recovery scenarios
 
 ### Keep the viewer stable when preview rendering fails
