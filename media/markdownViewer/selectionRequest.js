@@ -900,6 +900,11 @@
           return;
         }
 
+        const isTypingCharacter = event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey;
+        if (isTypingCharacter) {
+          event.stopPropagation();
+        }
+
         if (event.key !== 'Enter' || event.shiftKey || event.isComposing) {
           return;
         }
