@@ -738,6 +738,16 @@
       word-break: break-all;
     }
 
+    .mon-trace-label .file a {
+      color: var(--accent, var(--monitoring));
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+    }
+
+    .mon-trace-label .file a:hover {
+      border-bottom-color: var(--accent, var(--monitoring));
+    }
+
     .mon-trace-body p {
       margin: 0 0 6px;
       color: var(--ink);
@@ -1324,6 +1334,20 @@
               </dl>
             </article>
           </div>
+
+          <div class="wf-examples">
+            <h4 class="wf-examples-title">Example issues these agents file</h4>
+            <ul class="ex-list">
+              <li>
+                <span class="ex-num">Repository Audit Analyzer</span>
+                <a class="ex-text" href="https://github.com/andystumpp/inlinr/issues/226" target="_blank" rel="noopener">Repository audit: automation opportunities and maintenance improvements.</a>
+              </li>
+              <li>
+                <span class="ex-num">Daily Code Metrics</span>
+                <a class="ex-text" href="https://github.com/andystumpp/inlinr/discussions/260" target="_blank" rel="noopener">Daily Code Metrics Report &mdash; size, quality, churn, and coverage trends.</a>
+              </li>
+            </ul>
+          </div>
         </section>
 
       </div>
@@ -1392,7 +1416,7 @@
           <div class="mon-trace-row accent-product">
             <div class="mon-trace-label">
               <span class="step">Product requirement</span>
-              <span class="file">product/user-scenarios.md</span>
+              <span class="file"><a href="https://github.com/andystumpp/inlinr/blob/main/product/user-scenarios.md">product/user-scenarios.md</a></span>
             </div>
             <div class="mon-trace-body">
               <p>For the inline request flow, a user should see a reviewable suggested change within 2 seconds of submitting a request from the popup.</p>
@@ -1402,7 +1426,7 @@
           <div class="mon-trace-row accent-monitoring">
             <div class="mon-trace-label">
               <span class="step">Monitoring scenario</span>
-              <span class="file">monitoring/monitoring-scenarios.md</span>
+              <span class="file"><a href="https://github.com/andystumpp/inlinr/blob/main/monitoring/monitoring-scenarios.md">monitoring/monitoring-scenarios.md</a></span>
             </div>
             <div class="mon-trace-body">
               <p><strong>Submit a request and receive inline review state</strong></p>
@@ -1421,7 +1445,7 @@
           <div class="mon-trace-row accent-build">
             <div class="mon-trace-label">
               <span class="step">Monitoring contract</span>
-              <span class="file">monitoring/scenario-contract.yaml</span>
+              <span class="file"><a href="https://github.com/andystumpp/inlinr/blob/main/monitoring/scenario-contract.yaml">monitoring/scenario-contract.yaml</a></span>
             </div>
             <div class="mon-trace-body">
 <pre>- scenario_id: submit_request_receive_review
@@ -1446,7 +1470,7 @@
           <div class="mon-trace-row accent-release">
             <div class="mon-trace-label">
               <span class="step">Telemetry code</span>
-              <span class="file">src/editors/markdownCustomEditorProvider.ts</span>
+              <span class="file"><a href="https://github.com/andystumpp/inlinr/blob/main/src/editors/markdownCustomEditorProvider.ts">src/editors/markdownCustomEditorProvider.ts</a></span>
             </div>
             <div class="mon-trace-body">
 <pre>const submitAttempt = this.startScenarioAttempt(
