@@ -116,6 +116,7 @@
     "monitoring:validate": "npm run compile && npm run monitoring:validate-runtime && node ./tools/monitoring/validate-alert-policies.mjs",
     "monitoring:generate": "npm run compile && node ./tools/monitoring/generate-monitoring-artifacts.mjs",
     "package:vsix": "npm run readme:validate-public && node -e \"require('fs').mkdirSync('dist', { recursive: true })\" && npx --yes @vscode/vsce@3.9.1 package --out dist/inlinr.vsix",
+    "verify:vsix": "node scripts/verify-vsix.mjs",
     "test": "npm run test:integration:only && npm run test:unit:only",
     "test:webview:install": "playwright install chromium",
     "test:webview": "npm run compile && npm run test:webview:only",
@@ -124,7 +125,7 @@
     "test:integration:only": "node ./out/tests/runTest.js integration",
     "test:unit": "npm run compile && npm run test:unit:only",
     "test:unit:only": "node ./out/tests/runTest.js unit",
-    "verify:release": "npm run compile && npm test && npm run package:vsix"
+    "verify:release": "npm run compile && npm test && npm run package:vsix && npm run verify:vsix"
   },
   "dependencies": {
     "@azure/monitor-opentelemetry-exporter": "1.0.0-beta.41",

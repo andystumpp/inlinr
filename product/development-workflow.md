@@ -102,4 +102,5 @@ until the suite stabilizes.
 - `npm run test:integration` - VS Code integration suite
 - `npm run test:unit` - unit suite
 - `npm run package:vsix` - package extension artifact
-- `npm run verify:release` - compile, test, and package release artifact
+- `npm run verify:vsix` - smoke test the packaged VSIX for activation-critical files
+- `npm run verify:release` - compile, test, package, and smoke test release artifact
