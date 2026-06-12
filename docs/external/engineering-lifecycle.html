@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inlinr Engineering Lifecycle</title>
+  <title>Inlinr Development Lifecycle</title>
   <style>
     :root {
       --bg: #f6f1e7;
@@ -883,13 +883,13 @@
   <main>
     <section class="panel hero">
       <div>
-        <div class="eyebrow">Internal artifact</div>
-        <h1>Inlinr engineering lifecycle</h1>
+        <div class="eyebrow">A look behind the scenes</div>
+        <h1>Inlinr development lifecycle</h1>
         <p>
-          A specific map of the workflows we built into this repository. Discovery, intake, build, PR gates, and
-          release sit on the top strip. The monitoring strategy gets its own loop because it is unusual: three
-          dedicated agents maintain the readable monitoring scenarios, the machine-readable contract, and the
-          runtime telemetry, and a deterministic pipeline turns that contract into validated Azure alerts.
+          Inlinr is a VS Code extension for inline, selection-based AI editing of Markdown. You select text in a
+          doc, spec, or prompt, ask for a targeted revision, review the proposed change in context, and apply it
+          without detouring into chat. This page maps the development lifecycle behind the extension: how work is
+          discovered, built, reviewed, released, and monitored.
         </p>
         <div class="legend" aria-label="Legend">
           <span style="--swatch: var(--product);">Discovery</span>
@@ -902,12 +902,12 @@
       </div>
 
       <aside class="summary">
-        <h2>Reading guide</h2>
+        <h2>An experiment in automating the dev lifecycle</h2>
         <p>
-          Start with the high-level lifecycle strip right below — it shows how work moves from discovery to
-          release. The workflow catalog then lists every named workflow grouped by phase, with the input each
-          one consumes and the output it produces. The monitoring strategy panel covers the parallel loop that
-          keeps scenarios, contract, telemetry, and alerts aligned.
+          This repository is an experiment in how far the software development lifecycle can be automated with
+          AI agents. Discovery, triage, review, monitoring, and documentation are each driven by their own
+          agentic workflow, with humans staying in control of what ships. The map below shows how those pieces
+          fit together.
         </p>
       </aside>
     </section>
@@ -928,7 +928,7 @@
             <ul class="phase-list">
               <li>Head of Product</li>
               <li>UX Review</li>
-              <li>Spec Librarian</li>
+              <li>Drift Auditor</li>
             </ul>
           </section>
 
@@ -1013,7 +1013,7 @@
             </article>
 
             <article class="wf-card accent-product">
-              <div class="wf-head"><h3><a href="https://github.com/andystumpp/inlinr/blob/main/.github/workflows/spec-librarian.md">Spec Librarian</a></h3><div class="wf-tags"><span class="pill">Daily</span><span class="kind">Agentic</span></div></div>
+              <div class="wf-head"><h3><a href="https://github.com/andystumpp/inlinr/blob/main/.github/workflows/drift-auditor.md">Drift Auditor</a></h3><div class="wf-tags"><span class="pill">Daily</span><span class="kind">Agentic</span></div></div>
               <p>Audits drift across product, architecture, specs, monitoring, and shipped code. Opens at most one drift issue.</p>
               <dl class="wf-io">
                 <div><dt>In</dt><dd><code>product/</code>, <code>architecture/</code>, <code>specs/</code>, <code>src/</code>, <code>monitoring/</code>.</dd></div>
@@ -1130,7 +1130,7 @@
             </article>
 
             <article class="wf-card accent-review">
-              <div class="wf-head"><h3>CI</h3><div class="wf-tags"><span class="pill">On PR + main</span><span class="kind">Deterministic</span></div></div>
+              <div class="wf-head"><h3><a href="https://github.com/andystumpp/inlinr/blob/main/.github/workflows/ci.yml">CI</a></h3><div class="wf-tags"><span class="pill">On PR + main</span><span class="kind">Deterministic</span></div></div>
               <p>Compiles, runs unit and integration suites, and packages the VSIX artifact for inspection.</p>
               <dl class="wf-io">
                 <div><dt>In</dt><dd>PR commit.</dd></div>
@@ -1139,7 +1139,7 @@
             </article>
 
             <article class="wf-card accent-review">
-              <div class="wf-head"><h3>PR Auto-merge Enabler</h3><div class="wf-tags"><span class="pill">On review run</span><span class="kind">Deterministic</span></div></div>
+              <div class="wf-head"><h3><a href="https://github.com/andystumpp/inlinr/blob/main/.github/workflows/pr-auto-merge.yml">PR Auto-merge Enabler</a></h3><div class="wf-tags"><span class="pill">On review run</span><span class="kind">Deterministic</span></div></div>
               <p>Enables auto-merge only when all three review labels are cleared and no protected paths are touched.</p>
               <dl class="wf-io">
                 <div><dt>In</dt><dd>Three review-clearance labels + <code>workflow_run</code>.</dd></div>
@@ -1220,7 +1220,7 @@
             </article>
 
             <article class="wf-card accent-monitoring">
-              <div class="wf-head"><h3>Monitoring Alerts</h3><div class="wf-tags"><span class="pill">On PR + main</span><span class="kind">Deterministic</span></div></div>
+              <div class="wf-head"><h3><a href="https://github.com/andystumpp/inlinr/blob/main/.github/workflows/monitoring-alerts.yml">Monitoring Alerts</a></h3><div class="wf-tags"><span class="pill">On PR + main</span><span class="kind">Deterministic</span></div></div>
               <p>Validates contract and alert alignment, generates alert policies, and uploads them as deployable artifacts.</p>
               <dl class="wf-io">
                 <div><dt>In</dt><dd><code>monitoring/scenario-contract.yaml</code> + <code>monitoring/alert-policies.yaml</code>.</dd></div>
@@ -1590,7 +1590,7 @@ this.completeScenarioAttempt(submitAttempt, 'success');</pre>
               <code>docs/external/</code>
               <p>Public GitHub Pages content.</p>
               <ul>
-                <li>Engineering lifecycle page (this doc)</li>
+                <li>Development lifecycle page (this doc)</li>
                 <li>Scenario traceability matrix</li>
               </ul>
             </div>
