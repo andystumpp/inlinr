@@ -805,6 +805,21 @@
     /* Example outputs */
     .ex-groups { display: grid; gap: 0; }
 
+    .wf-examples {
+      margin-top: 22px;
+      padding-top: 18px;
+      border-top: 1px dashed var(--line);
+    }
+
+    .wf-examples-title {
+      margin: 0 0 12px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+
     .ex-group { padding: 22px 0; }
     .ex-group + .ex-group { border-top: 1px dashed var(--line); }
     .ex-group:first-of-type { padding-top: 6px; }
@@ -1040,6 +1055,43 @@
                 <div><dt>Out</dt><dd>One drift issue with the specific divergence.</dd></div>
               </dl>
             </article>
+          </div>
+
+          <div class="wf-examples">
+            <h4 class="wf-examples-title">Real issues these agents filed</h4>
+            <div class="ex-groups">
+              <section class="ex-group accent-product">
+                <header class="ex-group-head">
+                  <span class="ex-group-marker" aria-hidden="true"></span>
+                  <h3>Head of Product</h3>
+                  <p>Discovery agent that turns scenarios and gaps into bounded, criticality-tagged work items.</p>
+                </header>
+                <ul class="ex-list">
+                  <li>
+                    <span class="ex-num">#6</span>
+                    <a href="https://github.com/andystumpp/inlinr/issues/6" target="_blank" rel="noopener">[head-of-product] Add first-run guidance that gets users to their first successful edit within 60 seconds</a>
+                  </li>
+                  <li>
+                    <span class="ex-num">#218</span>
+                    <a href="https://github.com/andystumpp/inlinr/issues/218" target="_blank" rel="noopener">[head-of-product] Add bulk operations for multi-section document refinement</a>
+                  </li>
+                </ul>
+              </section>
+
+              <section class="ex-group accent-review">
+                <header class="ex-group-head">
+                  <span class="ex-group-marker" aria-hidden="true"></span>
+                  <h3>UX Review</h3>
+                  <p>Review agent that flags UX-risk gaps and proposes concrete affordances.</p>
+                </header>
+                <ul class="ex-list">
+                  <li>
+                    <span class="ex-num">#214</span>
+                    <a href="https://github.com/andystumpp/inlinr/issues/214" target="_blank" rel="noopener">UX: Add animated progress feedback during AI processing wait state</a>
+                  </li>
+                </ul>
+              </section>
+            </div>
           </div>
         </section>
 
@@ -1644,50 +1696,6 @@ this.completeScenarioAttempt(submitAttempt, 'success');</pre>
               </ul>
             </div>
           </div>
-        </section>
-
-      </div>
-    </section>
-
-    <section class="panel" aria-labelledby="examples-title">
-      <h2 id="examples-title">Example outputs</h2>
-      <p class="caption">
-        Real issues filed by these workflows in this repository. Each link is an actual artifact produced by the
-        agent named in its title prefix &mdash; not a mockup.
-      </p>
-
-      <div class="ex-groups">
-
-        <section class="ex-group accent-product">
-          <header class="ex-group-head">
-            <span class="ex-group-marker" aria-hidden="true"></span>
-            <h3>Head of Product</h3>
-            <p>Discovery agent that turns scenarios and gaps into bounded, criticality-tagged work items.</p>
-          </header>
-          <ul class="ex-list">
-            <li>
-              <span class="ex-num">#6</span>
-              <a href="https://github.com/andystumpp/inlinr/issues/6" target="_blank" rel="noopener">[head-of-product] Add first-run guidance that gets users to their first successful edit within 60 seconds</a>
-            </li>
-            <li>
-              <span class="ex-num">#218</span>
-              <a href="https://github.com/andystumpp/inlinr/issues/218" target="_blank" rel="noopener">[head-of-product] Add bulk operations for multi-section document refinement</a>
-            </li>
-          </ul>
-        </section>
-
-        <section class="ex-group accent-review">
-          <header class="ex-group-head">
-            <span class="ex-group-marker" aria-hidden="true"></span>
-            <h3>UX Review</h3>
-            <p>Review agent that flags UX-risk gaps and proposes concrete affordances.</p>
-          </header>
-          <ul class="ex-list">
-            <li>
-              <span class="ex-num">#214</span>
-              <a href="https://github.com/andystumpp/inlinr/issues/214" target="_blank" rel="noopener">UX: Add animated progress feedback during AI processing wait state</a>
-            </li>
-          </ul>
         </section>
 
       </div>
