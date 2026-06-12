@@ -1,140 +1,74 @@
-{"date": "2026-06-05", "timestamp": 1780677911, "metrics": {"size": {"lines_of_code_by_language": {"JSON": 4485, "Markdown": 5694, "JavaScript": 3681, "YAML": 1350, "HTML": 977, "TypeScript": 8357, "Shell": 620, "CSS": 1358}, "lines_of_code_by_directory": {".vscode": 31, "infra": 60, "monitoring": 1084, "docs": 987, "architecture": 822, "src": 4371, "prompts": 13, "tests": 4707, ".specify": 2279, "specs": 3141, "product": 293, "design": 2413, "media": 1941}, "file_counts_by_language": {"JSON": 12, "Markdown": 85, "JavaScript": 11, "YAML": 8, "HTML": 3, "TypeScript": 53, "Shell": 4, "CSS": 2}, "total_files": 178, "lines_of_code_total": 26522}, "quality": {"large_files_count": 6, "large_files": [{"path": "tests/integration/selectionScopedEditRequest.test.ts", "loc": 1238}, {"path": "src/editors/markdownCustomEditorProvider.ts", "loc": 1105}, {"path": "media/markdownViewer/selectionRequest.js", "loc": 1021}, {"path": "src/telemetry/applicationInsightsSink.ts", "loc": 587}, {"path": "design/template/inlinr.jsx", "loc": 578}, {"path": "design/template/tweaks-panel.jsx", "loc": 530}], "average_file_size": 188.1, "function_count": 729, "comment_lines": 179, "comment_ratio": 0.015}, "duplication": {"duplication_rate": 0.0612}, "tests": {"test_files": 29, "test_lines_of_code": 4673, "source_lines_of_code": 7365, "test_to_source_ratio": 0.634}, "workflows": {"total_workflows": 12, "lock_files": 12, "average_workflow_size": 820.2}, "docs": {"doc_files": 57, "doc_lines_of_code": 4287}, "ai_slop": {"type_escape_rate": 0.0227, "type_escape_counts": {"any": 0, "as_any": 0, "ts_ignore": 0, "ts_expect_error": 0, "non_null_assertions": 99}, "oversized_function_count": 5, "oversized_component_count": 0, "oversized_file_count": 3, "largest_units": [{"path": "src/editors/markdownCustomEditorProvider.ts", "loc": 1101, "kind": "file"}, {"path": "src/telemetry/applicationInsightsSink.ts", "loc": 584, "kind": "file"}, {"path": "src/telemetry/scenarioRegistry.ts", "loc": 313, "kind": "file"}, {"path": "src/editors/markdownCustomEditorProvider.ts", "unit_name": "resolveSelectionRangeFromMetadata", "unit_kind": "function", "loc": 95}, {"path": "src/telemetry/applicationInsightsSink.ts", "unit_name": "mapTelemetryEventToApplicationInsightsEnvelope", "unit_kind": "function", "loc": 65}, {"path": "src/telemetry/telemetryContract.ts", "unit_name": "assertValidTelemetryEvent", "unit_kind": "function", "loc": 61}, {"path": "src/webview/getMarkdownViewerHtml.ts", "unit_name": "getMarkdownViewerHtml", "unit_kind": "function", "loc": 58}, {"path": "src/rendering/markdownRenderer.ts", "unit_name": "buildRenderedSelectionMetadata", "unit_kind": "function", "loc": 55}], "nesting_depth_violations": 335, "max_nesting_depth": 8, "deepest_units": [{"path": "src/telemetry/applicationInsightsSink.ts", "unit_name": "line 266", "depth": 6}, {"path": "src/telemetry/applicationInsightsSink.ts", "unit_name": "line 267", "depth": 6}, {"path": "src/telemetry/applicationInsightsSink.ts", "unit_name": "line 268", "depth": 6}, {"path": "src/telemetry/applicationInsightsSink.ts", "unit_name": "line 269", "depth": 6}, {"path": "src/editors/markdownCustomEditorProvider.ts", "unit_name": "line 110", "depth": 5}], "error_swallow_count": 3, "error_swallow_examples": [{"path": "src/editors/markdownCustomEditorProvider.ts", "pattern": "promise catch fallback"}, {"path": "src/telemetry/telemetryAdapter.ts", "pattern": "promise catch fallback"}, {"path": "src/telemetry/applicationInsightsSink.ts", "pattern": "promise catch fallback"}], "generic_name_hits": 1, "generic_name_rate": 0.0024, "top_generic_identifiers": [{"name": "value", "count": 1}], "testless_change_ratio": 0.0, "source_changed_lines": 0, "source_changed_lines_without_test_change": 0, "changed_test_files": 0, "shallow_test_density": 0.0, "shallow_test_count": 0, "total_test_blocks": 0, "trivial_assertion_count": 0, "snapshot_only_test_count": 0, "shallow_test_examples": [], "dead_abstraction_signals": {"unused_exports": 0, "single_use_helpers": 0, "unused_params": 0, "low_value_interfaces": 0}, "missed_integration_updates": 0, "files_missing_tests": 0, "files_missing_docs_or_contract_updates": 0, "missed_integration_examples": [], "rework_rate_7d": 0.0, "changed_source_files_7d": 0, "repeatedly_touched_files_7d": 0, "high_rework_files": []}, "churn": {"source": {"files_modified": 0, "commits": 0, "lines_added": 0, "lines_deleted": 0, "net_change": 0}, "lock_files": {"files_modified": 0, "lines_added": 0, "lines_deleted": 0, "net_change": 0}, "note": "Git history shallow (grafted) - churn metrics unavailable"}}}
-{"date": "2026-06-05", "timestamp": 1780680406, "metrics": {"size": {"lines_of_code_by_language": {"JSON": 4499, "Markdown": 14632, "JavaScript": 5235, "YAML": 19237, "HTML": 1683, "TypeScript": 9635, "CSS": 1522}, "file_counts_by_language": {"JSON": 12, "Markdown": 146, "JavaScript": 20, "YAML": 26, "HTML": 3, "TypeScript": 53, "CSS": 2}, "lines_of_code_total": 56443, "lines_of_code_by_directory": {"src": {"loc": 5060, "files": 27}, "tests": {"loc": 5443, "files": 35}, "media": {"loc": 2285, "files": 3}, "monitoring": {"loc": 1194, "files": 4}, "architecture": {"loc": 1069, "files": 12}, "product": {"loc": 404, "files": 7}, "specs": {"loc": 4194, "files": 36}, "tools": {"loc": 1035, "files": 6}, "docs": {"loc": 1701, "files": 4}}}, "quality": {"large_files_count": 2, "large_files": [{"path": "src/editors/markdownCustomEditorProvider.ts", "loc": 1264}, {"path": "src/telemetry/applicationInsightsSink.ts", "loc": 676}], "avg_file_size": 187.4, "total_source_files": 27, "total_source_lines": 5060, "comment_lines": 9, "comment_ratio": 0.002}, "duplication": {"duplication_rate": 0.0612}, "tests": {"test_files": 24, "test_lines_of_code": 4512, "source_lines_of_code": 5060, "test_to_source_ratio": 0.892}, "churn": {"source": {"files_modified": 279, "commits": 1, "lines_added": 42095, "lines_deleted": 0, "net_change": 42095, "most_active_files": [{"changes": 4151, "file": "package-lock.json"}, {"changes": 1649, "file": "docs/external/engineering-lifecycle.html"}, {"changes": 1438, "file": "tests/integration/selectionScopedEditRequest.test.ts"}, {"changes": 1264, "file": "src/editors/markdownCustomEditorProvider.ts"}, {"changes": 1217, "file": "media/markdownViewer/selectionRequest.js"}, {"changes": 1058, "file": "media/markdownViewer/styles.css"}, {"changes": 992, "file": ".github/workflows/daily-code-metrics.md"}, {"changes": 676, "file": "src/telemetry/applicationInsightsSink.ts"}, {"changes": 643, "file": ".specify/scripts/powershell/common.ps1"}, {"changes": 601, "file": "design/template/inlinr.jsx"}]}, "lock_files": {"files_modified": 12, "lines_added": 17242, "lines_deleted": 0, "net_change": 17242}}, "workflows": {"total_workflows": 12, "lock_files": 12, "avg_workflow_size": 743.0, "total_workflow_lines": 17833}, "docs": {"doc_files": 57, "doc_lines": 5708}, "ai_slop": {"type_escape_rate": 0.0, "type_escape_counts": {"any": 0, "as_any": 0, "ts_ignore": 0, "ts_expect_error": 0, "non_null_assertions": 0}, "oversized_function_count": 2, "oversized_component_count": 0, "oversized_file_count": 3, "largest_units": [{"path": "src/editors/markdownCustomEditorProvider.ts", "loc": 1101}, {"path": "src/telemetry/applicationInsightsSink.ts", "loc": 584}, {"path": "src/telemetry/scenarioRegistry.ts", "loc": 313}], "nesting_depth_violations": 8, "max_nesting_depth": 8, "deepest_units": [{"path": "src/telemetry/applicationInsightsSink.ts", "depth": 8}, {"path": "src/editors/markdownCustomEditorProvider.ts", "depth": 6}, {"path": "src/requests/executionService.ts", "depth": 5}, {"path": "src/webview/getMarkdownViewerHtml.ts", "depth": 5}, {"path": "src/telemetry/scenarioRegistry.ts", "depth": 5}], "error_swallow_count": 0, "error_swallow_examples": [], "testless_change_ratio": 0.0, "shallow_test_density": 0.855, "shallow_test_count": 112, "total_test_blocks": 131, "trivial_assertion_count": 0, "snapshot_only_test_count": 0, "generic_name_hits": 1, "generic_name_rate": 0.0024, "top_generic_identifiers": [["value", 1]], "dead_abstraction_signals": {"unused_exports": 0, "single_use_helpers": 0, "unused_params": 0, "low_value_interfaces": 0}, "missed_integration_updates": 0, "files_missing_tests": 0, "files_missing_docs_or_contract_updates": 0, "rework_rate_7d": 0.0, "changed_source_files_7d": 0, "repeatedly_touched_files_7d": 0}}}
-{"date":"2026-06-05","timestamp":1780696303,"metrics":{"size":{"lines_of_code_by_language":{"TypeScript":9611,"JavaScript":4117,"JSON":4525,"Markdown":14602,"YAML":19237,"HTML":1683,"CSS":1522,"Shell":701},"file_counts_by_language":{"TypeScript":53,"JavaScript":11,"JSON":14,"Markdown":146,"YAML":26,"HTML":3,"CSS":2,"Shell":4},"lines_of_code_total":55998,"lines_of_code_by_directory":{"src":{"loc":5049,"files":27},"tests":{"loc":5424,"files":35},"media":{"loc":2281,"files":3},"monitoring":{"loc":1203,"files":4},"architecture":{"loc":1065,"files":12},"product":{"loc":404,"files":7},"specs":{"loc":4176,"files":36},"tools":{"loc":1030,"files":6},"docs":{"loc":1700,"files":4}}},"quality":{"large_files_count":4,"large_files":[{"path":"tests/integration/selectionScopedEditRequest.test.ts","loc":1438},{"path":"src/editors/markdownCustomEditorProvider.ts","loc":1264},{"path":"src/telemetry/applicationInsightsSink.ts","loc":676},{"path":"tests/integration/telemetryMonitoring.test.ts","loc":545}],"avg_file_size":417.6,"total_source_files":27,"total_source_lines":5049,"comment_lines":9,"comment_ratio":0.002},"duplication":{"duplication_rate":0.0612},"tests":{"test_files":24,"test_lines_of_code":4502,"source_lines_of_code":5049,"test_to_source_ratio":0.892},"churn":{"source":{"files_modified":279,"commits":1,"lines_added":42104,"lines_deleted":0,"net_change":42104,"most_active_files":[{"changes":4151,"file":"package-lock.json"},{"changes":1649,"file":"docs/external/engineering-lifecycle.html"},{"changes":1438,"file":"tests/integration/selectionScopedEditRequest.test.ts"},{"changes":1264,"file":"src/editors/markdownCustomEditorProvider.ts"},{"changes":1217,"file":"media/markdownViewer/selectionRequest.js"},{"changes":1058,"file":"media/markdownViewer/styles.css"},{"changes":992,"file":".github/workflows/daily-code-metrics.md"},{"changes":676,"file":"src/telemetry/applicationInsightsSink.ts"},{"changes":643,"file":".specify/scripts/powershell/common.ps1"},{"changes":601,"file":"design/template/inlinr.jsx"}]},"lock_files":{"files_modified":12,"lines_added":17242,"lines_deleted":0,"net_change":17242}},"workflows":{"total_workflows":17,"lock_files":12,"avg_workflow_size":1436.8,"total_workflow_lines":17242},"docs":{"doc_files":4,"doc_lines":1700},"ai_slop":{"type_escape_rate":0.0,"type_escape_counts":{"any":0,"as_any":0,"ts_ignore":0,"ts_expect_error":0,"non_null_assertions":0},"oversized_function_count":6,"oversized_component_count":0,"oversized_file_count":3,"largest_units":[{"path":"src/editors/markdownCustomEditorProvider.ts","loc":1101,"kind":"file"},{"path":"src/telemetry/applicationInsightsSink.ts","loc":584,"kind":"file"},{"path":"src/telemetry/scenarioRegistry.ts","loc":313,"kind":"file"},{"path":"src/telemetry/applicationInsightsSink.ts","unit_name":"createTelemetrySinkSelection","unit_kind":"function","loc":84},{"path":"src/telemetry/applicationInsightsSink.ts","unit_name":"createTelemetryItemFromEnvelope","unit_kind":"function","loc":79},{"path":"src/telemetry/applicationInsightsSink.ts","unit_name":"mapTelemetryEventToApplicationInsightsEnvelope","unit_kind":"function","loc":65},{"path":"src/telemetry/telemetryContract.ts","unit_name":"assertValidTelemetryEvent","unit_kind":"function","loc":61},{"path":"src/editors/markdownCustomEditorProvider.ts","unit_name":"widenToStructuralBoundaries","unit_kind":"function","loc":57}],"nesting_depth_violations":335,"max_nesting_depth":6,"deepest_units":[{"path":"src/telemetry/applicationInsightsSink.ts","unit_name":"line 266","depth":6},{"path":"src/editors/markdownCustomEditorProvider.ts","unit_name":"line 110","depth":5},{"path":"src/requests/executionService.ts","unit_name":"line 207","depth":5},{"path":"src/telemetry/applicationInsightsSink.ts","unit_name":"line 223","depth":5}],"error_swallow_count":3,"error_swallow_examples":[{"path":"src/editors/markdownCustomEditorProvider.ts","pattern":"promise catch fallback"},{"path":"src/telemetry/telemetryAdapter.ts","pattern":"promise catch fallback"},{"path":"src/telemetry/applicationInsightsSink.ts","pattern":"promise catch fallback"}],"generic_name_hits":5,"generic_name_rate":1.0,"top_generic_identifiers":[["value",5]],"testless_change_ratio":0.0,"shallow_test_density":0.0,"shallow_test_count":0,"total_test_blocks":0,"trivial_assertion_count":0,"snapshot_only_test_count":0,"dead_abstraction_signals":{"unused_exports":0,"single_use_helpers":0,"unused_params":0,"low_value_interfaces":0},"missed_integration_updates":0,"files_missing_tests":0,"files_missing_docs_or_contract_updates":0,"rework_rate_7d":0.0,"changed_source_files_7d":0,"repeatedly_touched_files_7d":0,"high_rework_files":[],"shallow_test_examples":[],"missed_integration_examples":[]}}}
 {
-  "date": "2026-06-06",
-  "timestamp": 1780782195,
+  "date": "2026-06-12",
+  "timestamp": 1781301743,
   "metrics": {
     "size": {
-      "lines_of_code_by_language": {
+      "loc_by_language": {
         "TypeScript": 9611,
-        "JavaScript": 4117,
-        "JSON": 4525,
+        "JavaScript": 5229,
         "CSS": 1522,
-        "HTML": 1683,
-        "Markdown": 14602,
-        "YAML": 19237,
-        "Shell": 701
+        "JSON": 4525,
+        "Markdown": 14753,
+        "YAML": 20902
       },
-      "lines_of_code_by_directory": {
-        "src": 5049,
-        "tests": 5424,
-        "media": 2281,
-        "monitoring": 1203,
-        "architecture": 1065,
-        "product": 404,
-        "specs": 4176,
-        "tools": 1030,
-        "docs": 1700,
-        ".github": 24858
-      },
-      "file_counts_by_directory": {
-        "src": 27,
-        "tests": 35,
-        "media": 3,
-        "monitoring": 4,
-        "architecture": 12,
-        "product": 7,
-        "specs": 36,
-        "tools": 6,
-        "docs": 4
-      },
-      "lines_of_code_total": 55998
-    },
-    "quality": {
-      "large_files_count": 3,
-      "total_source_files": 27,
-      "avg_file_size": 187.0,
-      "comment_lines": 9,
-      "comment_ratio": 0.002,
-      "function_count": 142
-    },
-    "tests": {
-      "test_files": 24,
-      "test_lines_of_code": 4502,
-      "source_lines_of_code": 5049,
-      "test_to_source_ratio": 0.892
+      "loc_by_directory": {
+        "src": {
+          "loc": 5049,
+          "files": 36
+        },
+        "tests": {
+          "loc": 5423,
+          "files": 41
+        },
+        "media": {
+          "loc": 2275,
+          "files": 4
+        },
+        "monitoring": {
+          "loc": 328,
+          "files": 4
+        },
+        "architecture": {
+          "loc": 1065,
+          "files": 12
+        },
+        "product": {
+          "loc": 403,
+          "files": 7
+        },
+        "specs": {
+          "loc": 4176,
+          "files": 50
+        },
+        "tools": {
+          "loc": 0,
+          "files": 8
+        },
+        "docs": {
+          "loc": 101,
+          "files": 10
+        }
+      }
     },
     "duplication": {
       "duplication_rate": 0.0612
     },
-    "churn": {
-      "source": {
-        "files_modified": 279,
-        "commits": 1,
-        "lines_added": 42104,
-        "lines_deleted": 0,
-        "net_change": 42104,
-        "most_active_files": [
-          {
-            "file": "package-lock.json",
-            "changes": 4151
-          },
-          {
-            "file": "docs/external/engineering-lifecycle.html",
-            "changes": 1649
-          },
-          {
-            "file": "tests/integration/selectionScopedEditRequest.test.ts",
-            "changes": 1438
-          },
-          {
-            "file": "src/editors/markdownCustomEditorProvider.ts",
-            "changes": 1264
-          },
-          {
-            "file": "media/markdownViewer/selectionRequest.js",
-            "changes": 1217
-          },
-          {
-            "file": "media/markdownViewer/styles.css",
-            "changes": 1058
-          },
-          {
-            "file": ".github/workflows/daily-code-metrics.md",
-            "changes": 992
-          },
-          {
-            "file": "src/telemetry/applicationInsightsSink.ts",
-            "changes": 676
-          },
-          {
-            "file": ".specify/scripts/powershell/common.ps1",
-            "changes": 643
-          },
-          {
-            "file": "design/template/inlinr.jsx",
-            "changes": 601
-          }
-        ]
-      },
-      "lock_files": {
-        "files_modified": 12,
-        "lines_added": 17242,
-        "lines_deleted": 0,
-        "net_change": 17242
-      }
-    },
-    "workflows": {
-      "total_workflows": 17,
-      "compiled_workflows": 12,
-      "avg_workflow_size": 209.8
-    },
-    "docs": {
-      "doc_files": 4,
-      "doc_loc": 1700,
-      "code_to_docs_ratio": 2.97
+    "tests": {
+      "test_files": 29,
+      "test_lines_of_code": 4672,
+      "source_lines_of_code": 4362,
+      "test_to_source_ratio": 1.0711
     },
     "ai_slop": {
-      "type_escape_rate": 0.0227,
+      "type_escape_rate": 0.0,
       "type_escape_counts": {
         "any": 0,
         "as_any": 0,
         "ts_ignore": 0,
         "ts_expect_error": 0,
-        "non_null_assertions": 99
+        "non_null_assertions": 0
       },
-      "oversized_function_count": 5,
+      "oversized_function_count": 0,
       "oversized_component_count": 0,
       "oversized_file_count": 3,
       "largest_units": [
@@ -168,7 +102,7 @@
         {
           "path": "src/editors/markdownCustomEditorProvider.ts",
           "unit_name": "markdownCustomEditorProvider.ts",
-          "depth": 5
+          "depth": 6
         },
         {
           "path": "src/requests/executionService.ts",
@@ -176,99 +110,91 @@
           "depth": 5
         },
         {
-          "path": "src/rendering/markdownRenderer.ts",
-          "unit_name": "markdownRenderer.ts",
-          "depth": 4
-        },
-        {
           "path": "src/requests/selectionAnchorResolver.ts",
           "unit_name": "selectionAnchorResolver.ts",
           "depth": 4
+        },
+        {
+          "path": "src/telemetry/telemetryAdapter.ts",
+          "unit_name": "telemetryAdapter.ts",
+          "depth": 4
         }
       ],
-      "error_swallow_count": 0,
+      "error_swallow_count": 3,
       "error_swallow_examples": [],
-      "testless_change_ratio": 0.0,
-      "source_changed_lines": 36661,
-      "source_changed_lines_without_test_change": 0,
-      "changed_test_files": 35,
-      "shallow_test_density": 0.854,
-      "shallow_test_count": 111,
+      "shallow_test_density": 0.9769,
+      "shallow_test_count": 127,
       "total_test_blocks": 130,
       "trivial_assertion_count": 0,
       "snapshot_only_test_count": 0,
       "shallow_test_examples": [
         {
-          "path": "tests/integration/markdownViewer.fallbacks.test.ts",
-          "test_blocks": 6,
-          "assertions": 0
+          "path": "tests/integration/viewerSession.error.contract.test.ts",
+          "test_name": "produces a valid error state when rendering fails",
+          "reason": "no-assertions"
         },
         {
           "path": "tests/integration/viewerSession.rendered.contract.test.ts",
-          "test_blocks": 3,
-          "assertions": 0
+          "test_name": "produces a valid rendered state for Markdown documents",
+          "reason": "no-assertions"
         },
         {
-          "path": "tests/integration/selectionRequest.contract.test.ts",
-          "test_blocks": 4,
-          "assertions": 0
+          "path": "tests/integration/viewerSession.rendered.contract.test.ts",
+          "test_name": "selection request script includes collapsed-toolbar quick actions and composer affordance",
+          "reason": "no-assertions"
         },
         {
-          "path": "tests/integration/telemetryMonitoring.test.ts",
-          "test_blocks": 6,
-          "assertions": 0
+          "path": "tests/integration/viewerSession.rendered.contract.test.ts",
+          "test_name": "selection request popup script captures selection from mouse and keyboard interactions",
+          "reason": "no-assertions"
         },
         {
-          "path": "tests/integration/markdownViewer.switching.test.ts",
-          "test_blocks": 5,
-          "assertions": 0
+          "path": "tests/integration/markdownViewer.opening.test.ts",
+          "test_name": "opens Markdown files in the Inlinr custom editor",
+          "reason": "no-assertions"
         }
       ],
-      "generic_name_hits": 1,
-      "generic_name_rate": 0.0024,
+      "generic_name_hits": 24,
+      "generic_name_rate": 0.0345,
       "top_generic_identifiers": [
         {
           "name": "value",
-          "count": 1
+          "count": 24
         }
       ],
-      "unused_exports": 129,
-      "single_use_helpers": 0,
-      "unused_params": 0,
-      "low_value_interfaces": 0,
+      "dead_abstraction_signals": {
+        "unused_exports": 129,
+        "single_use_helpers": 0,
+        "unused_params": 0,
+        "low_value_interfaces": 0
+      },
+      "testless_change_ratio": 0.0,
+      "source_changed_lines": 0,
+      "source_changed_lines_without_test_change": 0,
+      "changed_test_files": 0,
+      "rework_rate_7d": 0.0,
+      "changed_source_files_7d": 0,
+      "repeatedly_touched_files_7d": 0,
+      "high_rework_files": [],
       "missed_integration_updates": 0,
       "files_missing_tests": 0,
       "files_missing_docs_or_contract_updates": 0,
-      "missed_integration_examples": [],
-      "rework_rate_7d": 0.0,
-      "changed_source_files_7d": 27,
-      "repeatedly_touched_files_7d": 0,
-      "high_rework_files": [
-        {
-          "file": "src/webview/viewerState.ts",
-          "touches": 1
-        },
-        {
-          "file": "src/webview/viewerProtocol.ts",
-          "touches": 1
-        },
-        {
-          "file": "src/webview/getMarkdownViewerHtml.ts",
-          "touches": 1
-        },
-        {
-          "file": "src/telemetry/telemetrySanitizer.ts",
-          "touches": 1
-        },
-        {
-          "file": "src/telemetry/telemetryContract.ts",
-          "touches": 1
-        }
-      ]
+      "missed_integration_examples": []
+    },
+    "churn": {
+      "source": {
+        "files_modified": 0,
+        "commits": 1,
+        "lines_added": 0,
+        "lines_deleted": 0,
+        "net_change": 0
+      },
+      "lock_files": {
+        "files_modified": 0,
+        "lines_added": 0,
+        "lines_deleted": 0,
+        "net_change": 0
+      }
     }
   }
-{"date":"2026-06-07","timestamp":1780868890,"metrics":{"size":{"lines_of_code_total":32212,"loc_by_language":{"JSON":4383,"Markdown":6176,"JavaScript":5235,"Other":2703,"YAML":875,"HTML":1683,"TypeScript":9635,"CSS":1522},"loc_by_directory":{"infra":177,"monitoring":1203,"docs":1701,"architecture":1069,"src":5060,"prompts":17,"tests":5443,"specs":4194,"scripts":67,"product":404,"design":5138,"media":2285,"tools":1035},"file_count_by_language":{"JSON":4,"Markdown":67,"JavaScript":20,"Other":9,"YAML":2,"HTML":3,"TypeScript":53,"CSS":2},"total_files":160,"average_file_size":201.32,"large_files_count":12,"comment_lines":211,"comment_ratio":0.007,"all_files":[{"path":"package-lock.json","loc":4151,"ext":".json"},{"path":"package.json","loc":147,"ext":".json"},{"path":"CHANGELOG.md","loc":30,"ext":".md"},{"path":"playwright.config.js","loc":20,"ext":".js"},{"path":".vscode-test.mjs","loc":16,"ext":".mjs"},{"path":"README.md","loc":30,"ext":".md"},{"path":"tsconfig.json","loc":25,"ext":".json"},{"path":"infra/monitoring/action-group-definitions.example.json","loc":60,"ext":".json"},{"path":"infra/monitoring/main.bicep","loc":117,"ext":".bicep"},{"path":"monitoring/alert-policies.yaml","loc":307,"ext":".yaml"},{"path":"monitoring/telemetry-guidelines.md","loc":233,"ext":".md"},{"path":"monitoring/monitoring-scenarios.md","loc":95,"ext":".md"},{"path":"monitoring/scenario-contract.yaml","loc":568,"ext":".yaml"},{"path":"docs/scenario-traceability-matrix.md","loc":14,"ext":".md"},{"path":"docs/external/engineering-lifecycle.html","loc":1649,"ext":".html"},{"path":"docs/external/index.html","loc":11,"ext":".html"},{"path":"docs/internal/README.md","loc":27,"ext":".md"},{"path":"architecture/adr-template.md","loc":39,"ext":".md"},{"path":"architecture/adr-004-local-mermaid-rendering-in-markdown-viewer.md","loc":94,"ext":".md"},{"path":"architecture/security-principles.md","loc":12,"ext":".md"},{"path":"architecture/adr-001-custom-markdown-editor-surface.md","loc":71,"ext":".md"},{"path":"architecture/adr-003-client-owned-inline-request-overlay.md","loc":74,"ext":".md"},{"path":"architecture/adr-006-mixed-pr-governance-with-agentic-review.md","loc":247,"ext":".md"},{"path":"architecture/adr-007-browser-based-webview-selection-contract-tests.md","loc":117,"ext":".md"},{"path":"architecture/data-contract-rules.md","loc":10,"ext":".md"},{"path":"architecture/engineering-principles.md","loc":15,"ext":".md"},{"path":"architecture/adr-002-inlinr-owned-request-capture-and-model-invocation.md","loc":45,"ext":".md"},{"path":"architecture/adr-005-repo-owned-monitoring-alert-management.md","loc":242,"ext":".md"},{"path":"architecture/high-level-architecture.md","loc":103,"ext":".md"},{"path":"src/extension.ts","loc":58,"ext":".ts"},{"path":"src/editors/markdownCustomEditorProvider.ts","loc":1264,"ext":".ts"},{"path":"src/rendering/markdownRenderer.ts","loc":236,"ext":".ts"},{"path":"src/rendering/renderedSelectionMetadata.ts","loc":77,"ext":".ts"},{"path":"src/onboarding/firstActionGuidanceState.ts","loc":72,"ext":".ts"},{"path":"src/presentation/presentationPresetState.ts","loc":29,"ext":".ts"},{"path":"src/presentation/presentationPresets.ts","loc":38,"ext":".ts"},{"path":"src/requests/editApplicationService.ts","loc":100,"ext":".ts"},{"path":"src/requests/selectionSupportPolicy.ts","loc":38,"ext":".ts"},{"path":"src/requests/selectionAnchorResolver.ts","loc":129,"ext":".ts"},{"path":"src/requests/executionService.ts","loc":231,"ext":".ts"},{"path":"src/requests/suggestionNormalizer.ts","loc":76,"ext":".ts"},{"path":"src/requests/requestPayloadBuilder.ts","loc":118,"ext":".ts"},{"path":"src/requests/requestService.ts","loc":31,"ext":".ts"},{"path":"src/requests/documentDraftMarkers.ts","loc":63,"ext":".ts"},{"path":"src/sessions/documentSessionController.ts","loc":145,"ext":".ts"},{"path":"src/webview/getMarkdownViewerHtml.ts","loc":174,"ext":".ts"},{"path":"src/webview/viewerState.ts","loc":227,"ext":".ts"},{"path":"src/webview/viewerProtocol.ts","loc":237,"ext":".ts"},{"path":"src/telemetry/telemetryContract.ts","loc":306,"ext":".ts"},{"path":"src/telemetry/scenarioRegistry.ts","loc":331,"ext":".ts"},{"path":"src/telemetry/telemetrySanitizer.ts","loc":92,"ext":".ts"},{"path":"src/telemetry/defaultTelemetryConfig.ts","loc":3,"ext":".ts"},{"path":"src/telemetry/telemetryAdapter.ts","loc":262,"ext":".ts"},{"path":"src/telemetry/applicationInsightsSink.ts","loc":676,"ext":".ts"},{"path":"src/commands/openWithInlinrViewer.ts","loc":25,"ext":".ts"},{"path":"src/commands/reopenWithDefaultEditor.ts","loc":22,"ext":".ts"},{"path":"prompts/selection-scoped-edit.md","loc":17,"ext":".md"},{"path":"tests/runTest.ts","loc":80,"ext":".ts"},{"path":"tests/integration/markdownViewer.fallbacks.test.ts","loc":110,"ext":".ts"},{"path":"tests/integration/viewerSession.rendered.contract.test.ts","loc":58,"ext":".ts"},{"path":"tests/integration/selectionRequest.contract.test.ts","loc":99,"ext":".ts"},{"path":"tests/integration/telemetryMonitoring.test.ts","loc":545,"ext":".ts"},{"path":"tests/integration/markdownViewer.switching.test.ts","loc":138,"ext":".ts"},{"path":"tests/integration/index.ts","loc":53,"ext":".ts"},{"path":"tests/integration/viewerSession.error.contract.test.ts","loc":21,"ext":".ts"},{"path":"tests/integration/markdownViewer.opening.test.ts","loc":116,"ext":".ts"},{"path":"tests/integration/selectionScopedEditRequest.test.ts","loc":1438,"ext":".ts"},{"path":"tests/integration/helpers.ts","loc":343,"ext":".ts"},{"path":"tests/unit/firstActionGuidanceState.test.ts","loc":35,"ext":".ts"},{"path":"tests/unit/documentSessionController.test.ts","loc":80,"ext":".ts"},{"path":"tests/unit/index.ts","loc":49,"ext":".ts"},{"path":"tests/unit/selectionAnchorResolver.test.ts","loc":67,"ext":".ts"},{"path":"tests/unit/markdownRenderer.test.ts","loc":47,"ext":".ts"},{"path":"tests/unit/presentationPresetState.test.ts","loc":23,"ext":".ts"},{"path":"tests/unit/scenarioRegistry.test.ts","loc":84,"ext":".ts"},{"path":"tests/unit/selectionSupportPolicy.test.ts","loc":40,"ext":".ts"},{"path":"tests/unit/requestPayloadBuilder.test.ts","loc":48,"ext":".ts"},{"path":"tests/unit/viewerState.test.ts","loc":174,"ext":".ts"},{"path":"tests/unit/telemetrySanitizer.test.ts","loc":123,"ext":".ts"},{"path":"tests/unit/executionService.test.ts","loc":196,"ext":".ts"},{"path":"tests/unit/telemetryAdapter.test.ts","loc":327,"ext":".ts"},{"path":"tests/unit/suggestionNormalizer.test.ts","loc":87,"ext":".ts"},{"path":"tests/unit/editApplicationService.test.ts","loc":194,"ext":".ts"},{"path":"tests/webview/selectionRequest.test.js","loc":435,"ext":".js"},{"path":"tests/webview/viewerPresentation.test.js","loc":27,"ext":".js"},{"path":"tests/webview/helpers/selectionRequestHarness.js","loc":341,"ext":".js"},{"path":"tests/fixtures/workspace/selection-request-execution.md","loc":10,"ext":".md"},{"path":"tests/fixtures/workspace/second.md","loc":3,"ext":".md"},{"path":"tests/fixtures/workspace/selection-request-unsupported.md","loc":9,"ext":".md"},{"path":"tests/fixtures/workspace/plain.txt","loc":2,"ext":".txt"},{"path":"tests/fixtures/workspace/selection-request-basic.md","loc":35,"ext":".md"},{"path":"tests/fixtures/workspace/sample.md","loc":6,"ext":".md"},{"path":"specs/005-add-empty-state-guidance/spec.md","loc":112,"ext":".md"},{"path":"specs/005-add-empty-state-guidance/quickstart.md","loc":50,"ext":".md"},{"path":"specs/005-add-empty-state-guidance/tasks.md","loc":218,"ext":".md"},{"path":"specs/005-add-empty-state-guidance/checklists/requirements.md","loc":35,"ext":".md"},{"path":"specs/002-selection-scoped-edit-request/spec.md","loc":144,"ext":".md"},{"path":"specs/002-selection-scoped-edit-request/quickstart.md","loc":50,"ext":".md"},{"path":"specs/002-selection-scoped-edit-request/data-model.md","loc":143,"ext":".md"},{"path":"specs/002-selection-scoped-edit-request/tasks.md","loc":271,"ext":".md"},{"path":"specs/002-selection-scoped-edit-request/plan.md","loc":124,"ext":".md"},{"path":"specs/002-selection-scoped-edit-request/research.md","loc":37,"ext":".md"},{"path":"specs/002-selection-scoped-edit-request/contracts/selection-request-contract.md","loc":162,"ext":".md"},{"path":"specs/002-selection-scoped-edit-request/checklists/requirements.md","loc":34,"ext":".md"},{"path":"specs/004-scenario-monitoring/spec.md","loc":132,"ext":".md"},{"path":"specs/004-scenario-monitoring/quickstart.md","loc":62,"ext":".md"},{"path":"specs/004-scenario-monitoring/data-model.md","loc":169,"ext":".md"},{"path":"specs/004-scenario-monitoring/tasks.md","loc":202,"ext":".md"},{"path":"specs/004-scenario-monitoring/plan.md","loc":90,"ext":".md"},{"path":"specs/004-scenario-monitoring/research.md","loc":55,"ext":".md"},{"path":"specs/004-scenario-monitoring/contracts/scenario-monitoring-contract.md","loc":219,"ext":".md"},{"path":"specs/004-scenario-monitoring/checklists/requirements.md","loc":34,"ext":".md"},{"path":"specs/001-markdown-viewer/spec.md","loc":134,"ext":".md"},{"path":"specs/001-markdown-viewer/quickstart.md","loc":50,"ext":".md"},{"path":"specs/001-markdown-viewer/data-model.md","loc":113,"ext":".md"},{"path":"specs/001-markdown-viewer/tasks.md","loc":211,"ext":".md"},{"path":"specs/001-markdown-viewer/plan.md","loc":95,"ext":".md"},{"path":"specs/001-markdown-viewer/research.md","loc":45,"ext":".md"},{"path":"specs/001-markdown-viewer/contracts/viewer-session-contract.md","loc":96,"ext":".md"},{"path":"specs/001-markdown-viewer/checklists/requirements.md","loc":34,"ext":".md"},{"path":"specs/003-execute-selection-request/spec.md","loc":192,"ext":".md"},{"path":"specs/003-execute-selection-request/quickstart.md","loc":59,"ext":".md"},{"path":"specs/003-execute-selection-request/data-model.md","loc":183,"ext":".md"},{"path":"specs/003-execute-selection-request/tasks.md","loc":150,"ext":".md"},{"path":"specs/003-execute-selection-request/plan.md","loc":103,"ext":".md"},{"path":"specs/003-execute-selection-request/research.md","loc":49,"ext":".md"},{"path":"specs/003-execute-selection-request/contracts/selection-request-execution-contract.md","loc":302,"ext":".md"},{"path":"specs/003-execute-selection-request/checklists/requirements.md","loc":35,"ext":".md"},{"path":"scripts/launch-devhost.mjs","loc":34,"ext":".mjs"},{"path":"scripts/bundle.mjs","loc":33,"ext":".mjs"},{"path":"product/product-outline.md","loc":62,"ext":".md"},{"path":"product/non-goals.md","loc":12,"ext":".md"},{"path":"product/user-scenarios.md","loc":20,"ext":".md"},{"path":"product/markdown-presentation-roadmap.md","loc":170,"ext":".md"},{"path":"product/development-workflow.md","loc":105,"ext":".md"},{"path":"product/ux-principles.md","loc":18,"ext":".md"},{"path":"product/glossary.md","loc":17,"ext":".md"},{"path":"design/template/app.jsx","loc":341,"ext":".jsx"},{"path":"design/template/chrome.jsx","loc":221,"ext":".jsx"},{"path":"design/template/styles.css","loc":464,"ext":".css"},{"path":"design/template/inlinr.jsx","loc":601,"ext":".jsx"},{"path":"design/template/doc.js","loc":94,"ext":".js"},{"path":"design/template/tweaks-panel.jsx","loc":568,"ext":".jsx"},{"path":"design/template/editor.jsx","loc":252,"ext":".jsx"},{"path":"design/template/Inlinr Prototype.html","loc":23,"ext":".html"},{"path":"design/template/screenshots/01-scroll-fix.png","loc":409,"ext":".png"},{"path":"design/template/screenshots/02-scroll-fix.png","loc":396,"ext":".png"},{"path":"design/template/screenshots/initial.png","loc":436,"ext":".png"},{"path":"design/template/screenshots/scrolled.png","loc":377,"ext":".png"},{"path":"design/template/screenshots/bottom-states.png","loc":419,"ext":".png"},{"path":"design/template/uploads/pasted-1779247141950-0.png","loc":537,"ext":".png"},{"path":"media/inlinr-icon.png","loc":10,"ext":".png"},{"path":"media/markdownViewer/styles.css","loc":1058,"ext":".css"},{"path":"media/markdownViewer/selectionRequest.js","loc":1217,"ext":".js"},{"path":"tools/monitoring/alertPolicyUtils.mjs","loc":239,"ext":".mjs"},{"path":"tools/monitoring/generate-monitoring-artifacts.mjs","loc":228,"ext":".mjs"},{"path":"tools/monitoring/generate-alert-policies-from-contract.mjs","loc":270,"ext":".mjs"},{"path":"tools/monitoring/validate-alert-policies.mjs","loc":40,"ext":".mjs"},{"path":"tools/monitoring/validate-runtime-scenarios-from-contract.mjs","loc":213,"ext":".mjs"},{"path":"tools/release/validate-public-readme.mjs","loc":45,"ext":".mjs"}]},"duplication":{"duplication_rate":0.0612},"tests":{"test_files_count":24,"test_lines_of_code":4512,"source_lines_of_code":5060,"test_to_source_ratio":0.892},"churn":{"source":{"files_modified":279,"commits":1,"lines_added":42104,"lines_deleted":0,"net_change":42104},"lock_files":{"files_modified":12,"lines_added":17242,"lines_deleted":0,"net_change":17242},"most_active_files":[{"file":"package-lock.json","added":4151,"deleted":0,"total":4151},{"file":"docs/external/engineering-lifecycle.html","added":1649,"deleted":0,"total":1649},{"file":"tests/integration/selectionScopedEditRequest.test.ts","added":1438,"deleted":0,"total":1438},{"file":"src/editors/markdownCustomEditorProvider.ts","added":1264,"deleted":0,"total":1264},{"file":"media/markdownViewer/selectionRequest.js","added":1217,"deleted":0,"total":1217},{"file":"media/markdownViewer/styles.css","added":1058,"deleted":0,"total":1058},{"file":".github/workflows/daily-code-metrics.md","added":992,"deleted":0,"total":992},{"file":"src/telemetry/applicationInsightsSink.ts","added":676,"deleted":0,"total":676},{"file":".specify/scripts/powershell/common.ps1","added":643,"deleted":0,"total":643},{"file":"design/template/inlinr.jsx","added":601,"deleted":0,"total":601}]},"workflows":{"total_workflows":12,"total_lock_files":12,"average_workflow_size":243.75,"total_workflow_loc":2925},"docs":{"docs_files":57,"docs_loc":5708},"ai_slop":{"type_escape_rate":0.0229,"type_escape_counts":{"any":0,"as_any":0,"ts_ignore":0,"ts_expect_error":0,"non_null_assertions":100},"oversized_function_count":224,"oversized_component_count":0,"oversized_file_count":3,"largest_units":[{"path":"src/editors/markdownCustomEditorProvider.ts","loc":1105},{"path":"src/telemetry/applicationInsightsSink.ts","loc":587},{"path":"src/telemetry/scenarioRegistry.ts","loc":313}],"nesting_depth_violations":0,"max_nesting_depth":0,"error_swallow_count":0,"testless_change_ratio":0.0,"source_changed_lines":5060,"source_changed_lines_without_test_change":0,"changed_test_files":35,"shallow_test_density":0.0,"shallow_test_count":0,"total_test_blocks":0,"trivial_assertion_count":0,"snapshot_only_test_count":0,"generic_name_hits":1,"generic_name_rate":0.0024,"top_generic_identifiers":{"value":1},"dead_abstraction_signals":{"unused_exports":0,"single_use_helpers":0,"unused_params":0,"low_value_interfaces":0},"missed_integration_updates":0,"files_missing_tests":0,"files_missing_docs_or_contract_updates":0,"rework_rate_7d":0.0,"changed_source_files_7d":27,"repeatedly_touched_files_7d":0,"high_rework_files":[]}}}
-{"date": "2026-06-08", "timestamp": 1780956086, "metrics": {"size": {"lines_of_code_by_language": {"TypeScript": 8357, "JavaScript": 3681, "JSON": 4530, "Markdown": 11064, "CSS": 1358, "HTML": 1507, "YAML": 18814, "Shell": 620}, "files_by_language": {"TypeScript": 53, "JavaScript": 11, "JSON": 14, "Markdown": 146, "CSS": 2, "HTML": 3, "YAML": 26, "Shell": 4}, "lines_of_code_by_directory": {"src": 4371, "tests": 4709, "media": 1951, "monitoring": 1092, "architecture": 822, "product": 294, "specs": 3141, "tools": 847, "docs": 1517, ".github": 22883}, "files_by_directory": {"src": 27, "tests": 35, "media": 3, "monitoring": 4, "architecture": 12, "product": 7, "specs": 36, "tools": 6, "docs": 4, ".github": 82}, "lines_of_code_total": 49931}, "quality": {"large_files": 6, "total_files": 64, "avg_file_size": 188.1, "total_functions": 311, "comment_lines": 179, "comment_ratio": 0.015}, "duplication": {"duplication_rate": 0.061}, "tests": {"test_files": 24, "test_lines_of_code": 3931, "source_lines_of_code": 4371, "test_to_source_ratio": 0.9}, "churn": {"source": {"files_modified": 279, "commits": 1, "lines_added": 42104, "lines_deleted": 0, "net_change": 42104}, "lock_files": {"files_modified": 12, "lines_added": 17242, "lines_deleted": 0, "net_change": 17242}, "most_active_files": [{"path": "package-lock.json", "lines_added": 4151, "lines_deleted": 0}, {"path": "docs/external/engineering-lifecycle.html", "lines_added": 1649, "lines_deleted": 0}, {"path": "tests/integration/selectionScopedEditRequest.test.ts", "lines_added": 1438, "lines_deleted": 0}, {"path": "src/editors/markdownCustomEditorProvider.ts", "lines_added": 1264, "lines_deleted": 0}, {"path": "media/markdownViewer/selectionRequest.js", "lines_added": 1217, "lines_deleted": 0}, {"path": "media/markdownViewer/styles.css", "lines_added": 1058, "lines_deleted": 0}, {"path": ".github/workflows/daily-code-metrics.md", "lines_added": 992, "lines_deleted": 0}, {"path": "src/telemetry/applicationInsightsSink.ts", "lines_added": 676, "lines_deleted": 0}, {"path": ".specify/scripts/powershell/common.ps1", "lines_added": 643, "lines_deleted": 0}, {"path": "design/template/inlinr.jsx", "lines_added": 601, "lines_deleted": 0}]}, "workflows": {"total_workflows": 17, "lock_files": 12}, "docs": {"doc_files": 2, "doc_loc": 1517}, "ai_slop": {"type_escape_rate": 0.0226, "type_escape_counts": {"any": 0, "as_any": 0, "ts_ignore": 0, "ts_expect_error": 0, "non_null_assertions": 99}, "oversized_function_count": 87, "oversized_component_count": 0, "oversized_file_count": 3, "largest_units": [{"path": "src/editors/markdownCustomEditorProvider.ts", "unit_name": "function", "unit_kind": "function", "loc": 1213}, {"path": "src/editors/markdownCustomEditorProvider.ts", "unit_name": "function", "unit_kind": "function", "loc": 1208}, {"path": "src/editors/markdownCustomEditorProvider.ts", "unit_name": "function", "unit_kind": "function", "loc": 1185}], "nesting_depth_violations": 7, "max_nesting_depth": 7, "deepest_units": [{"path": "src/editors/markdownCustomEditorProvider.ts", "unit_name": "markdownCustomEditorProvider.ts", "depth": 5}, {"path": "src/rendering/markdownRenderer.ts", "unit_name": "markdownRenderer.ts", "depth": 4}, {"path": "src/requests/selectionAnchorResolver.ts", "unit_name": "selectionAnchorResolver.ts", "depth": 4}], "error_swallow_count": 0, "error_swallow_examples": [], "testless_change_ratio": 0.0, "source_changed_lines": 8374, "test_changed_lines": 4512, "shallow_test_density": 0.85, "shallow_test_count": 112, "total_test_blocks": 131, "trivial_assertion_count": 0, "snapshot_only_test_count": 0, "generic_name_hits": 1, "generic_name_rate": 0.002, "dead_abstraction_signals": {"unused_exports": 0, "single_use_helpers": 0, "unused_params": 0, "low_value_interfaces": 0}, "missed_integration_updates": 0, "files_missing_tests": 0, "files_missing_docs_or_contract_updates": 0, "rework_rate_7d": 0.0, "changed_source_files_7d": 64, "repeatedly_touched_files_7d": 0}}}
-{"date": "2026-06-09", "timestamp": 1781042385, "metrics": {"size": {"by_language": {"JSON": 4383, "Markdown": 6176, "JavaScript": 4117, "CSS": 1522, "HTML": 1683, "TypeScript": 9635, "YAML": 875}, "by_directory": {"package-lock.json": 4151, "README.md": 30, "tsconfig.json": 25, "CHANGELOG.md": 30, "playwright.config.js": 20, "package.json": 147, "design": 2564, "architecture": 1069, "docs": 1701, "src": 5060, "product": 404, "specs": 4194, "monitoring": 1203, "tests": 5441, "infra": 60, "media": 2275, "prompts": 17}, "file_counts": {"package-lock.json": 1, "README.md": 1, "tsconfig.json": 1, "CHANGELOG.md": 1, "playwright.config.js": 1, "package.json": 1, "design": 8, "architecture": 12, "docs": 4, "src": 27, "product": 7, "specs": 36, "monitoring": 4, "tests": 34, "infra": 1, "media": 2, "prompts": 1}, "total_loc": 28391, "total_files": 142}, "quality": {"large_files": 4, "avg_file_size": 181.79245283018867, "function_count": 173, "comment_lines": 10, "comment_ratio": 0.10378827192527244, "source_loc": 9635}, "duplication": {"duplication_rate": 0.061210453920220086, "duplicated_lines": 267, "total_normalized_lines": 4362}, "tests": {"test_files": 22, "test_lines_of_code": 4050, "source_lines_of_code": 5060, "test_to_source_ratio": 0.8003952569169961}, "churn": {"source": {"files_modified": 279, "commits": 1, "lines_added": 42104, "lines_deleted": 0, "net_change": 42104, "most_active": [{"path": "package-lock.json", "added": 4151, "deleted": 0, "net": 4151}, {"path": "docs/external/engineering-lifecycle.html", "added": 1649, "deleted": 0, "net": 1649}, {"path": "tests/integration/selectionScopedEditRequest.test.ts", "added": 1438, "deleted": 0, "net": 1438}, {"path": "src/editors/markdownCustomEditorProvider.ts", "added": 1264, "deleted": 0, "net": 1264}, {"path": "media/markdownViewer/selectionRequest.js", "added": 1217, "deleted": 0, "net": 1217}, {"path": "media/markdownViewer/styles.css", "added": 1058, "deleted": 0, "net": 1058}, {"path": ".github/workflows/daily-code-metrics.md", "added": 992, "deleted": 0, "net": 992}, {"path": "src/telemetry/applicationInsightsSink.ts", "added": 676, "deleted": 0, "net": 676}, {"path": ".specify/scripts/powershell/common.ps1", "added": 643, "deleted": 0, "net": 643}, {"path": "design/template/inlinr.jsx", "added": 601, "deleted": 0, "net": 601}]}, "lock_files": {"files_modified": 12, "lines_added": 17242, "lines_deleted": 0, "net_change": 17242}}, "workflows": {"total_workflows": 12, "lock_files": 12, "avg_workflow_size": 243.75}, "docs": {"doc_files": 2, "doc_loc": 41, "code_to_docs_ratio": 123.41463414634147}, "ai_slop": {"type_escape_rate": 0.0, "type_escape_counts": {"any": 0, "as_any": 0, "ts_ignore": 0, "ts_expect_error": 0, "non_null_assertions": 0}, "oversized_function_count": 14, "oversized_component_count": 0, "oversized_file_count": 3, "largest_units": [{"path": "src/editors/markdownCustomEditorProvider.ts", "unit_name": "markdownCustomEditorProvider.ts", "unit_kind": "file", "loc": 1101}, {"path": "src/telemetry/applicationInsightsSink.ts", "unit_name": "applicationInsightsSink.ts", "unit_kind": "file", "loc": 584}, {"path": "src/telemetry/scenarioRegistry.ts", "unit_name": "scenarioRegistry.ts", "unit_kind": "file", "loc": 313}, {"path": "src/editors/markdownCustomEditorProvider.ts", "unit_name": "resolveSelectionRangeFromMetadata", "unit_kind": "function", "loc": 117}, {"path": "src/telemetry/applicationInsightsSink.ts", "unit_name": "separatorIndex", "unit_kind": "function", "loc": 77}], "nesting_depth_violations": 5, "max_nesting_depth": 6, "deepest_units": [{"path": "src/telemetry/applicationInsightsSink.ts", "unit_name": "applicationInsightsSink.ts", "depth": 6}, {"path": "src/editors/markdownCustomEditorProvider.ts", "unit_name": "markdownCustomEditorProvider.ts", "depth": 5}, {"path": "src/requests/executionService.ts", "unit_name": "executionService.ts", "depth": 5}, {"path": "src/requests/selectionAnchorResolver.ts", "unit_name": "selectionAnchorResolver.ts", "depth": 4}, {"path": "src/telemetry/telemetryAdapter.ts", "unit_name": "telemetryAdapter.ts", "depth": 4}], "error_swallow_count": 3, "error_swallow_examples": [{"path": "src/editors/markdownCustomEditorProvider.ts", "line": 384, "pattern": "silent_error_handling"}, {"path": "src/telemetry/applicationInsightsSink.ts", "line": 340, "pattern": "silent_error_handling"}, {"path": "src/telemetry/telemetryAdapter.ts", "line": 108, "pattern": "silent_error_handling"}], "testless_change_ratio": 1.0, "source_changed_lines": 7335, "source_changed_lines_without_test_change": 7335, "changed_test_files": 24, "shallow_test_density": 0.2, "shallow_test_count": 44, "total_test_blocks": 220, "trivial_assertion_count": 0, "snapshot_only_test_count": 0, "shallow_test_examples": [{"path": "tests/integration/viewerSession.error.contract.test.ts", "reason": "low_assertion_density"}, {"path": "tests/integration/viewerSession.rendered.contract.test.ts", "reason": "low_assertion_density"}, {"path": "tests/integration/markdownViewer.opening.test.ts", "reason": "low_assertion_density"}], "generic_name_hits": 1, "generic_name_rate": 0.0017605633802816902, "top_generic_identifiers": [{"name": "value", "count": 1}], "dead_abstraction_signals": {"unused_exports": 102, "single_use_helpers": 0, "unused_params": 0, "low_value_interfaces": 0}, "missed_integration_updates": 27, "files_missing_tests": 27, "files_missing_docs_or_contract_updates": 0, "missed_integration_examples": [{"path": "src/commands/openWithInlinrViewer.ts", "missing": "test"}, {"path": "src/commands/reopenWithDefaultEditor.ts", "missing": "test"}, {"path": "src/editors/markdownCustomEditorProvider.ts", "missing": "test"}], "rework_rate_7d": 0.0, "changed_source_files_7d": 27, "repeatedly_touched_files_7d": 0, "high_rework_files": []}}}
-{"date": "2026-06-10", "timestamp": 1781128994, "metrics": {"size": {"by_language": {"JSON": 4383, "Markdown": 6176, "JavaScript": 5219, "CSS": 1522, "HTML": 1683, "TypeScript": 9635, "YAML": 875}, "by_directory": {"package-lock.json": 4151, "README.md": 30, "tsconfig.json": 25, "CHANGELOG.md": 30, "playwright.config.js": 20, "package.json": 147, "design": 2564, "scripts": 67, "architecture": 1069, "docs": 1701, "src": 5060, "product": 404, "specs": 4194, "monitoring": 1203, "tests": 5441, "infra": 60, "media": 2275, "prompts": 17, "tools": 1035}, "file_counts": {"JSON": 4, "Markdown": 67, "JavaScript": 19, "CSS": 2, "HTML": 3, "TypeScript": 53, "YAML": 2}, "total_loc": 29493, "total_files": 150}, "quality": {"large_files": [{"path": "tests/integration/selectionScopedEditRequest.test.ts", "loc": 1438}, {"path": "src/editors/markdownCustomEditorProvider.ts", "loc": 1264}, {"path": "media/markdownViewer/selectionRequest.js", "loc": 1217}, {"path": "src/telemetry/applicationInsightsSink.ts", "loc": 676}, {"path": "design/template/inlinr.jsx", "loc": 601}, {"path": "design/template/tweaks-panel.jsx", "loc": 568}, {"path": "tests/integration/telemetryMonitoring.test.ts", "loc": 545}], "comment_lines": 898, "total_source_lines": 14870, "avg_file_size": 203.6986301369863, "comment_ratio": 0.06039004707464694}, "duplication": {"duplication_rate": 0.0612}, "tests": {"test_files": 24, "test_loc": 4512, "source_loc": 10358, "test_to_source_ratio": 0.43560532921413403}, "churn": {"source": {"files_modified": 279, "lines_added": 42104, "lines_deleted": 0, "net_change": 42104, "commits": 1}, "lock_files": {"files_modified": 12, "lines_added": 17242, "lines_deleted": 0, "net_change": 17242}}, "workflows": {"total_workflows": 12, "lock_files": 12, "avg_workflow_size": 1436.8333333333333}, "docs": {"doc_files": 2, "doc_loc": 41}, "ai_slop": {"type_escape_rate": 0.0, "type_escape_counts": {"any": 0, "as_any": 0, "ts_ignore": 0, "ts_expect_error": 0, "non_null_assertions": 0}, "oversized_function_count": 0, "oversized_component_count": 1, "oversized_file_count": 3, "largest_units": [{"path": "src/editors/markdownCustomEditorProvider.ts", "unit_name": "markdownCustomEditorProvider.ts", "unit_kind": "file", "loc": 1101}, {"path": "src/telemetry/applicationInsightsSink.ts", "unit_name": "applicationInsightsSink.ts", "unit_kind": "file", "loc": 584}, {"path": "src/telemetry/scenarioRegistry.ts", "unit_name": "scenarioRegistry.ts", "unit_kind": "file", "loc": 313}], "nesting_depth_violations": 8, "max_nesting_depth": 8, "deepest_units": [{"path": "src/telemetry/applicationInsightsSink.ts", "unit_name": "applicationInsightsSink.ts", "depth": 8}, {"path": "src/editors/markdownCustomEditorProvider.ts", "unit_name": "markdownCustomEditorProvider.ts", "depth": 6}, {"path": "src/webview/getMarkdownViewerHtml.ts", "unit_name": "getMarkdownViewerHtml.ts", "depth": 5}, {"path": "src/requests/executionService.ts", "unit_name": "executionService.ts", "depth": 5}, {"path": "src/telemetry/scenarioRegistry.ts", "unit_name": "scenarioRegistry.ts", "depth": 5}], "error_swallow_count": 0, "error_swallow_examples": [], "shallow_test_density": 0.85, "shallow_test_count": 112, "total_test_blocks": 131, "trivial_assertion_count": 0, "snapshot_only_test_count": 0, "shallow_test_examples": [], "generic_name_hits": 1, "generic_name_rate": 0.002, "top_generic_identifiers": [{"name": "value", "count": 1}], "testless_change_ratio": 0.0, "source_changed_lines": 0, "source_changed_lines_without_test_change": 0, "changed_test_files": 0, "dead_abstraction_signals": {"unused_exports": 0, "single_use_helpers": 0, "unused_params": 0, "low_value_interfaces": 0}, "missed_integration_updates": 0, "files_missing_tests": 0, "files_missing_docs_or_contract_updates": 0, "rework_rate_7d": 0.0, "changed_source_files_7d": 0, "repeatedly_touched_files_7d": 0, "high_rework_files": []}}}
-{"date": "2026-06-11", "timestamp": 1781215375, "metrics": {"size": {"by_directory": {"src": {"loc": 5049, "files": 27}, "tests": {"loc": 5424, "files": 35}, "media": {"loc": 2281, "files": 3}, "monitoring": {"loc": 1203, "files": 4}, "architecture": {"loc": 1065, "files": 12}, "product": {"loc": 404, "files": 7}, "specs": {"loc": 4176, "files": 36}, "tools": {"loc": 1030, "files": 6}, "docs": {"loc": 1700, "files": 4}}, "by_language": {"TypeScript": {"loc": 9611, "files": 53}, "TSX": {"loc": 0, "files": 0}, "JavaScript": {"loc": 2134, "files": 6}, "JSX": {"loc": 1983, "files": 5}, "CSS": {"loc": 1522, "files": 2}, "Markdown": {"loc": 14602, "files": 146}, "YAML": {"loc": 19237, "files": 26}, "JSON": {"loc": 374, "files": 13}}, "lines_of_code_total": 49463}, "quality": {"large_files_count": 8, "total_files": 64, "average_file_size": 214}, "duplication": {"duplication_rate": 0.0612, "duplicated_lines": 267, "total_normalized_lines": 4362}, "tests": {"test_lines_of_code": 4512, "test_files": 24, "source_lines_of_code": 5060, "test_to_source_ratio": 0.892}, "churn": {"source": {"files_modified": 279, "commits": 1, "lines_added": 42104, "lines_deleted": 0, "net_change": 42104, "most_active_files": [{"file": "package-lock.json", "changes": 4151}, {"file": "docs/external/engineering-lifecycle.html", "changes": 1649}, {"file": "tests/integration/selectionScopedEditRequest.test.ts", "changes": 1438}, {"file": "src/editors/markdownCustomEditorProvider.ts", "changes": 1264}, {"file": "media/markdownViewer/selectionRequest.js", "changes": 1217}, {"file": "media/markdownViewer/styles.css", "changes": 1058}, {"file": ".github/workflows/daily-code-metrics.md", "changes": 992}, {"file": "src/telemetry/applicationInsightsSink.ts", "changes": 676}, {"file": ".specify/scripts/powershell/common.ps1", "changes": 643}, {"file": "design/template/inlinr.jsx", "changes": 601}]}, "lock_files": {"files_modified": 12, "lines_added": 17242, "lines_deleted": 0, "net_change": 17242}}, "workflows": {"total_workflows": 12, "compiled_workflows": 12, "average_workflow_size": 243}, "docs": {"doc_files": 4, "doc_loc": 1701}, "ai_slop": {"type_escape_counts": {"any": 0, "as_any": 0, "ts_ignore": 0, "ts_expect_error": 0, "non_null_assertions": 0}, "type_escape_rate": 0.0, "oversized_function_count": 10, "oversized_component_count": 0, "oversized_file_count": 3, "largest_units": [{"path": "src/editors/markdownCustomEditorProvider.ts", "unit_name": "markdownCustomEditorProvider.ts", "unit_kind": "file", "loc": 1101}, {"path": "src/telemetry/applicationInsightsSink.ts", "unit_name": "applicationInsightsSink.ts", "unit_kind": "file", "loc": 584}, {"path": "src/telemetry/scenarioRegistry.ts", "unit_name": "scenarioRegistry.ts", "unit_kind": "file", "loc": 313}, {"path": "src/editors/markdownCustomEditorProvider.ts", "unit_name": "resolveSelectionRangeFromMetadata", "unit_kind": "function", "loc": 113}, {"path": "src/telemetry/applicationInsightsSink.ts", "unit_name": "mapTelemetryEventToApplicationInsightsEnvelope", "unit_kind": "function", "loc": 77}], "nesting_depth_violations": 0, "max_nesting_depth": 3, "deepest_units": [], "error_swallow_count": 0, "error_swallow_examples": [], "testless_change_ratio": 0.0, "source_changed_lines": 7277, "source_changed_lines_without_test_change": 0, "changed_test_files": 24, "shallow_test_density": 0.992, "shallow_test_count": 127, "total_test_blocks": 128, "trivial_assertion_count": 0, "snapshot_only_test_count": 0, "shallow_test_examples": [{"path": "tests/integration/viewerSession.error.contract.test.ts", "reason": "no_assertions"}, {"path": "tests/integration/viewerSession.rendered.contract.test.ts", "reason": "no_assertions"}, {"path": "tests/integration/viewerSession.rendered.contract.test.ts", "reason": "no_assertions"}, {"path": "tests/integration/viewerSession.rendered.contract.test.ts", "reason": "no_assertions"}, {"path": "tests/integration/markdownViewer.opening.test.ts", "reason": "no_assertions"}], "generic_name_hits": 1, "generic_name_rate": 0.002, "top_generic_identifiers": [{"name": "value", "count": 1}], "dead_abstraction_signals": {"unused_exports": 91, "single_use_helpers": 0, "unused_params": 0, "low_value_interfaces": 0}, "missed_integration_updates": 0, "files_missing_tests": 0, "files_missing_docs_or_contract_updates": 0, "missed_integration_examples": [], "rework_rate_7d": 0.0, "changed_source_files_7d": 27, "repeatedly_touched_files_7d": 0, "high_rework_files": []}}}
+}
