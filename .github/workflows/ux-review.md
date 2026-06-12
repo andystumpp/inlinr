@@ -10,6 +10,9 @@ permissions:
   contents: read
   issues: read
   pull-requests: read
+engine:
+  id: copilot
+  model: opus?effort=high
 strict: true
 timeout-minutes: 20
 network:
