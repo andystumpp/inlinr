@@ -26,6 +26,9 @@ jobs:
       - name: Compile extension
         run: npm run compile
 
+      - name: Validate monitoring contract
+        run: npm run monitoring:validate-only
+
       - name: Run test suites
         run: xvfb-run -a npm test
 

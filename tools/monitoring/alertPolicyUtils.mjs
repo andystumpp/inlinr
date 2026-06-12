@@ -207,6 +207,20 @@ export async function validateAlertPolicies(inputAlertPolicies) {
           pushError(errors, `${pathLabel}.runtime_binding.checkpoint_ids references unknown checkpoint ${checkpointId}.`);
         }
       }
+
+      for (const [supportingIndex, supportingAlert] of (policy.supporting_alerts ?? []).entries()) {
+        if (
+          (supportingAlert.signal_type === 'checkpoint_spike' || supportingAlert.signal_type === 'latency') &&
+          typeof supportingAlert.checkpoint_id === 'string' &&
+          supportingAlert.checkpoint_id.length > 0 &&
+          !runtimeCheckpointIds.has(supportingAlert.checkpoint_id)
+        ) {
+          pushError(
+            errors,
+            `${pathLabel}.supporting_alerts[${supportingIndex}].checkpoint_id ${supportingAlert.checkpoint_id} does not exist in runtime scenario ${runtimeBinding.scenario_id}.`
+          );
+        }
+      }
     }
   }
 
