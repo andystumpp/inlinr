@@ -76,22 +76,36 @@ The repository currently has these automated suites wired into `npm test`:
 - **Unit tests:** under `tests/unit/`
 - **Integration tests:** under `tests/integration/`
 
-The browser-based webview selection contract suite exists as a dedicated command under
-`tests/webview/`, but it is intentionally kept separate from `npm test`, CI, and release verification
-until the suite stabilizes.
+The browser-based webview selection contract suite runs under `tests/webview/` via Playwright and is
+kept separate from `npm test` so the core CI gate stays fast.  It runs automatically in the
+**Webview Contract** CI workflow whenever a PR or push to `main` touches the webview interaction
+surface (see below).
 
-## When to run browser-based webview contract tests
+## Webview contract CI gate
+
+`.github/workflows/webview-contract.yml` is a path-scoped workflow that runs the Playwright
+contract suite automatically.  It fires on `pull_request` and on `push` to `main` for any of these
+paths:
+
+| Path | What it contains |
+|---|---|
+| `media/markdownViewer/**` | Webview scripts (`selectionRequest.js`) and styles (`styles.css`) |
+| `src/webview/**` | Extension-side webview protocol, HTML generation, and viewer state |
+| `tests/webview/**` | Playwright contract tests and test harness helpers |
+| `playwright.config.js` | Playwright configuration |
+| `.github/workflows/webview-contract.yml` | The gate workflow itself |
+
+The `webview-contract` job is a required status check.  PRs that touch any of the paths above must
+pass this check before merging.
+
+## When to run browser-based webview contract tests locally
 
 - Install the Playwright browser once per machine with `npm run test:webview:install` before running
   `npm run test:webview`.
 - Run them during feature work and bug fixes that touch rendered selection handling, popup behavior,
   selection anchors, rendered selection markup, or bounding-rect and geometry logic.
-- Run them explicitly before merge for pull requests that affect the webview selection-to-popup
-  contract.
 - Add or update one of these tests for bugs that originate at the webview DOM selection or popup
   boundary.
-- Promote them into `npm test`, CI, and release verification only after the suite is stable enough to
-  serve as a blocking gate.
 
 ## Verification commands
 

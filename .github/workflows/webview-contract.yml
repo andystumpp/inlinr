@@ -1,0 +1,53 @@
+name: Webview Contract
+
+# Runs the Playwright browser-based webview contract suite whenever a PR or
+# push to main touches the webview interaction surface.  This makes the
+# popup-selection contract check deterministic rather than advisory.
+#
+# Paths that trigger this gate:
+#   media/markdownViewer/**   – webview scripts and styles (selectionRequest.js, styles.css)
+#   src/webview/**            – extension-side webview protocol and HTML generation
+#   tests/webview/**          – Playwright contract tests and test harness helpers
+#   playwright.config.js      – Playwright configuration
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/webview-contract.yml'
+      - 'media/markdownViewer/**'
+      - 'src/webview/**'
+      - 'tests/webview/**'
+      - 'playwright.config.js'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/webview-contract.yml'
+      - 'media/markdownViewer/**'
+      - 'src/webview/**'
+      - 'tests/webview/**'
+      - 'playwright.config.js'
+
+jobs:
+  webview-contract:
+    name: Webview contract suite (Playwright)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npm run test:webview:install
+
+      - name: Run webview contract suite
+        run: npm run test:webview
