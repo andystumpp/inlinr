@@ -1212,10 +1212,10 @@
 
             <article class="wf-card accent-monitoring">
               <div class="wf-head"><h3><a href="https://github.com/andystumpp/inlinr/blob/main/.github/workflows/monitoring-telemetry.md">Monitoring Telemetry</a></h3><div class="wf-tags"><span class="pill">Daily + on push</span><span class="kind">Agentic</span></div></div>
-              <p>Updates runtime telemetry in <code>src/telemetry/**</code> and adjacent code so emission matches the contract and tests.</p>
+              <p>Finds where each contract scenario should be monitored and instruments the real emission sites across <code>src/**</code> (editors, requests, sessions, rendering, extension host) plus tests &mdash; not just <code>src/telemetry/**</code>.</p>
               <dl class="wf-io">
                 <div><dt>In</dt><dd><code>monitoring/scenario-contract.yaml</code> + existing telemetry code.</dd></div>
-                <div><dt>Out</dt><dd>PR updating <code>src/telemetry/**</code> and tests.</dd></div>
+                <div><dt>Out</dt><dd>PR instrumenting <code>src/**</code> and tests.</dd></div>
               </dl>
             </article>
 
@@ -1301,7 +1301,7 @@
           <section class="mon-step">
             <div class="mon-node">Telemetry<br>Agent</div>
             <h4>Monitoring Telemetry</h4>
-            <p>Keeps runtime emission in <code>src/telemetry/**</code> aligned with the contract.</p>
+            <p>Instruments the real emission sites across <code>src/**</code> and tests so runtime behavior matches the contract.</p>
           </section>
 
           <section class="mon-step">
