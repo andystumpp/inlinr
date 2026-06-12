@@ -1254,7 +1254,7 @@
           </header>
           <div class="wf-grid">
             <article class="wf-card accent-release">
-              <div class="wf-head"><h3>Release workflow</h3><div class="wf-tags"><span class="pill">Tag or dispatch</span><span class="kind">Deterministic</span></div></div>
+              <div class="wf-head"><h3><a href="https://github.com/andystumpp/inlinr/blob/main/.github/workflows/release.yml">Release workflow</a></h3><div class="wf-tags"><span class="pill">Tag or dispatch</span><span class="kind">Deterministic</span></div></div>
               <p>Verifies version, compiles, tests, packages, and orchestrates monitoring deploy plus Marketplace publish.</p>
               <dl class="wf-io">
                 <div><dt>In</dt><dd>Version tag push or <code>workflow_dispatch</code>.</dd></div>
@@ -1263,7 +1263,7 @@
             </article>
 
             <article class="wf-card accent-release">
-              <div class="wf-head"><h3>Monitoring deploy + verify</h3><div class="wf-tags"><span class="pill">Release stage</span><span class="kind">Deterministic</span></div></div>
+              <div class="wf-head"><h3><a href="https://github.com/andystumpp/inlinr/blob/main/.github/workflows/release.yml#L104-L192">Monitoring deploy + verify</a></h3><div class="wf-tags"><span class="pill">Release stage</span><span class="kind">Deterministic</span></div></div>
               <p>Deploys generated Azure alert rules to prod, then verifies the expected scheduled query rule count.</p>
               <dl class="wf-io">
                 <div><dt>In</dt><dd>Generated alert-policy artifacts from <code>infra/monitoring/</code>.</dd></div>
@@ -1272,7 +1272,7 @@
             </article>
 
             <article class="wf-card accent-release">
-              <div class="wf-head"><h3>Marketplace publish</h3><div class="wf-tags"><span class="pill">Final stage</span><span class="kind">Deterministic</span></div></div>
+              <div class="wf-head"><h3><a href="https://github.com/andystumpp/inlinr/blob/main/.github/workflows/release.yml#L194">Marketplace publish</a></h3><div class="wf-tags"><span class="pill">Final stage</span><span class="kind">Deterministic</span></div></div>
               <p>Validates the public README, then publishes the VSIX to the Visual Studio Marketplace.</p>
               <dl class="wf-io">
                 <div><dt>In</dt><dd>Validated <code>.vsix</code> + public <code>README.md</code>.</dd></div>
