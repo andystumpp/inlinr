@@ -3,6 +3,10 @@ name: Monitoring Scenarios
 description: Maintain Inlinr's monitoring scenario catalog from current implementation, active work, and product context.
 on:
   schedule: daily on weekdays
+  push:
+    branches: [main]
+    paths:
+      - "product/**"
 permissions:
   contents: read
   issues: read
