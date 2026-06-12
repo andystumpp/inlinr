@@ -10,7 +10,7 @@ permissions:
   pull-requests: read
 engine:
   id: copilot
-  model: sonnet?effort=high
+  model: sonnet
 strict: true
 timeout-minutes: 15
 network:
