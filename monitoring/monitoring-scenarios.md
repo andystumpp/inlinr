@@ -22,9 +22,9 @@ Each scenario stays crisp and monitoring-oriented: a real user journey, the key 
 **Journey:** A user selects a specific range in rendered Markdown and immediately gets one anchored inline request popup for that exact selection inside the document surface.
 **Key checkpoints:**
 1. A non-empty rendered selection is recognized.
-2. The popup appears near the selected text.
+2. The popup appears near the selected text within 500ms.
 3. The popup opens for the intended scope rather than expanding or drifting.
-**Monitoring intent:** Catch regressions where selection capture, popup display, or visible scope targeting stops feeling precise and immediate.
+**Monitoring intent:** Catch regressions where selection capture, popup display, or visible scope targeting stops feeling precise and immediate, or where popup appearance exceeds the 500ms latency budget.
 
 ### Submit a request and receive inline review state
 **Criticality:** Core
