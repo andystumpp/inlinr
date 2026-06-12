@@ -1,5 +1,5 @@
 ---
-name: Spec Librarian
+name: Drift Auditor
 description: Audit drift across Inlinr's product, architecture, specs, monitoring, and implementation surfaces.
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ permissions:
   pull-requests: read
 strict: true
 timeout-minutes: 15
-tracker-id: spec-librarian
+tracker-id: drift-auditor
 network:
   allowed: [defaults, github]
 tools:
@@ -22,14 +22,14 @@ safe-outputs:
   mentions: false
   allowed-github-references: []
   create-issue:
-    title-prefix: "[spec-librarian] "
+    title-prefix: "[drift-auditor] "
     max: 1
     close-older-issues: true
     expires: 14d
     footer: false
 ---
 
-# Specification Librarian
+# Drift Auditor
 
 You audit drift across Inlinr's documented product intent, architecture, feature specs, operational monitoring scenarios, and current implementation.
 
