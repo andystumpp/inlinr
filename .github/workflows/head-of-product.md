@@ -8,9 +8,6 @@ permissions:
   contents: read
   issues: read
   pull-requests: read
-engine:
-  id: copilot
-  model: sonnet?effort=high
 strict: true
 timeout-minutes: 15
 network:
