@@ -76,9 +76,9 @@ The repository currently has these automated suites wired into `npm test`:
 - **Unit tests:** under `tests/unit/`
 - **Integration tests:** under `tests/integration/`
 
-The browser-based webview selection contract suite exists as a dedicated command under
-`tests/webview/`, but it is intentionally kept separate from `npm test`, CI, and release verification
-until the suite stabilizes.
+The browser-based webview selection contract suite remains a dedicated command under
+`tests/webview/`, separate from `npm test` and release verification, but CI now installs the
+Playwright Chromium browser and runs `npm run test:webview` as a blocking PR and main-branch check.
 
 ## When to run browser-based webview contract tests
 
@@ -86,12 +86,12 @@ until the suite stabilizes.
   `npm run test:webview`.
 - Run them during feature work and bug fixes that touch rendered selection handling, popup behavior,
   selection anchors, rendered selection markup, or bounding-rect and geometry logic.
-- Run them explicitly before merge for pull requests that affect the webview selection-to-popup
-  contract.
+- CI runs them automatically before merge for pull requests and pushes that go through the main `CI`
+  workflow, so a failing webview contract test now blocks that check.
 - Add or update one of these tests for bugs that originate at the webview DOM selection or popup
   boundary.
-- Promote them into `npm test`, CI, and release verification only after the suite is stable enough to
-  serve as a blocking gate.
+- Keep them as a dedicated command unless there is a deliberate decision to fold them into `npm test`
+  or release verification later.
 
 ## Verification commands
 
