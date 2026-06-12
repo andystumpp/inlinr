@@ -758,6 +758,26 @@
       white-space: pre;
     }
 
+    .mon-trace-figure {
+      margin: 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .mon-trace-figure img {
+      width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid rgba(29, 36, 48, 0.12);
+      display: block;
+    }
+
+    .mon-trace-figure figcaption {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
     .mon-trace-checkpoints {
       margin: 0 0 6px;
       padding-left: 22px;
@@ -1407,6 +1427,19 @@ this.emitScenarioCheckpoint(submitAttempt, 'review_rendered_inline', 'pass', {
   durationMs: Math.max(0, Date.now() - submitStartedAt) // 2 s budget
 });
 this.completeScenarioAttempt(submitAttempt, 'success');</pre>
+            </div>
+          </div>
+
+          <div class="mon-trace-row accent-monitoring">
+            <div class="mon-trace-label">
+              <span class="step">Deployed alerts</span>
+              <span class="file">Azure Monitor scheduled query rules</span>
+            </div>
+            <div class="mon-trace-body">
+              <figure class="mon-trace-figure">
+                <img src="../azure-alert-rules.png" alt="Azure Monitor alert rules generated from the Inlinr monitoring contract" loading="lazy" />
+                <figcaption>The contract and telemetry compile into Azure Monitor scheduled query rules &mdash; the emitted checkpoints above are what these deployed alerts evaluate.</figcaption>
+              </figure>
             </div>
           </div>
 
