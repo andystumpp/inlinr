@@ -42,6 +42,18 @@ defaults:
           threshold:
             failure_rate_percent: 5
             minimum_sample_size: 10
+        - template_id: latency
+          kind: scheduled_query
+          signal_type: latency
+          severity: non_paging
+          route_ref: team_non_paging
+          rule_kind: log_search_alert
+          window: PT30M
+          evaluation_frequency: PT5M
+          threshold:
+            p95_duration_ms: 1000
+            minimum_sample_size: 10
+          requires_checkpoint_id: true
         - template_id: checkpoint_spike
           kind: scheduled_query
           signal_type: checkpoint_spike
@@ -67,6 +79,18 @@ defaults:
           consecutive_failures: 2
           minimum_sample_size: 2
       supporting_alert_templates:
+        - template_id: latency
+          kind: scheduled_query
+          signal_type: latency
+          severity: non_paging
+          route_ref: team_non_paging
+          rule_kind: log_search_alert
+          window: PT30M
+          evaluation_frequency: PT5M
+          threshold:
+            p95_duration_ms: 500
+            minimum_sample_size: 10
+          requires_checkpoint_id: true
         - template_id: checkpoint_spike
           kind: scheduled_query
           signal_type: checkpoint_spike
@@ -129,6 +153,18 @@ defaults:
           failure_rate_percent: 5
           minimum_sample_size: 10
       supporting_alert_templates:
+        - template_id: latency
+          kind: scheduled_query
+          signal_type: latency
+          severity: non_paging
+          route_ref: team_non_paging
+          rule_kind: log_search_alert
+          window: PT30M
+          evaluation_frequency: PT5M
+          threshold:
+            p95_duration_ms: 1000
+            minimum_sample_size: 10
+          requires_checkpoint_id: true
         - template_id: checkpoint_spike
           kind: scheduled_query
           signal_type: checkpoint_spike
@@ -289,6 +325,8 @@ scenarios:
       profile: core_viewer_availability
       overrides:
         supporting_alerts:
+          - template_id: latency
+            checkpoint_id: render_markdown
           - template_id: checkpoint_spike
             checkpoint_id: render_markdown
 
@@ -328,6 +366,8 @@ scenarios:
       profile: core_selection_availability
       overrides:
         supporting_alerts:
+          - template_id: latency
+            checkpoint_id: popup_shown
           - template_id: checkpoint_spike
             checkpoint_id: scope_accurate
 
@@ -410,6 +450,8 @@ scenarios:
       profile: core_apply_integrity
       overrides:
         supporting_alerts:
+          - template_id: latency
+            checkpoint_id: render_refresh
           - template_id: checkpoint_spike
             checkpoint_id: mutate_targeted_range
 
@@ -488,6 +530,44 @@ scenarios:
         supporting_alerts:
           - template_id: checkpoint_spike
             checkpoint_id: current_state_reused
+
+  - scenario_id: discover_first_action_guidance
+    title: Discover the first action through empty state guidance
+    criticality: important
+    journey:
+      start_condition: A new user opens a Markdown file in Inlinr.
+      success_condition: Subtle in-document guidance appears, teaches the core selection-based editing workflow, and is dismissed after the first qualifying interaction.
+      safe_block_condition: Guidance fails to appear or blocks the editing workflow, but the viewer remains usable.
+    runtime:
+      readiness: not_instrumented
+      scenario_version: '1'
+      owner_surface: custom_editor
+      owner_component: viewer
+      checkpoints:
+        - checkpoint_id: guidance_shown_first_time
+          order: 1
+          description: The guidance appears for eligible first-time users when opening a Markdown file.
+          component: viewer
+        - checkpoint_id: guidance_visible_non_blocking
+          order: 2
+          description: The guidance is visible but does not block document reading or selection.
+          component: viewer
+        - checkpoint_id: guidance_dismissed
+          order: 3
+          description: The guidance is dismissed after the first qualifying selection or explicit dismissal.
+          component: viewer
+    telemetry:
+      result_event: scenario_result
+      safe_block_status: blocked_safe
+      allowed_supporting_signals:
+        - checkpoint
+        - exception
+    alerting:
+      profile: important_session_continuity
+      overrides:
+        supporting_alerts:
+          - template_id: checkpoint_spike
+            checkpoint_id: guidance_dismissed
 
   - scenario_id: stable_viewer_on_render_failure
     title: Keep the viewer stable when preview rendering fails
